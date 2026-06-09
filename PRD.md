@@ -37,7 +37,9 @@ During major soccer tournaments, fans struggle to identify:
 - Where official or unofficial fan gatherings are taking place
 
 Today this information is fragmented across social media, Google searches, event
-sites, and local communities. **FanMatch centralizes it into one platform.**
+sites, and local communities. **FanMatch centralizes it into one platform** — a
+core part of the product is an automated **data aggregation layer** that scrapes
+and ingests this fragmented information (see §5).
 
 ---
 
@@ -71,9 +73,58 @@ sites, and local communities. **FanMatch centralizes it into one platform.**
 
 ---
 
-## 5. MVP Features
+## 5. Data Aggregation & Ingestion (Phase 0 — Foundation)
 
-### 5.1 Location-Based Discovery
+Discovery is only as good as the underlying data. Before and alongside the MVP,
+FanMatch runs an automated ingestion layer that **scrapes and aggregates** the
+raw inventory the rest of the platform depends on.
+
+### 5.1 What we ingest
+
+- **Cities & locations** — supported metros, neighborhoods, zip/geo boundaries
+- **Venues** — bars, pubs, restaurants, fan parks
+- **Fan events** — viewing parties, community watch events, official fan zones
+- **Match schedules** — fixtures per competition (World Cup first, then leagues)
+- **Enrichment signals** — venue images, hours, ratings, social engagement,
+  team/supporter affiliations
+
+### 5.2 Sources
+
+- Maps & places providers (e.g. Google Places, OSM) for venues and geo data
+- Event platforms and ticketing sites for viewing parties / fan events
+- Social media (Instagram, TikTok, X, Reddit, Facebook) for fan gatherings and
+  engagement signals
+- Official competition schedules for fixtures
+- Supporter-club and community pages for team-affiliation signals
+
+### 5.3 Ingestion pipeline
+
+1. **Collect** — scheduled scrapers / connectors pull raw records per source.
+2. **Normalize** — map disparate schemas into the canonical FanMatch model.
+3. **Geocode** — resolve every venue/event to a geo point for radius search.
+4. **Deduplicate & match** — merge the same venue/event across sources into one
+   record.
+5. **Enrich** — attach images, ratings, team affiliations, engagement counts.
+6. **Score** — feed normalized signals into the ranking engine (§6.5 weights).
+7. **Publish** — write to the primary DB + geo index, refresh caches.
+
+### 5.4 Operational requirements
+
+- Scheduled, incremental refresh (events/schedules are time-sensitive).
+- Source connectors are **pluggable** so new cities/sources/competitions can be
+  added without rearchitecting.
+- Respect source terms of service, rate limits, and robots directives; cache
+  responsibly.
+- Data-quality monitoring: freshness, dedup rate, geocode success, coverage per
+  city.
+
+> See [`WORKFLOW.md`](./WORKFLOW.md) §3 for the ingestion pipeline diagram.
+
+---
+
+## 6. MVP Features
+
+### 6.1 Location-Based Discovery
 
 Users can:
 - Detect current location
@@ -88,7 +139,7 @@ Output:
 - Viewing parties
 - Community events
 
-### 5.2 Venue Listings
+### 6.2 Venue Listings
 
 Each venue should display:
 - Name
@@ -101,7 +152,7 @@ Each venue should display:
 - Team supporters expected
 - User rating
 
-### 5.3 Interactive Map
+### 6.3 Interactive Map
 
 - Map view
 - List view
@@ -109,13 +160,13 @@ Each venue should display:
 - Directions link
 - Nearby recommendations
 
-### 5.4 Team-Based Filtering
+### 6.4 Team-Based Filtering
 
 Users can filter venues by supporter base:
 - Argentina, Brazil, England, USA, Spain, Germany, France
 - Other participating teams
 
-### 5.5 Venue Ranking Engine
+### 6.5 Venue Ranking Engine
 
 The platform ranks venues based on multiple factors.
 
@@ -143,7 +194,7 @@ Venue Score =
 > The ranking algorithm must be **configurable** (weights tunable without a code
 > deploy).
 
-### 5.6 Recommendation Engine
+### 6.6 Recommendation Engine
 
 Provides personalized recommendations.
 
@@ -158,7 +209,7 @@ Factors:
 
 ---
 
-## 6. Fan Engagement Features (Phase 2)
+## 7. Fan Engagement Features (Phase 2)
 
 - Venue check-ins
 - Fan profiles
@@ -170,9 +221,9 @@ Factors:
 
 ---
 
-## 7. Business Model
+## 8. Business Model
 
-### 7.1 Bar Advertising
+### 8.1 Bar Advertising
 
 Bars can:
 - Promote events
@@ -186,7 +237,7 @@ Bars can:
 - Banner advertisements
 - Event promotion packages
 
-### 7.2 Premium Business Accounts
+### 8.2 Premium Business Accounts
 
 Venue owners can:
 - Claim a venue
@@ -198,7 +249,7 @@ Monthly subscription model.
 
 ---
 
-## 8. User Acquisition Strategy
+## 9. User Acquisition Strategy
 
 ### Digital marketing
 **Channels:** Instagram, TikTok, Facebook, Reddit, X, YouTube Shorts
@@ -217,7 +268,7 @@ Users earn rewards for:
 
 ---
 
-## 9. Success Metrics
+## 10. Success Metrics
 
 ### User metrics
 - Monthly Active Users (MAU)
@@ -239,17 +290,22 @@ Users earn rewards for:
 
 ---
 
-## 10. Future Roadmap
+## 11. Future Roadmap
 
 | Phase | Focus |
 |-------|-------|
+| **Phase 0** | **Data foundation: scraping & ingestion of cities, venues, bars, fan events, and match schedules; normalization, geocoding, dedup, enrichment** |
 | **Phase 1** | Venue discovery, location search, rankings, recommendations |
 | **Phase 2** | User accounts, reviews, check-ins, fan communities |
 | **Phase 3** | AI recommendations, live crowd estimation, event creation, sponsorship marketplace, international expansion |
 
+> Phase 0 underpins Phase 1 — discovery, rankings, and recommendations all read
+> from the aggregated dataset. It continues to run as an ongoing operational
+> service after launch (incremental refresh), not a one-time effort.
+
 ---
 
-## 11. Out of Scope (for MVP)
+## 12. Out of Scope (for MVP)
 
 - Native mobile apps (web-first; responsive)
 - In-app payments / ticketing

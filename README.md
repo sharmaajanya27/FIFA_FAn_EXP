@@ -7,6 +7,11 @@ ranked by popularity, atmosphere, team support, and fan engagement.
 Launches during the World Cup, built as a **year-round** platform that extends
 to the Premier League, UEFA Champions League, MLS, La Liga, and more.
 
+A **data aggregation layer (Phase 0)** scrapes and ingests cities, venues, bars,
+fan events, and match schedules — normalizing, geocoding, deduplicating, and
+enriching them into the dataset that powers discovery, rankings, and
+recommendations.
+
 ## Documentation
 
 - [`PRD.md`](./PRD.md) — Product Requirements Document

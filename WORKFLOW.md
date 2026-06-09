@@ -30,6 +30,9 @@ flowchart TD
     O --> P([Attend event])
 ```
 
+> The discovery query (step F) reads from the aggregated dataset produced by the
+> ingestion pipeline (§3).
+
 ---
 
 ## 2. System Architecture (High Level)
@@ -38,6 +41,12 @@ flowchart TD
 flowchart LR
     subgraph Client
         WEB[Web App - responsive SPA]
+    end
+
+    subgraph Ingestion[Data Ingestion - Phase 0]
+        SCRAPE[Scrapers / Source Connectors]
+        ETL[Normalize · Geocode · Dedup · Enrich]
+        SCHED[Scheduler - incremental refresh]
     end
 
     subgraph API[Backend API]
@@ -57,10 +66,17 @@ flowchart LR
     end
 
     subgraph External
+        SRC[Source sites: Maps · Events · Social · Schedules]
         MAPS[Maps & Directions API]
         GEOCODE[Geocoding API]
-        SOCIAL[Social Engagement Feeds]
     end
+
+    SCHED --> SCRAPE
+    SRC --> SCRAPE
+    SCRAPE --> ETL
+    ETL --> GEOCODE
+    ETL --> DB
+    ETL --> GEO
 
     WEB --> GW
     GW --> DISC
@@ -78,12 +94,50 @@ flowchart LR
     BIZ --> DB
     DISC --> GEOCODE
     WEB --> MAPS
-    RANK --> SOCIAL
 ```
 
 ---
 
-## 3. Ranking Engine Pipeline
+## 3. Data Ingestion / Scraping Pipeline (Phase 0 — Foundation)
+
+How raw, fragmented data becomes the clean dataset that powers discovery. Runs
+on a schedule and refreshes incrementally.
+
+```mermaid
+flowchart TD
+    subgraph Sources
+        S1[Maps & places<br/>Google Places · OSM]
+        S2[Event & ticketing sites<br/>viewing parties · fan zones]
+        S3[Social media<br/>IG · TikTok · X · Reddit · FB]
+        S4[Official match schedules]
+        S5[Supporter-club / community pages]
+    end
+
+    S1 --> C[1. Collect<br/>scheduled scrapers / connectors]
+    S2 --> C
+    S3 --> C
+    S4 --> C
+    S5 --> C
+
+    C --> N[2. Normalize<br/>map to canonical model]
+    N --> G[3. Geocode<br/>resolve to geo point]
+    G --> D[4. Deduplicate & match<br/>merge venues/events across sources]
+    D --> E[5. Enrich<br/>images · ratings · team affiliation · engagement]
+    E --> SC[6. Score<br/>feed ranking signals]
+    SC --> P[7. Publish<br/>primary DB + geo index, refresh cache]
+
+    P --> MON{{Data-quality monitor<br/>freshness · coverage · dedup rate}}
+    MON -. triggers re-run .-> C
+```
+
+**What gets ingested:** cities & locations, venues (bars/pubs/restaurants/fan
+parks), fan events (viewing parties, community watch events), match schedules
+per competition, and enrichment signals (images, ratings, social engagement,
+team affiliation).
+
+---
+
+## 4. Ranking Engine Pipeline
 
 How a venue score is computed. Weights are configurable without a deploy.
 
@@ -106,19 +160,21 @@ flowchart TD
 
 ---
 
-## 4. Phased Delivery Roadmap
+## 5. Phased Delivery Roadmap
 
 ```mermaid
 flowchart LR
+    P0[Phase 0<br/>Data Foundation<br/>Scrape & ingest cities · venues<br/>bars · fan events · schedules<br/>normalize · geocode · dedup · enrich]
     P1[Phase 1<br/>Discovery · Search<br/>Rankings · Recommendations]
     P2[Phase 2<br/>Accounts · Reviews<br/>Check-ins · Communities]
     P3[Phase 3<br/>AI recs · Live crowd<br/>Event creation · Sponsorship<br/>International expansion]
-    P1 --> P2 --> P3
+    P0 --> P1 --> P2 --> P3
+    P0 -. ongoing refresh .-> P0
 ```
 
 ---
 
-## 5. Data Model (Core Entities)
+## 6. Data Model (Core Entities)
 
 ```mermaid
 erDiagram
@@ -129,6 +185,8 @@ erDiagram
     EVENT ||--o{ CHECKIN : records
     TEAM ||--o{ FAVORITE_TEAM : referenced
     EVENT }o--|| MATCH : shows
+    SOURCE ||--o{ VENUE : provides
+    SOURCE ||--o{ EVENT : provides
 
     USER {
         id PK
@@ -142,6 +200,7 @@ erDiagram
         geo_point
         capacity
         rating_avg
+        source_id FK
     }
     EVENT {
         id PK
@@ -149,6 +208,7 @@ erDiagram
         match_id FK
         start_time
         est_attendance
+        source_id FK
     }
     TEAM {
         id PK
@@ -162,8 +222,17 @@ erDiagram
         away_team
         kickoff
     }
+    SOURCE {
+        id PK
+        name
+        type
+        last_scraped_at
+    }
 ```
 
-> **Note for engineers:** the data model is competition-agnostic (`MATCH` carries
-> a `competition` field), so the same schema serves the World Cup launch and
-> later leagues (Premier League, UCL, MLS, La Liga) without restructuring.
+> **Notes for engineers:**
+> - The model is competition-agnostic (`MATCH.competition`), so the same schema
+>   serves the World Cup launch and later leagues (Premier League, UCL, MLS,
+>   La Liga) without restructuring.
+> - `SOURCE` tracks provenance for every scraped record — required for dedup,
+>   freshness checks, and honoring source terms / rate limits.
