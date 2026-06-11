@@ -1,0 +1,17 @@
+{
+  "competition": "FIFA World Cup 2026",
+  "matches": [
+    { "externalId": "wc2026-001", "homeTeam": "USA", "awayTeam": "MEX", "kickoff": "2026-06-11T20:00:00Z", "stage": "Group A" },
+    { "externalId": "wc2026-002", "homeTeam": "ARG", "awayTeam": "CRO", "kickoff": "2026-06-12T18:00:00Z", "stage": "Group B" },
+    { "externalId": "wc2026-003", "homeTeam": "ENG", "awayTeam": "USA", "kickoff": "2026-06-13T19:00:00Z", "stage": "Group A" },
+    { "externalId": "wc2026-004", "homeTeam": "BRA", "awayTeam": "POR", "kickoff": "2026-06-14T21:00:00Z", "stage": "Group C" },
+    { "externalId": "wc2026-005", "homeTeam": "FRA", "awayTeam": "GER", "kickoff": "2026-06-15T18:00:00Z", "stage": "Group D" },
+    { "externalId": "wc2026-006", "homeTeam": "ESP", "awayTeam": "NED", "kickoff": "2026-06-16T20:00:00Z", "stage": "Group E" },
+    { "externalId": "wc2026-007", "homeTeam": "MEX", "awayTeam": "ENG", "kickoff": "2026-06-17T19:00:00Z", "stage": "Group A" },
+    { "externalId": "wc2026-008", "homeTeam": "ITA", "awayTeam": "URU", "kickoff": "2026-06-18T22:00:00Z", "stage": "Group F" },
+    { "externalId": "wc2026-009", "homeTeam": "ARG", "awayTeam": "JPN", "kickoff": "2026-06-19T18:00:00Z", "stage": "Group B" },
+    { "externalId": "wc2026-010", "homeTeam": "BRA", "awayTeam": "MAR", "kickoff": "2026-06-20T21:00:00Z", "stage": "Group C" },
+    { "externalId": "wc2026-011", "homeTeam": "USA", "awayTeam": "MEX", "kickoff": "2026-06-25T23:00:00Z", "stage": "Round of 16" },
+    { "externalId": "wc2026-012", "homeTeam": "ARG", "awayTeam": "BRA", "kickoff": "2026-07-12T19:00:00Z", "stage": "Final" }
+  ]
+}

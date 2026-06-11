@@ -6,7 +6,12 @@
  */
 import { createHash } from "node:crypto";
 import type { City } from "../config/cities.js";
+import { TEAM_BY_CODE, matchTeamCode } from "../config/teams.js";
 import {
+  type Event,
+  EventSchema,
+  type Match,
+  MatchSchema,
   type Venue,
   type VenueKind,
   VenueSchema,
@@ -104,6 +109,103 @@ export function normalizeOsm(records: RawRecord[], city: City): Venue[] {
     if (v) out.push(v);
   }
   log.info("normalize: produced canonical venues", {
+    city: city.slug,
+    in: records.length,
+    out: out.length,
+  });
+  return out;
+}
+
+/** Normalize raw fixture records into canonical Matches. */
+export function normalizeMatches(records: RawRecord[]): Match[] {
+  const out: Match[] = [];
+  for (const rec of records) {
+    const p = rec.payload as {
+      competition: string;
+      homeTeam: string;
+      awayTeam: string;
+      kickoff: string;
+      stage?: string;
+    };
+    if (!TEAM_BY_CODE[p.homeTeam] || !TEAM_BY_CODE[p.awayTeam]) {
+      log.warn("normalize: unknown team code in fixture", {
+        externalId: rec.source.externalId,
+        home: p.homeTeam,
+        away: p.awayTeam,
+      });
+      continue;
+    }
+    const candidate: Match = {
+      id: venueId(rec.source.name, rec.source.externalId),
+      competition: p.competition,
+      homeTeam: p.homeTeam,
+      awayTeam: p.awayTeam,
+      kickoff: p.kickoff,
+      stage: p.stage,
+      sources: [rec.source],
+    };
+    const parsed = MatchSchema.safeParse(candidate);
+    if (parsed.success) out.push(parsed.data);
+    else
+      log.warn("normalize: dropped invalid match", {
+        externalId: rec.source.externalId,
+      });
+  }
+  log.info("normalize: produced canonical matches", {
+    in: records.length,
+    out: out.length,
+  });
+  return out;
+}
+
+/** Normalize raw event records into canonical Events. */
+export function normalizeEvents(records: RawRecord[], city: City): Event[] {
+  const out: Event[] = [];
+  for (const rec of records) {
+    const p = rec.payload as {
+      title: string;
+      kind?: Event["kind"];
+      lat: number;
+      lon: number;
+      startTime: string;
+      venueId?: string;
+      matchId?: string;
+      teams?: string[];
+      estAttendance?: number;
+    };
+    if (!p.title || p.lat === undefined || p.lon === undefined) continue;
+    const geo = { lat: p.lat, lon: p.lon };
+    // Infer team affiliation from the title when not explicitly provided.
+    const inferred = matchTeamCode(p.title);
+    const teams = p.teams?.length
+      ? p.teams
+      : inferred
+        ? [inferred]
+        : [];
+    const candidate: Event = {
+      id: venueId(rec.source.name, rec.source.externalId),
+      title: p.title,
+      kind: p.kind ?? "viewing_party",
+      geo,
+      geohash: geohash(geo),
+      startTime: p.startTime,
+      city: city.name,
+      country: city.country,
+      venueId: p.venueId,
+      matchId: p.matchId,
+      teams,
+      estAttendance: p.estAttendance,
+      sources: [rec.source],
+    };
+    const parsed = EventSchema.safeParse(candidate);
+    if (parsed.success) out.push(parsed.data);
+    else
+      log.warn("normalize: dropped invalid event", {
+        externalId: rec.source.externalId,
+        issues: parsed.error.issues.map((i) => i.path.join(".")),
+      });
+  }
+  log.info("normalize: produced canonical events", {
     city: city.slug,
     in: records.length,
     out: out.length,

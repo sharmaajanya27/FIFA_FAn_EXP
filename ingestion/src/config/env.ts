@@ -8,6 +8,8 @@ export interface Env {
   userAgent: string;
   overpassThrottleMs: number;
   dataDir: string;
+  /** Optional live fixtures JSON URL; falls back to the bundled seed. */
+  fixturesUrl?: string;
 }
 
 export function loadEnv(): Env {
@@ -19,5 +21,6 @@ export function loadEnv(): Env {
       "FanMatch-Ingestion/0.0.1 (contact: you@example.com)",
     overpassThrottleMs: Number(process.env.OVERPASS_THROTTLE_MS ?? 1500),
     dataDir: process.env.DATA_DIR ?? "data",
+    fixturesUrl: process.env.FIXTURES_URL || undefined,
   };
 }
