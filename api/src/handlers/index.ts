@@ -3,10 +3,7 @@
  * function of ApiRequest → ApiResponse, with services injected via a container
  * so they're trivially testable and deployable as individual Lambdas.
  */
-import type { ApiEnv } from "../config/env.js";
-import type { Repository } from "../data/repository.js";
-import { DiscoveryService } from "../services/discovery.js";
-import { RecommendationService } from "../services/recommendations.js";
+import type { Container } from "../container.js";
 import {
   type ApiRequest,
   type ApiResponse,
@@ -14,22 +11,6 @@ import {
   ok,
   requireFloat,
 } from "../http/types.js";
-
-export interface Container {
-  env: ApiEnv;
-  repo: Repository;
-  discovery: DiscoveryService;
-  recommendations: RecommendationService;
-}
-
-export function buildContainer(env: ApiEnv, repo: Repository): Container {
-  return {
-    env,
-    repo,
-    discovery: new DiscoveryService(repo),
-    recommendations: new RecommendationService(repo),
-  };
-}
 
 const str = (req: ApiRequest, key: string): string | undefined =>
   req.query[key]?.trim() || undefined;
