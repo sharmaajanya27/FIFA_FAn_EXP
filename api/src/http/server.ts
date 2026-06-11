@@ -19,6 +19,11 @@ import {
 import { login, me, register } from "../handlers/auth.js";
 import { getProfile, updateProfile } from "../handlers/profiles.js";
 import { createReview, listReviews } from "../handlers/reviews.js";
+import {
+  createCheckIn,
+  listUserCheckIns,
+  listVenueCheckIns,
+} from "../handlers/checkins.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -92,6 +97,10 @@ function buildRoutes(c: Container): Route[] {
     // Reviews
     route("POST", "/venues/:id/reviews", createReview(c)),
     route("GET", "/venues/:id/reviews", listReviews(c)),
+    // Check-ins
+    route("POST", "/venues/:id/checkins", createCheckIn(c)),
+    route("GET", "/venues/:id/checkins", listVenueCheckIns(c)),
+    route("GET", "/users/:id/checkins", listUserCheckIns(c)),
   ];
 }
 
