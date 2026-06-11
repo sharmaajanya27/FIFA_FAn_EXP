@@ -27,6 +27,10 @@ export interface Venue {
   engagement?: number;
   /** Precomputed static ranking score (0..1) from Phase 0. */
   score?: number;
+  /** True when a business has an active featured (sponsored) placement. */
+  featured?: boolean;
+  /** True when a business has claimed this venue. */
+  claimed?: boolean;
 }
 
 export interface Match {

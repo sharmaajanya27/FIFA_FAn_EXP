@@ -35,6 +35,7 @@ import { estimateCrowd, getCrowd, reportCrowd } from "../handlers/crowd.js";
 import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
 import { createEvent, listEvents } from "../handlers/events.js";
+import { claimVenue, featureVenue, getListing } from "../handlers/sponsorship.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -133,6 +134,10 @@ function buildRoutes(c: Container): Route[] {
     // Fan photos
     route("POST", "/venues/:id/photos", uploadPhoto(c)),
     route("GET", "/venues/:id/photos", listPhotos(c)),
+    // Sponsorship marketplace (Phase 3 / §8)
+    route("POST", "/venues/:id/claim", claimVenue(c)),
+    route("POST", "/venues/:id/feature", featureVenue(c)),
+    route("GET", "/venues/:id/listing", getListing(c)),
   ];
 }
 
