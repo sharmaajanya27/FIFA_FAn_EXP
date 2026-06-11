@@ -30,6 +30,7 @@ import {
   listMatchPredictions,
   listMyPredictions,
 } from "../handlers/predictions.js";
+import { createPost, listFeed, toggleLike } from "../handlers/communities.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -112,6 +113,10 @@ function buildRoutes(c: Container): Route[] {
     route("POST", "/matches/:id/predictions", createPrediction(c)),
     route("GET", "/matches/:id/predictions", listMatchPredictions(c)),
     route("GET", "/me/predictions", listMyPredictions(c)),
+    // Communities
+    route("POST", "/communities/:team/posts", createPost(c)),
+    route("GET", "/communities/:team/posts", listFeed(c)),
+    route("POST", "/posts/:id/like", toggleLike(c)),
   ];
 }
 
