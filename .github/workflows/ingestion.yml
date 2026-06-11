@@ -1,0 +1,58 @@
+# Scheduled FanWatch Phase 0 ingestion.
+#
+# Runs the pipeline for all configured cities and uploads the published JSONL +
+# Excel artifacts. Today it publishes a build artifact; when the Postgres
+# migration lands (ARCHITECTURE.md §2/§6), point the same job at the DB by
+# setting DATA_DIR / DATABASE_URL secrets — the workflow shape stays the same.
+name: ingestion
+
+on:
+  # Daily refresh (events/schedules are time-sensitive — PRD §5.4). 06:00 UTC.
+  schedule:
+    - cron: "0 6 * * *"
+  # Allow manual runs from the Actions tab, optionally scoped to one city.
+  workflow_dispatch:
+    inputs:
+      cities:
+        description: 'City slugs (space-separated) or "all"'
+        required: false
+        default: "all"
+
+# Avoid overlapping runs writing the same artifacts.
+concurrency:
+  group: ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ingestion
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ingestion/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ingestion
+        env:
+          # Be a good OSM citizen from CI runners (see ingestion/.env.example).
+          INGEST_USER_AGENT: "FanWatch-Ingestion/0.0.1 (contact: you@example.com)"
+          OVERPASS_THROTTLE_MS: "2000"
+        run: npm run ingest -- ${{ github.event.inputs.cities || 'all' }}
+
+      - name: Upload dataset artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fanwatch-data
+          path: ingestion/data/
+          retention-days: 14
+          if-no-files-found: error

@@ -1,4 +1,4 @@
-# FanMatch — Product Requirements Document
+# FanWatch — Product Requirements Document
 
 > **Status:** Draft v1.0
 > **Last updated:** 2026-06-09
@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-FanMatch is a location-based web application that helps soccer fans discover the
+FanWatch is a location-based web application that helps soccer fans discover the
 best places to watch matches. The platform aggregates bars, pubs, fan zones,
 viewing parties, and community watch events, then ranks them based on
 popularity, atmosphere, team support, reviews, and fan engagement.
@@ -18,7 +18,7 @@ experience in their city.
 
 ### Positioning note
 
-FanMatch should **not** be positioned only as a "World Cup" app. It launches
+FanWatch should **not** be positioned only as a "World Cup" app. It launches
 during the World Cup for maximum reach, but is built as a **year-round soccer
 fan discovery platform** that later supports the Premier League, UEFA Champions
 League, Major League Soccer, La Liga, and other competitions. This makes the
@@ -37,7 +37,7 @@ During major soccer tournaments, fans struggle to identify:
 - Where official or unofficial fan gatherings are taking place
 
 Today this information is fragmented across social media, Google searches, event
-sites, and local communities. **FanMatch centralizes it into one platform** — a
+sites, and local communities. **FanWatch centralizes it into one platform** — a
 core part of the product is an automated **data aggregation layer** that scrapes
 and ingests this fragmented information (see §5).
 
@@ -63,7 +63,7 @@ and ingests this fragmented information (see §5).
 
 ## 4. Core User Journey
 
-1. User visits FanMatch.
+1. User visits FanWatch.
 2. User allows location access **or** enters city manually.
 3. User selects favorite team(s).
 4. Platform displays nearby watch locations.
@@ -76,7 +76,7 @@ and ingests this fragmented information (see §5).
 ## 5. Data Aggregation & Ingestion (Phase 0 — Foundation)
 
 Discovery is only as good as the underlying data. Before and alongside the MVP,
-FanMatch runs an automated ingestion layer that **scrapes and aggregates** the
+FanWatch runs an automated ingestion layer that **scrapes and aggregates** the
 raw inventory the rest of the platform depends on.
 
 ### 5.1 What we ingest
@@ -100,7 +100,7 @@ raw inventory the rest of the platform depends on.
 ### 5.3 Ingestion pipeline
 
 1. **Collect** — scheduled scrapers / connectors pull raw records per source.
-2. **Normalize** — map disparate schemas into the canonical FanMatch model.
+2. **Normalize** — map disparate schemas into the canonical FanWatch model.
 3. **Geocode** — resolve every venue/event to a geo point for radius search.
 4. **Deduplicate & match** — merge the same venue/event across sources into one
    record.

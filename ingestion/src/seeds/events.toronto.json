@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "tor-evt-001",
+      "title": "Argentina vs Croatia Watch Party — Distillery District",
+      "kind": "viewing_party",
+      "lat": 43.65,
+      "lon": -79.36,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 460
+    },
+    {
+      "externalId": "tor-evt-002",
+      "title": "Italy vs Uruguay Fan Zone — Little Italy",
+      "kind": "fan_zone",
+      "lat": 43.655,
+      "lon": -79.41,
+      "startTime": "2026-06-18T21:30:00Z",
+      "matchId": "wc2026-008",
+      "estAttendance": 280
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# FanMatch — Ingestion (Phase 0)
+# FanWatch — Ingestion (Phase 0)
 
 The data aggregation layer. Scrapes and ingests the raw inventory that powers
 discovery, rankings, and recommendations (see [`../PRD.md`](../PRD.md) §5 and

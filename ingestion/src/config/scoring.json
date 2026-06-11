@@ -1,9 +1,10 @@
 {
-  "_comment": "Venue ranking weights (PRD §6.5). Tunable without a code deploy. 'static' signals are precomputed here in Phase 0; 'queryTime' signals (distance, teamFanMatch) are applied at discovery time in Phase 1 because they depend on the requesting user.",
+  "_comment": "Venue ranking weights (PRD §6.5). Tunable without a code deploy. 'static' signals are precomputed in Phase 0; 'queryTime' signals (distance, teamFanMatch) are applied at discovery time because they depend on the requesting user. 'showsMatches' is the strongest content signal — it favors venues that actually show live matches over generic restaurants/cafes.",
   "weights": {
-    "userRatings": { "weight": 0.3, "stage": "static" },
-    "attendance": { "weight": 0.25, "stage": "static" },
-    "fanEngagement": { "weight": 0.2, "stage": "static" },
+    "showsMatches": { "weight": 0.25, "stage": "static" },
+    "userRatings": { "weight": 0.2, "stage": "static" },
+    "attendance": { "weight": 0.15, "stage": "static" },
+    "fanEngagement": { "weight": 0.15, "stage": "static" },
     "teamFanMatch": { "weight": 0.15, "stage": "queryTime" },
     "distance": { "weight": 0.1, "stage": "queryTime" }
   },

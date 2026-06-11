@@ -1,8 +1,8 @@
 {
-  "name": "@fanmatch/ingestion",
+  "name": "@fanwatch/ingestion",
   "version": "0.0.1",
   "private": true,
-  "description": "FanMatch Phase 0 — data aggregation & ingestion (scrape, normalize, geocode, dedup, publish).",
+  "description": "FanWatch Phase 0 — data aggregation & ingestion (scrape, normalize, geocode, dedup, publish).",
   "type": "module",
   "engines": {
     "node": ">=20"

@@ -1,4 +1,4 @@
-# FanMatch
+# FanWatch
 
 A location-based web app that helps soccer fans discover the best places to
 watch matches — bars, pubs, fan zones, viewing parties, and community events —

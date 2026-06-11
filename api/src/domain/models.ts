@@ -25,6 +25,8 @@ export interface Venue {
   capacity?: number;
   supportsTeams: string[];
   engagement?: number;
+  /** Likelihood (0..1) that this venue shows live matches (sports bar / pub signals). */
+  showsMatches?: number;
   /** Precomputed static ranking score (0..1) from Phase 0. */
   score?: number;
   /** True when a business has an active featured (sponsored) placement. */

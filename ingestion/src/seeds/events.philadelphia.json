@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "phl-evt-001",
+      "title": "England vs USA Watch Party — Old City",
+      "kind": "viewing_party",
+      "lat": 39.951,
+      "lon": -75.145,
+      "startTime": "2026-06-13T18:30:00Z",
+      "matchId": "wc2026-003",
+      "estAttendance": 350
+    },
+    {
+      "externalId": "phl-evt-002",
+      "title": "Italy vs Uruguay Community Watch — Fishtown",
+      "kind": "community_watch",
+      "lat": 39.971,
+      "lon": -75.135,
+      "startTime": "2026-06-18T21:30:00Z",
+      "matchId": "wc2026-008",
+      "estAttendance": 160
+    }
+  ]
+}

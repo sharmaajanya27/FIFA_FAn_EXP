@@ -1,4 +1,4 @@
-# FanMatch — API (Phase 1)
+# FanWatch — API (Phase 1)
 
 The discovery backend. Serves venue discovery, location/team search, ranking,
 and recommendations over the dataset produced by Phase 0 ingestion (see

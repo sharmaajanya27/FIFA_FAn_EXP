@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" fill="#000">
+  <!-- Suspension bridge silhouette (CSS mask). -->
+  <rect x="0" y="318" width="1440" height="42"/>
+  <!-- towers -->
+  <rect x="360" y="70" width="34" height="248"/>
+  <rect x="350" y="60" width="54" height="18"/>
+  <rect x="358" y="120" width="38" height="14" fill="#fff" opacity="0"/>
+  <rect x="1046" y="70" width="34" height="248"/>
+  <rect x="1036" y="60" width="54" height="18"/>
+  <!-- main suspension cables -->
+  <path d="M0,150 C180,90 300,84 377,84 C460,84 590,250 720,250 C850,250 980,84 1063,84 C1140,84 1280,96 1440,150 L1440,166 C1280,112 1140,100 1063,100 C980,100 850,266 720,266 C590,266 460,100 377,100 C300,100 180,106 0,166 Z"/>
+  <!-- deck -->
+  <rect x="0" y="250" width="1440" height="8"/>
+  <!-- vertical hangers -->
+  <g>
+    <rect x="120" y="120" width="4" height="130"/>
+    <rect x="220" y="104" width="4" height="146"/>
+    <rect x="300" y="92" width="4" height="158"/>
+    <rect x="520" y="150" width="4" height="100"/>
+    <rect x="620" y="210" width="4" height="40"/>
+    <rect x="820" y="210" width="4" height="40"/>
+    <rect x="920" y="150" width="4" height="100"/>
+    <rect x="1140" y="92" width="4" height="158"/>
+    <rect x="1220" y="104" width="4" height="146"/>
+    <rect x="1320" y="120" width="4" height="130"/>
+  </g>
+</svg>

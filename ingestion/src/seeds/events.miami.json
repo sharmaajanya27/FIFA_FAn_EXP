@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "mia-evt-001",
+      "title": "Argentina vs Croatia Watch Party — Wynwood",
+      "kind": "viewing_party",
+      "lat": 25.802,
+      "lon": -80.199,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 550
+    },
+    {
+      "externalId": "mia-evt-002",
+      "title": "Brazil vs Portugal Fan Zone — Brickell",
+      "kind": "fan_zone",
+      "lat": 25.765,
+      "lon": -80.193,
+      "startTime": "2026-06-14T20:30:00Z",
+      "matchId": "wc2026-004",
+      "estAttendance": 400
+    }
+  ]
+}

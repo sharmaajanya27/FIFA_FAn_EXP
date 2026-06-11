@@ -1,4 +1,4 @@
-/** Response shapes from the FanMatch discovery API (Phase 1 backend). */
+/** Response shapes from the FanWatch discovery API (Phase 1 backend). */
 export interface GeoPoint {
   lat: number;
   lon: number;
@@ -16,6 +16,7 @@ export interface RankedVenue {
   hours?: string;
   ratingAvg?: number;
   supportsTeams: string[];
+  showsMatches?: number;
   score?: number;
   distanceMeters: number;
   finalScore: number;

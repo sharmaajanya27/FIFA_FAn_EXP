@@ -1,5 +1,5 @@
 /**
- * Canonical FanMatch data model (Phase 0).
+ * Canonical FanWatch data model (Phase 0).
  *
  * Every source connector normalizes its raw records into these shapes, so the
  * rest of the platform (discovery, ranking, recommendations) reads one schema
@@ -43,7 +43,7 @@ export type VenueKind = z.infer<typeof VenueKind>;
 
 /** A place where matches can be watched. */
 export const VenueSchema = z.object({
-  /** Stable FanMatch id (deterministic hash of source + externalId). */
+  /** Stable FanWatch id (deterministic hash of source + externalId). */
   id: z.string(),
   name: z.string().min(1),
   kind: VenueKind,
@@ -73,6 +73,12 @@ export const VenueSchema = z.object({
    * team-fan-match — are applied at discovery time in Phase 1 (PRD §6.5).
    */
   score: z.number().min(0).max(1).optional(),
+  /**
+   * Heuristic 0..1 confidence that this venue actually shows live matches /
+   * hosts fans (derived from OSM tags in normalize). This is the signal that
+   * separates a sports bar from a quiet cafe; it feeds the Score stage.
+   */
+  showsMatches: z.number().min(0).max(1).default(0),
   /** Provenance — one entry per source that contributed to this record. */
   sources: z.array(SourceSchema).min(1),
 });
@@ -118,9 +124,9 @@ export const EventSchema = z.object({
   startTime: z.string().datetime(),
   city: z.string().optional(),
   country: z.string().optional(),
-  /** FanMatch venue id this event is hosted at, if resolved. */
+  /** FanWatch venue id this event is hosted at, if resolved. */
   venueId: z.string().optional(),
-  /** FanMatch match id this event shows, if known. */
+  /** FanWatch match id this event shows, if known. */
   matchId: z.string().optional(),
   /** Team codes this event is oriented toward. */
   teams: z.array(z.string()).default([]),

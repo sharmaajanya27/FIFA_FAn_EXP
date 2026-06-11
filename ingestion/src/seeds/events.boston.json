@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "bos-evt-001",
+      "title": "Argentina vs Croatia Viewing Party — Seaport",
+      "kind": "viewing_party",
+      "lat": 42.351,
+      "lon": -71.045,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 300
+    },
+    {
+      "externalId": "bos-evt-002",
+      "title": "France vs Germany Community Watch — Faneuil Hall",
+      "kind": "community_watch",
+      "lat": 42.36,
+      "lon": -71.055,
+      "startTime": "2026-06-15T17:30:00Z",
+      "matchId": "wc2026-005",
+      "estAttendance": 180
+    }
+  ]
+}

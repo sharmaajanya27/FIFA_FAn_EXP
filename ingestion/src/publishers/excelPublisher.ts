@@ -22,7 +22,7 @@ export class ExcelPublisher implements Publisher {
     const file = join(dir, "venues.xlsx");
 
     const wb = new ExcelJS.Workbook();
-    wb.creator = "FanMatch Ingestion";
+    wb.creator = "FanWatch Ingestion";
     wb.created = new Date();
     const ws = wb.addWorksheet("Venues");
 
@@ -78,7 +78,7 @@ export class ExcelPublisher implements Publisher {
     const file = join(dir, "matches.xlsx");
 
     const wb = new ExcelJS.Workbook();
-    wb.creator = "FanMatch Ingestion";
+    wb.creator = "FanWatch Ingestion";
     const ws = wb.addWorksheet("Matches");
     ws.columns = [
       { header: "ID", key: "id", width: 18 },
@@ -110,7 +110,7 @@ export class ExcelPublisher implements Publisher {
     const file = join(dir, "events.xlsx");
 
     const wb = new ExcelJS.Workbook();
-    wb.creator = "FanMatch Ingestion";
+    wb.creator = "FanWatch Ingestion";
     const ws = wb.addWorksheet("Events");
     ws.columns = [
       { header: "ID", key: "id", width: 18 },

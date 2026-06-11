@@ -1,4 +1,4 @@
-# FanMatch — Workflow & Architecture Diagrams
+# FanWatch — Workflow & Architecture Diagrams
 
 Reference diagrams for the development team. All diagrams use
 [Mermaid](https://mermaid.js.org/) and render natively on GitHub.
@@ -11,7 +11,7 @@ The end-to-end path a fan takes from landing to attending an event.
 
 ```mermaid
 flowchart TD
-    A([User visits FanMatch]) --> B{Location access?}
+    A([User visits FanWatch]) --> B{Location access?}
     B -- Allow --> C[Detect current location]
     B -- Deny --> D[Enter city / zip / neighborhood]
     C --> E[Select favorite team-s-]

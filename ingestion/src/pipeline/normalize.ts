@@ -20,7 +20,7 @@ import type { RawRecord } from "../sources/types.js";
 import { geohash } from "../util/geo.js";
 import { log } from "../util/logger.js";
 
-/** Deterministic FanMatch id from provenance, so re-runs are idempotent. */
+/** Deterministic FanWatch id from provenance, so re-runs are idempotent. */
 function venueId(sourceName: string, externalId: string): string {
   return createHash("sha1")
     .update(`${sourceName}:${externalId}`)
@@ -41,6 +41,43 @@ function mapKind(amenity: string | undefined): VenueKind {
     default:
       return "other";
   }
+}
+
+/** Known sports-bar chains — strong "shows matches" signal when OSM has a brand. */
+const SPORTS_BAR_BRANDS = [
+  "buffalo wild wings",
+  "hooters",
+  "twin peaks",
+  "dave & buster",
+  "yard house",
+  "the greene turtle",
+  "miller's ale house",
+  "walk-on's",
+];
+const MATCH_KEYWORDS =
+  /\b(sports?|football|soccer|f[uú]tbol|futebol|supporters?|fans?|tavern|ale\s?house|brewhouse|gastropub|sports bar)\b/i;
+
+/**
+ * Heuristic 0..1 confidence that a venue shows live matches / hosts fans,
+ * derived from OSM tags. Separates a sports bar from a quiet cafe. Richer
+ * sources (Places categories, reviews, social) raise confidence when they land.
+ */
+function computeShowsMatches(
+  tags: Record<string, string>,
+  kind: VenueKind,
+): number {
+  let score = 0;
+  const sport = (tags.sport ?? "").toLowerCase();
+  if (/soccer|football|multi/.test(sport)) score += 0.5;
+  const tv = (tags.tv ?? "").toLowerCase();
+  if (tv && tv !== "no") score += 0.3;
+  if (kind === "pub") score += 0.25;
+  else if (kind === "bar") score += 0.15;
+  const text = `${tags.name ?? ""} ${tags.description ?? ""} ${tags.brand ?? ""}`;
+  if (MATCH_KEYWORDS.test(text)) score += 0.3;
+  const brand = (tags.brand ?? "").toLowerCase();
+  if (SPORTS_BAR_BRANDS.some((b) => brand.includes(b))) score += 0.4;
+  return Math.max(0, Math.min(1, score));
 }
 
 /** Assemble an OSM address string from addr:* tags, if present. */
@@ -64,11 +101,12 @@ export function normalizeOsmRecord(rec: RawRecord, city: City): Venue | null {
   if (!name) return null;
 
   const geo = { lat: payload.lat, lon: payload.lon };
+  const kind = mapKind(tags.amenity);
 
   const candidate: Venue = {
     id: venueId(rec.source.name, rec.source.externalId),
     name,
-    kind: mapKind(tags.amenity),
+    kind,
     geo,
     geohash: geohash(geo),
     address: osmAddress(tags),
@@ -77,6 +115,7 @@ export function normalizeOsmRecord(rec: RawRecord, city: City): Venue | null {
     phone: tags.phone ?? tags["contact:phone"],
     website: safeUrl(tags.website ?? tags["contact:website"]),
     hours: tags.opening_hours,
+    showsMatches: computeShowsMatches(tags, kind),
     supportsTeams: [],
     sources: [rec.source],
   };
@@ -177,11 +216,7 @@ export function normalizeEvents(records: RawRecord[], city: City): Event[] {
     const geo = { lat: p.lat, lon: p.lon };
     // Infer team affiliation from the title when not explicitly provided.
     const inferred = matchTeamCode(p.title);
-    const teams = p.teams?.length
-      ? p.teams
-      : inferred
-        ? [inferred]
-        : [];
+    const teams = p.teams?.length ? p.teams : inferred ? [inferred] : [];
     const candidate: Event = {
       id: venueId(rec.source.name, rec.source.externalId),
       title: p.title,

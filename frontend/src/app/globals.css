@@ -1,33 +1,100 @@
 :root {
-  --bg: #0b1220;
-  --panel: #131c2e;
-  --panel-2: #1b2840;
-  --border: #26344f;
-  --text: #e8eef9;
-  --muted: #9fb0cc;
-  --accent: #2bd576;
-  --accent-2: #38bdf8;
-  --danger: #f87171;
-  --radius: 12px;
+  /* FIFA World Cup 2026 — bold tri-host tournament theme. Light, airy base
+     with vibrant accents; the page background is tinted per selected city. */
+  --bg: #eef3f1;
+  --bg-2: #ffffff;
+  --panel: #ffffff;
+  --panel-2: #f1f6f2;
+  --border: #e2e9e4;
+  --text: #0d1f17;
+  --muted: #5f7468;
+  --accent: #f4a300; /* trophy gold */
+  --accent-deep: #d98a00;
+  --accent-2: #0aa15a; /* pitch green */
+  --accent-3: #e0245e; /* host magenta */
+  --accent-4: #1893c6; /* host cyan */
+  --ink: #06140d; /* deep tournament navy-green for the hero */
+  --danger: #e5484d;
+  --radius: 16px;
+  /* Overridden per selected city via inline style on .city-bg. */
+  --city-accent: #0aa15a;
+  --gold-grad: linear-gradient(135deg, #ffd966 0%, #f4a300 55%, #d98a00 100%);
+  --host-grad: linear-gradient(90deg, #e0245e 0%, #f4a300 50%, #1893c6 100%);
+  --hero-grad: linear-gradient(125deg, #06140d 0%, #0c3b27 45%, #0a6b41 100%);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  background: var(--bg);
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+  background-color: transparent;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
+/* --- Per-city tinted background + skyline silhouette band --- */
+.city-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      1100px 720px at 82% -12%,
+      color-mix(in srgb, var(--city-accent) 30%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      900px 620px at -5% 105%,
+      color-mix(in srgb, var(--city-accent) 18%, transparent),
+      transparent 58%
+    ),
+    var(--bg);
+  transition: background 0.6s ease;
+}
+/* Footballs scattered at deterministic-but-random spots per city. */
+.city-bg .ball {
+  position: absolute;
+  background-color: var(--city-accent);
+  -webkit-mask: url("/football-pattern.svg") center / contain no-repeat;
+  mask: url("/football-pattern.svg") center / contain no-repeat;
+  opacity: 0.22;
+  pointer-events: none;
+}
+.city-skyline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(42vh, 380px);
+  background-color: var(--city-accent);
+  opacity: 0.22;
+  /* Tint the silhouette SVG with the city accent via a mask. */
+  -webkit-mask: var(--city-shape) bottom center / cover no-repeat;
+  mask: var(--city-shape) bottom center / cover no-repeat;
+  transition: opacity 0.6s ease;
+}
+
 a {
-  color: var(--accent-2);
+  color: var(--accent-4);
   text-decoration: none;
 }
 a:hover {
@@ -40,6 +107,158 @@ a:hover {
   padding: 20px 16px 64px;
 }
 
+/* --- FIFA World Cup 2026 hero header --- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--hero-grad);
+  color: #fff;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 18px 44px rgba(6, 20, 13, 0.28);
+}
+.hero::before {
+  /* faint pitch stripes */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0 2px,
+    transparent 2px 84px
+  );
+  pointer-events: none;
+}
+.hero::after {
+  /* tri-host gold glow */
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(244, 163, 0, 0.35), transparent 62%);
+  pointer-events: none;
+}
+.hero-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.crest {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--gold-grad);
+  font-size: 24px;
+  box-shadow: 0 8px 20px rgba(244, 163, 0, 0.4);
+  flex-shrink: 0;
+}
+.hero h1 {
+  font-size: 34px;
+  margin: 0;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+}
+.hero .brand {
+  background: var(--gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 6px;
+}
+.hero .eyebrow .flags {
+  letter-spacing: 0;
+  font-size: 13px;
+}
+.hero .eyebrow .pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.tagline {
+  position: relative;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 6px 0 0;
+  font-size: 14px;
+}
+
+/* Seasonal "World Cup is happening now" context banner — distinct from the
+   FanWatch brand so the app reads as a standalone product with a live event. */
+.season-banner {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  font-size: 12px;
+}
+.season-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(244, 163, 0, 0.6);
+  animation: season-pulse 1.8s ease-out infinite;
+}
+@keyframes season-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(244, 163, 0, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(244, 163, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 163, 0, 0);
+  }
+}
+.season-flags {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.season-title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+.season-status {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--gold-grad);
+  color: var(--ink);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
 .header {
   display: flex;
   align-items: baseline;
@@ -48,28 +267,43 @@ a:hover {
   margin-bottom: 4px;
 }
 .header h1 {
-  font-size: 28px;
+  font-size: 32px;
   margin: 0;
   letter-spacing: -0.02em;
+  font-weight: 800;
 }
 .header .brand {
-  color: var(--accent);
-}
-.tagline {
-  color: var(--muted);
-  margin: 0 0 20px;
-  font-size: 14px;
+  background: linear-gradient(
+    135deg,
+    var(--accent-2) 0%,
+    var(--accent-deep) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(20, 39, 29, 0.06);
+}
+.controls::before {
+  /* pitch top-line accent */
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--host-grad);
 }
 .field {
   display: flex;
@@ -84,8 +318,10 @@ a:hover {
 }
 select,
 input[type="number"],
+input[type="email"],
+input[type="text"],
 button {
-  background: var(--panel-2);
+  background: var(--bg-2);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -93,23 +329,32 @@ button {
   font-size: 14px;
 }
 input[type="range"] {
-  accent-color: var(--accent);
+  accent-color: var(--accent-2);
 }
 button {
   cursor: pointer;
   font-weight: 600;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
 }
 button:hover {
-  border-color: var(--accent);
+  border-color: var(--accent-2);
+}
+button:active {
+  transform: translateY(1px);
 }
 button.primary {
-  background: var(--accent);
-  color: #04210f;
-  border-color: var(--accent);
+  background: var(--gold-grad);
+  color: #3a2600;
+  border-color: var(--accent-deep);
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(244, 163, 0, 0.28);
 }
 button.toggle.active {
   background: var(--accent-2);
-  color: #04263a;
+  color: #ffffff;
   border-color: var(--accent-2);
 }
 
@@ -125,10 +370,12 @@ button.toggle.active {
 }
 
 .panel {
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+  box-shadow: 0 10px 30px rgba(20, 39, 29, 0.08);
 }
 .panel h2 {
   font-size: 14px;
@@ -158,8 +405,8 @@ button.toggle.active {
 }
 .rank {
   font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--accent);
+  font-weight: 800;
+  color: var(--accent-deep);
   min-width: 26px;
 }
 .venue .body {
@@ -190,8 +437,9 @@ button.toggle.active {
   color: var(--muted);
 }
 .badge.team {
-  color: var(--accent);
+  color: var(--accent-deep);
   border-color: var(--accent);
+  background: #fff7e6;
 }
 .badge.kind {
   text-transform: capitalize;
@@ -253,4 +501,61 @@ button.toggle.active {
 .tabs {
   display: flex;
   gap: 8px;
+}
+
+/* Primary navigation rendered as a premium segmented control. */
+.nav-tabs {
+  gap: 4px;
+  padding: 5px;
+  width: fit-content;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(20, 39, 29, 0.06);
+}
+.nav-tabs .toggle {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 9px 20px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.nav-tabs .toggle:hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
+.nav-tabs .toggle.active {
+  color: #fff;
+  background: var(--hero-grad);
+  box-shadow: 0 6px 16px rgba(10, 107, 65, 0.32);
+}
+
+/* Site-wide copyright footer. */
+.site-footer {
+  margin-top: 40px;
+  padding: 24px 16px 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.site-footer .footer-brand {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.site-footer .footer-copy {
+  font-size: 13px;
+  color: var(--muted);
+}
+.site-footer .footer-note {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.8;
+  max-width: 440px;
 }

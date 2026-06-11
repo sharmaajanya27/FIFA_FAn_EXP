@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "la-evt-001",
+      "title": "Mexico vs England Watch Party — Downtown LA",
+      "kind": "viewing_party",
+      "lat": 34.045,
+      "lon": -118.255,
+      "startTime": "2026-06-17T18:30:00Z",
+      "matchId": "wc2026-007",
+      "estAttendance": 600
+    },
+    {
+      "externalId": "la-evt-002",
+      "title": "Brazil vs Morocco Fan Zone — Santa Monica",
+      "kind": "fan_zone",
+      "lat": 34.02,
+      "lon": -118.3,
+      "startTime": "2026-06-20T20:30:00Z",
+      "matchId": "wc2026-010",
+      "estAttendance": 320
+    }
+  ]
+}

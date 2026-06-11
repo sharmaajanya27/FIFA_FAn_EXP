@@ -51,23 +51,38 @@ async function main(): Promise<void> {
     new ExcelPublisher(env.dataDir),
   ];
 
+  const failures: string[] = [];
   for (const slug of slugs) {
     const city = getCity(slug);
-    const result = await runPipeline(city, {
-      env,
-      publishers,
-      matches,
-      scoring,
-      manifest,
-    });
-    log.info("ingest: city complete", {
-      city: result.city,
-      venues: result.venues.length,
-      events: result.events.length,
-    });
+    try {
+      const result = await runPipeline(city, {
+        env,
+        publishers,
+        matches,
+        scoring,
+        manifest,
+      });
+      log.info("ingest: city complete", {
+        city: result.city,
+        venues: result.venues.length,
+        events: result.events.length,
+      });
+    } catch (err) {
+      // Isolate per-city failures so one bad source doesn't abort the batch.
+      failures.push(slug);
+      log.error("ingest: city failed, continuing", {
+        city: slug,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   await manifest.save();
+
+  if (failures.length > 0) {
+    log.warn("ingest: completed with failures", { failed: failures });
+    process.exitCode = 1;
+  }
 }
 
 main().catch((err) => {

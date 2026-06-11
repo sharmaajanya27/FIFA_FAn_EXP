@@ -1,4 +1,4 @@
-/** Typed client for the FanMatch discovery + engagement API. */
+/** Typed client for the FanWatch discovery + engagement API. */
 import type {
   AiRecommendation,
   AuthResult,
@@ -22,7 +22,7 @@ import type {
 const BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ?? "http://localhost:3001";
 
-const TOKEN_KEY = "fanmatch_token";
+const TOKEN_KEY = "fanwatch_token";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;

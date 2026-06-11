@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "sea-evt-001",
+      "title": "USA vs Mexico Watch Party — Capitol Hill",
+      "kind": "viewing_party",
+      "lat": 47.62,
+      "lon": -122.32,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 420
+    },
+    {
+      "externalId": "sea-evt-002",
+      "title": "France vs Germany Community Watch — Pioneer Square",
+      "kind": "community_watch",
+      "lat": 47.6,
+      "lon": -122.334,
+      "startTime": "2026-06-15T17:30:00Z",
+      "matchId": "wc2026-005",
+      "estAttendance": 170
+    }
+  ]
+}

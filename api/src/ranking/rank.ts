@@ -1,10 +1,15 @@
 /**
- * Query-time ranking. Combines each venue's precomputed static score with the
- * user-relative signals (distance, team-fan-match) into a final 0..1 score,
- * renormalizing over whichever signals apply (team-fan-match only counts when
- * the user picked a team).
+ * Query-time ranking. Combines a venue's "is this a sports venue?" content
+ * signal (venue-type prior + showsMatches) and its precomputed static score
+ * with the user-relative signals (distance, team-fan-match) into a final 0..1
+ * score, renormalizing over whichever signals apply (team-fan-match only counts
+ * when the user picked a team).
  */
-import { RANKING_WEIGHTS } from "../config/ranking.js";
+import {
+  DEFAULT_KIND_PRIOR,
+  KIND_PRIOR,
+  RANKING_WEIGHTS,
+} from "../config/ranking.js";
 import type { GeoPoint, RankedVenue, Venue } from "../domain/models.js";
 import { haversineMeters } from "../util/geo.js";
 
@@ -23,6 +28,19 @@ function distanceScore(distanceMeters: number, radiusMeters: number): number {
   return clamp01(1 - distanceMeters / radiusMeters);
 }
 
+/**
+ * "Is this a place to watch the match?" — blends the venue-type prior (pubs/bars
+ * over cafes/restaurants) with the per-venue showsMatches signal. The prior
+ * keeps real sports venues on top even for cities whose data predates the
+ * showsMatches signal; showsMatches lifts venues with explicit sports tags
+ * above their generic peers.
+ */
+function contentScore(venue: Venue): number {
+  const prior = KIND_PRIOR[venue.kind] ?? DEFAULT_KIND_PRIOR;
+  const showsMatches = clamp01(venue.showsMatches ?? 0);
+  return clamp01(0.55 * prior + 0.65 * showsMatches);
+}
+
 export function rankVenue(
   venue: Venue,
   distanceMeters: number,
@@ -31,9 +49,11 @@ export function rankVenue(
   const w = RANKING_WEIGHTS;
   const staticScore = venue.score ?? 0;
   const distScore = distanceScore(distanceMeters, params.radiusMeters);
+  const content = contentScore(venue);
 
-  let weighted = w.static * staticScore + w.distance * distScore;
-  let totalWeight = w.static + w.distance;
+  let weighted =
+    w.content * content + w.static * staticScore + w.distance * distScore;
+  let totalWeight = w.content + w.static + w.distance;
 
   if (params.team) {
     const teamMatch = venue.supportsTeams.includes(params.team) ? 1 : 0;

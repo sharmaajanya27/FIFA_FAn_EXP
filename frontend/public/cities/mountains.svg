@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" fill="#000">
+  <!-- Mountain range silhouette (CSS mask). -->
+  <rect x="0" y="320" width="1440" height="40"/>
+  <polygon points="-40,320 220,120 360,240 520,90 700,300 760,220 920,330 1080,140 1240,300 1340,210 1480,330 1480,360 -40,360"/>
+  <polygon points="380,320 560,180 720,320" opacity="0.9"/>
+  <polygon points="980,320 1180,170 1360,320" opacity="0.9"/>
+  <!-- snow caps -->
+  <polygon points="520,90 560,150 500,150 480,128" fill="#fff" opacity="0.0"/>
+</svg>

@@ -1,0 +1,24 @@
+{
+  "events": [
+    {
+      "externalId": "atl-evt-001",
+      "title": "USA vs Mexico Watch Party — Battery Atlanta",
+      "kind": "viewing_party",
+      "lat": 33.755,
+      "lon": -84.39,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 500
+    },
+    {
+      "externalId": "atl-evt-002",
+      "title": "England Supporters Fan Zone — Midtown",
+      "kind": "fan_zone",
+      "lat": 33.781,
+      "lon": -84.383,
+      "startTime": "2026-06-13T18:30:00Z",
+      "matchId": "wc2026-003",
+      "estAttendance": 220
+    }
+  ]
+}

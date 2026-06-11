@@ -41,6 +41,11 @@ function mergeInto(target: Venue, dup: Venue): void {
   target.hours ??= dup.hours;
   target.ratingAvg ??= dup.ratingAvg;
   target.capacity ??= dup.capacity;
+  // A match-showing signal from any source wins.
+  target.showsMatches = Math.max(
+    target.showsMatches ?? 0,
+    dup.showsMatches ?? 0,
+  );
   target.supportsTeams = Array.from(
     new Set([...target.supportsTeams, ...dup.supportsTeams]),
   );

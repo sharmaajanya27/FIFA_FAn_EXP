@@ -8,9 +8,32 @@
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { readFile } from "node:fs/promises";
 import type { Event, Match, Venue } from "../models/canonical.js";
 import { log } from "../util/logger.js";
 import type { PublishContext, Publisher } from "./types.js";
+
+/**
+ * Read a previously published entity file (data/<city>/<entity>.jsonl) back
+ * into an array. Returns [] when the file doesn't exist yet (first run). This
+ * is the seam the incremental merge uses to avoid overwriting prior data.
+ */
+export async function readPublishedEntity<T>(
+  dataDir: string,
+  citySlug: string,
+  entity: string,
+): Promise<T[]> {
+  const file = join(resolve(dataDir, citySlug), `${entity}.jsonl`);
+  try {
+    const text = await readFile(file, "utf8");
+    return text
+      .split(/\r?\n/)
+      .filter((line) => line.trim().length > 0)
+      .map((line) => JSON.parse(line) as T);
+  } catch {
+    return [];
+  }
+}
 
 export class JsonlPublisher implements Publisher {
   readonly id = "jsonl";
