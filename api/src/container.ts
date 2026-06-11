@@ -13,6 +13,7 @@ import { RecommendationService } from "./services/recommendations.js";
 import { ReviewService } from "./services/reviews.js";
 import { AiRecommendationService } from "./services/aiRecommendations.js";
 import { CrowdEstimationService } from "./services/crowdEstimation.js";
+import { EventService } from "./services/events.js";
 
 export interface Container {
   env: ApiEnv;
@@ -25,12 +26,14 @@ export interface Container {
   recommendations: RecommendationService;
   aiRecommendations: AiRecommendationService;
   crowdEstimation: CrowdEstimationService;
+  events: EventService;
 }
 
 export function buildContainer(env: ApiEnv, repo: Repository): Container {
   const store = new Store(env.dataDir);
   const auth = new AuthService(store.collection<User>("users"));
   const reviews = new ReviewService(store);
+  const events = new EventService(store);
   const recommendations = new RecommendationService(repo, reviews);
 
   return {
@@ -39,9 +42,10 @@ export function buildContainer(env: ApiEnv, repo: Repository): Container {
     store,
     auth,
     reviews,
-    discovery: new DiscoveryService(repo, reviews),
+    discovery: new DiscoveryService(repo, reviews, events),
     recommendations,
     aiRecommendations: new AiRecommendationService(recommendations, env),
     crowdEstimation: new CrowdEstimationService(repo, store),
+    events,
   };
 }

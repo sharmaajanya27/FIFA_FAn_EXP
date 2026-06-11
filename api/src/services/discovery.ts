@@ -28,10 +28,16 @@ export interface VenueOverlay {
   applyOverlay(venues: Venue[]): Promise<Venue[]>;
 }
 
+/** Optional source of additional (user-created) events to merge into discovery. */
+export interface EventOverlay {
+  forCity(city: string): Promise<Event[]>;
+}
+
 export class DiscoveryService {
   constructor(
     private readonly repo: Repository,
     private readonly overlay?: VenueOverlay,
+    private readonly eventOverlay?: EventOverlay,
   ) {}
 
   private async loadVenues(city: string): Promise<Venue[]> {
@@ -72,7 +78,9 @@ export class DiscoveryService {
     radiusMeters: number;
     team?: string;
   }): Promise<(Event & { distanceMeters: number })[]> {
-    const events = await this.repo.events(q.city);
+    const seed = await this.repo.events(q.city);
+    const userEvents = this.eventOverlay ? await this.eventOverlay.forCity(q.city) : [];
+    const events = [...seed, ...userEvents];
     return events
       .filter((e) => !q.team || e.teams.includes(q.team))
       .map((e) => ({

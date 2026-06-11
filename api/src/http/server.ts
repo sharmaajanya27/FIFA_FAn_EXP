@@ -34,6 +34,7 @@ import { createPost, listFeed, toggleLike } from "../handlers/communities.js";
 import { estimateCrowd, getCrowd, reportCrowd } from "../handlers/crowd.js";
 import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
+import { createEvent, listEvents } from "../handlers/events.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -96,6 +97,9 @@ function buildRoutes(c: Container): Route[] {
     route("GET", "/venues/:id", venueById(c)),
     route("GET", "/matches", matches(c)),
     route("GET", "/events/nearby", nearbyEvents(c)),
+    // Event creation (Phase 3)
+    route("POST", "/events", createEvent(c)),
+    route("GET", "/events", listEvents(c)),
     route("GET", "/recommendations", recommendations(c)),
     // AI recommendations (Phase 3)
     route("GET", "/ai/recommendations", aiRecommendations(c)),
