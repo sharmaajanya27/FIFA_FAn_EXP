@@ -1,0 +1,21 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import "leaflet/dist/leaflet.css";
+
+export const metadata: Metadata = {
+  title: "FanMatch — Find the best place to watch the match",
+  description:
+    "Discover bars, pubs, fan zones, and viewing parties near you, ranked by atmosphere, team support, and fan engagement.",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
