@@ -49,6 +49,11 @@ export function VenueList({ venues, activeId, onHover, onSelect }: Props) {
               {v.hours ? ` · ${v.hours}` : ""}
             </div>
             <div className="badges">
+              {v.featured && (
+                <span className="badge" style={{ color: "var(--accent)", borderColor: "var(--accent)" }}>
+                  ★ Featured
+                </span>
+              )}
               <span className="badge kind">{v.kind}</span>
               {v.supportsTeams.map((t) => (
                 <span key={t} className="badge team">

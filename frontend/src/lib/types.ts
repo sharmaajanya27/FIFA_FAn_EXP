@@ -19,6 +19,8 @@ export interface RankedVenue {
   score?: number;
   distanceMeters: number;
   finalScore: number;
+  featured?: boolean;
+  claimed?: boolean;
 }
 
 export interface Match {
@@ -136,4 +138,35 @@ export interface Photo {
 export interface AuthResult {
   token: string;
   user: PublicUser;
+}
+
+// ---- Phase 3 ----
+export interface AiRecommendation extends Recommendation {
+  mode: "smart" | "ai";
+  aiSummary: string;
+  aiStatus: "available" | "coming_soon";
+  message?: string;
+}
+
+export type CrowdLevelValue = "empty" | "quiet" | "lively" | "packed";
+export interface CrowdEstimate {
+  venueId: string;
+  level: CrowdLevelValue;
+  source: "reported" | "estimated";
+  confidence: number;
+  signals: {
+    recentReports: number;
+    recentCheckIns: number;
+    minutesToKickoff: number | null;
+    capacity: number | null;
+  };
+}
+
+export interface VenueListing {
+  venueId: string;
+  claimed: boolean;
+  businessName?: string;
+  featured: boolean;
+  featuredUntil?: string;
+  package?: string;
 }
