@@ -49,6 +49,24 @@ ingestion `scoring.json`.
 | GET | `/events/nearby` | `city,lat,lon[,radius,team]` | Fan events near a point |
 | GET | `/recommendations` | `city,lat,lon,team[,radius,limit]` | Personalized venue recs |
 
+### Phase 2 — engagement (user-generated, write APIs)
+
+Writes go through a pluggable JSON store (`src/store`, swap for Postgres/
+DynamoDB) and require a bearer token from register/login (dev-stub auth in
+`src/auth`). Reviews overlay onto venue ratings, so they feed the §6.5 ranking.
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| POST | `/auth/register` · `/auth/login` | — | Get a bearer token |
+| GET | `/me` | ✓ | Current user |
+| GET/PUT | `/users/:id` · `/me/profile` | ✓(PUT) | Fan profiles |
+| POST/GET | `/venues/:id/reviews` | ✓(POST) | Reviews (+ rating overlay) |
+| POST/GET | `/venues/:id/checkins` | ✓(POST) | Check-ins |
+| POST/GET | `/venues/:id/crowd` | ✓(POST) | Live crowd level |
+| POST/GET | `/venues/:id/photos` | ✓(POST) | Fan photos |
+| POST/GET | `/matches/:id/predictions` · `/predictions/leaderboard` | ✓(POST) | Predictions |
+| POST/GET | `/communities/:team/posts` · `/posts/:id/like` | ✓(POST) | Team communities |
+
 ## Usage
 
 ```bash
