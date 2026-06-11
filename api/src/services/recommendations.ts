@@ -34,8 +34,11 @@ export interface Recommendation {
 export class RecommendationService {
   private readonly discovery: DiscoveryService;
 
-  constructor(private readonly repo: Repository) {
-    this.discovery = new DiscoveryService(repo);
+  constructor(
+    private readonly repo: Repository,
+    overlay?: import("./discovery.js").VenueOverlay,
+  ) {
+    this.discovery = new DiscoveryService(repo, overlay);
   }
 
   async recommend(q: RecommendationQuery): Promise<Recommendation> {

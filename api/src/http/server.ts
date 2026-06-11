@@ -18,6 +18,7 @@ import {
 } from "../handlers/index.js";
 import { login, me, register } from "../handlers/auth.js";
 import { getProfile, updateProfile } from "../handlers/profiles.js";
+import { createReview, listReviews } from "../handlers/reviews.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -88,6 +89,9 @@ function buildRoutes(c: Container): Route[] {
     // Profiles
     route("GET", "/users/:id", getProfile(c)),
     route("PUT", "/me/profile", updateProfile(c)),
+    // Reviews
+    route("POST", "/venues/:id/reviews", createReview(c)),
+    route("GET", "/venues/:id/reviews", listReviews(c)),
   ];
 }
 

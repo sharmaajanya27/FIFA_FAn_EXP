@@ -10,12 +10,15 @@ import type { User } from "./domain/engagement.js";
 import { Store } from "./store/jsonStore.js";
 import { DiscoveryService } from "./services/discovery.js";
 import { RecommendationService } from "./services/recommendations.js";
+import { ReviewService } from "./services/reviews.js";
 
 export interface Container {
   env: ApiEnv;
   repo: Repository;
   store: Store;
   auth: AuthService;
+  /** Community reviews; also overlaid onto discovery to feed §6.5 ranking. */
+  reviews: ReviewService;
   discovery: DiscoveryService;
   recommendations: RecommendationService;
 }
@@ -23,13 +26,15 @@ export interface Container {
 export function buildContainer(env: ApiEnv, repo: Repository): Container {
   const store = new Store(env.dataDir);
   const auth = new AuthService(store.collection<User>("users"));
+  const reviews = new ReviewService(store);
 
   return {
     env,
     repo,
     store,
     auth,
-    discovery: new DiscoveryService(repo),
-    recommendations: new RecommendationService(repo),
+    reviews,
+    discovery: new DiscoveryService(repo, reviews),
+    recommendations: new RecommendationService(repo, reviews),
   };
 }
