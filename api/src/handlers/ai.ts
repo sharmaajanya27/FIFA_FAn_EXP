@@ -12,8 +12,10 @@ const str = (req: ApiRequest, key: string): string | undefined =>
   req.query[key]?.trim() || undefined;
 
 /**
- * GET /ai/recommendations?city&lat&lon&team[&radius&limit]
- * Personalized matchday pitch (Claude-generated, heuristic fallback).
+ * GET /ai/recommendations?city&lat&lon&team[&radius&limit&mode]
+ * Matchday recommendation. Defaults to the deterministic "smart" pitch;
+ * `mode=ai` is reserved for the Claude workflow and currently returns
+ * "coming soon" alongside the smart picks.
  */
 export const aiRecommendations =
   (c: Container) =>
@@ -26,6 +28,7 @@ export const aiRecommendations =
     const lon = requireFloat(req, "lon");
     const radius = Number(req.query.radius ?? c.env.defaultRadiusMeters);
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const mode = str(req, "mode") === "ai" ? "ai" : "smart";
 
     const result = await c.aiRecommendations.recommend({
       city,
@@ -33,6 +36,7 @@ export const aiRecommendations =
       radiusMeters: radius,
       team,
       limit,
+      mode,
     });
     return ok(result);
   };
