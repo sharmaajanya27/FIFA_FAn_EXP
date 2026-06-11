@@ -1,0 +1,24 @@
+{
+  "name": "@fanmatch/ingestion",
+  "version": "0.0.1",
+  "private": true,
+  "description": "FanMatch Phase 0 — data aggregation & ingestion (scrape, normalize, geocode, dedup, publish).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "ingest": "tsx src/cli/run.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
