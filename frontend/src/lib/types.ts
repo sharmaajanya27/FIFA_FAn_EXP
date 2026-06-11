@@ -58,3 +58,82 @@ export interface Recommendation {
   upcomingMatches: Match[];
   rationale: string;
 }
+
+// ---- Phase 2 engagement ----
+export interface PublicUser {
+  id: string;
+  displayName: string;
+  favoriteTeams: string[];
+  homeCity?: string;
+  bio?: string;
+  createdAt: string;
+}
+
+export interface Review {
+  id: string;
+  venueId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
+
+export interface CheckIn {
+  id: string;
+  venueId: string;
+  userId: string;
+  userName: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface Prediction {
+  id: string;
+  matchId: string;
+  userId: string;
+  userName: string;
+  homeScore: number;
+  awayScore: number;
+  createdAt: string;
+}
+
+export interface LeaderboardEntry {
+  userId: string;
+  userName: string;
+  predictions: number;
+  points: number;
+}
+
+export interface CommunityPost {
+  id: string;
+  team: string;
+  userId: string;
+  userName: string;
+  text: string;
+  likedBy: string[];
+  createdAt: string;
+}
+
+export type CrowdLevel = "empty" | "quiet" | "lively" | "packed";
+export interface CrowdStatus {
+  venueId: string;
+  level: CrowdLevel | null;
+  recentReports: number;
+  updatedAt: string | null;
+}
+
+export interface Photo {
+  id: string;
+  venueId: string;
+  userId: string;
+  userName: string;
+  dataUrl: string;
+  caption?: string;
+  createdAt: string;
+}
+
+export interface AuthResult {
+  token: string;
+  user: PublicUser;
+}

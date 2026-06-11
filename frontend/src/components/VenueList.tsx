@@ -8,9 +8,10 @@ interface Props {
   venues: RankedVenue[];
   activeId?: string;
   onHover?: (id: string | undefined) => void;
+  onSelect?: (venue: RankedVenue) => void;
 }
 
-export function VenueList({ venues, activeId, onHover }: Props) {
+export function VenueList({ venues, activeId, onHover, onSelect }: Props) {
   if (venues.length === 0) {
     return <div className="empty">No venues match your filters. Try widening the radius.</div>;
   }
@@ -27,7 +28,13 @@ export function VenueList({ venues, activeId, onHover }: Props) {
           <div className="rank">{i + 1}</div>
           <div className="body">
             <div className="row">
-              <span className="name">{v.name}</span>
+              <span
+                className="name"
+                style={onSelect ? { cursor: "pointer" } : undefined}
+                onClick={() => onSelect?.(v)}
+              >
+                {v.name}
+              </span>
               <a
                 href={directionsUrl(v.geo.lat, v.geo.lon, v.name)}
                 target="_blank"

@@ -23,12 +23,25 @@ export interface NearbyQuery {
   limit?: number;
 }
 
+/** Optional overlay that augments venues with community signals (reviews). */
+export interface VenueOverlay {
+  applyOverlay(venues: Venue[]): Promise<Venue[]>;
+}
+
 export class DiscoveryService {
-  constructor(private readonly repo: Repository) {}
+  constructor(
+    private readonly repo: Repository,
+    private readonly overlay?: VenueOverlay,
+  ) {}
+
+  private async loadVenues(city: string): Promise<Venue[]> {
+    const venues = await this.repo.venues(city);
+    return this.overlay ? this.overlay.applyOverlay(venues) : venues;
+  }
 
   /** Ranked venues near a point within a city (PRD §6.1, §6.5). */
   async nearbyVenues(q: NearbyQuery): Promise<RankedVenue[]> {
-    const venues = await this.repo.venues(q.city);
+    const venues = await this.loadVenues(q.city);
     const params: RankParams = {
       origin: q.origin,
       radiusMeters: q.radiusMeters,
@@ -39,7 +52,7 @@ export class DiscoveryService {
   }
 
   async venueById(city: string, id: string): Promise<Venue | undefined> {
-    const venues = await this.repo.venues(city);
+    const venues = await this.loadVenues(city);
     return venues.find((v) => v.id === id);
   }
 

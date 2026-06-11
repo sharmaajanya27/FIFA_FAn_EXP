@@ -3,9 +3,16 @@
  * Node's http or API Gateway types, so the same handler runs behind the local
  * dev server today and behind an API Gateway → Lambda adapter later.
  */
+import type { User } from "../domain/engagement.js";
+
 export interface ApiRequest {
+  method: string;
   query: Record<string, string>;
   params: Record<string, string>;
+  /** Parsed JSON body (POST/PUT), or undefined. */
+  body?: unknown;
+  /** Resolved authenticated user, if a valid bearer token was supplied. */
+  user?: User;
 }
 
 export interface ApiResponse {
@@ -18,11 +25,26 @@ export type Handler = (req: ApiRequest) => Promise<ApiResponse>;
 export function ok(body: unknown): ApiResponse {
   return { status: 200, body };
 }
+export function created(body: unknown): ApiResponse {
+  return { status: 201, body };
+}
 export function badRequest(message: string): ApiResponse {
   return { status: 400, body: { error: message } };
 }
+export function unauthorized(message = "Authentication required"): ApiResponse {
+  return { status: 401, body: { error: message } };
+}
 export function notFound(message: string): ApiResponse {
   return { status: 404, body: { error: message } };
+}
+
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+  }
 }
 
 /** Parse a required float query param, throwing a 400-friendly error. */
@@ -35,11 +57,22 @@ export function requireFloat(req: ApiRequest, key: string): number {
   return n;
 }
 
-export class ApiError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-  ) {
-    super(message);
+/** Return the authenticated user or throw a 401. */
+export function requireUser(req: ApiRequest): User {
+  if (!req.user) throw new ApiError(401, "Authentication required");
+  return req.user;
+}
+
+/** Read a required field from the JSON body, throwing 400 if absent. */
+export function requireField<T>(req: ApiRequest, key: string): T {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  if (body[key] === undefined || body[key] === null || body[key] === "") {
+    throw new ApiError(400, `Missing body field: ${key}`);
   }
+  return body[key] as T;
+}
+
+export function bodyField<T>(req: ApiRequest, key: string): T | undefined {
+  const body = (req.body ?? {}) as Record<string, unknown>;
+  return body[key] as T | undefined;
 }

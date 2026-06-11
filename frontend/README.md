@@ -17,6 +17,15 @@ Maps URL (no SDK/key).
 - **§6.5 Ranking** — venues ordered by the API's final score (static + distance + team-fan-match)
 - **§6.6 Recommendations** — personalized top venues + upcoming fixtures for your team
 
+## Phase 2 — engagement (PRD §7)
+
+- **Accounts** — inline sign up / log in (dev-stub auth), favorite team on signup
+- **Venue detail drawer** — reviews (feed the ranking), check-ins, live crowd reporting, fan-photo upload
+- **Predictions** — predict fixture scorelines + leaderboard
+- **Team communities** — per-team feed with posts and likes
+
+All engagement writes require login; the bearer token is kept in `localStorage`.
+
 ## Run
 
 The app needs the discovery API running (default `http://localhost:3001`) with
