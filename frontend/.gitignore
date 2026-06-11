@@ -6,6 +6,9 @@ node_modules/
 out/
 next-env.d.ts.bak
 
+# TypeScript
+*.tsbuildinfo
+
 # Env
 .env
 .env.local
