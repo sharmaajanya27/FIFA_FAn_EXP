@@ -1,11 +1,14 @@
 /** Typed client for the FanMatch discovery + engagement API. */
 import type {
+  AiRecommendation,
   AuthResult,
   CheckIn,
   CommunityPost,
+  CrowdEstimate,
   CrowdLevel,
   CrowdStatus,
   EventsResponse,
+  FanEvent,
   LeaderboardEntry,
   NearbyVenuesResponse,
   Photo,
@@ -13,6 +16,7 @@ import type {
   PublicUser,
   Recommendation,
   Review,
+  VenueListing,
 } from "./types";
 
 const BASE =
@@ -128,4 +132,19 @@ export const api = {
     get<{ count: number; photos: Photo[] }>(`/venues/${venueId}/photos`),
   uploadPhoto: (venueId: string, dataUrl: string, caption?: string) =>
     request<Photo>("POST", `/venues/${venueId}/photos`, { body: { dataUrl, caption } }),
+
+  // ---- Phase 3 ----
+  aiRecommendations: (a: { city: string; lat: number; lon: number; team: string; radius: number; mode?: "smart" | "ai" }) =>
+    get<AiRecommendation>("/ai/recommendations", { ...a }),
+  crowdEstimate: (venueId: string, city: string) =>
+    get<CrowdEstimate>(`/venues/${venueId}/crowd/estimate`, { city }),
+  createEvent: (body: {
+    city: string; title: string; lat: number; lon: number; startTime: string;
+    kind?: string; teams?: string[]; estAttendance?: number; matchId?: string;
+  }) => request<FanEvent>("POST", "/events", { body }),
+  venueListing: (venueId: string) => get<VenueListing>(`/venues/${venueId}/listing`),
+  claimVenue: (venueId: string, businessName: string) =>
+    request<{ id: string }>("POST", `/venues/${venueId}/claim`, { body: { businessName } }),
+  featureVenue: (venueId: string, pkg: string, days?: number) =>
+    request<{ id: string }>("POST", `/venues/${venueId}/feature`, { body: { package: pkg, days } }),
 };

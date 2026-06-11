@@ -5,12 +5,13 @@ import dynamic from "next/dynamic";
 import { api } from "@/lib/api";
 import { CITIES, cityBySlug } from "@/lib/cities";
 import { TEAMS } from "@/lib/teams";
-import type { FanEvent, RankedVenue, Recommendation } from "@/lib/types";
+import type { AiRecommendation, FanEvent, RankedVenue } from "@/lib/types";
 import { VenueList } from "@/components/VenueList";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
 import { EventsPanel } from "@/components/EventsPanel";
 import { AuthBar } from "@/components/AuthBar";
 import { VenueDetail } from "@/components/VenueDetail";
+import { CreateEventForm } from "@/components/CreateEventForm";
 import { PredictionsPanel } from "@/components/PredictionsPanel";
 import { CommunityPanel } from "@/components/CommunityPanel";
 
@@ -28,7 +29,8 @@ export default function Home() {
 
   const [venues, setVenues] = useState<RankedVenue[]>([]);
   const [events, setEvents] = useState<FanEvent[]>([]);
-  const [rec, setRec] = useState<Recommendation | null>(null);
+  const [rec, setRec] = useState<AiRecommendation | null>(null);
+  const [recMode, setRecMode] = useState<"smart" | "ai">("smart");
   const [activeId, setActiveId] = useState<string | undefined>();
   const [view, setView] = useState<"map" | "list">("map");
   const [tab, setTab] = useState<"recs" | "events">("recs");
@@ -67,7 +69,7 @@ export default function Home() {
       setEvents(e.events);
       setRec(
         team
-          ? await api.recommendations({ city, lat: origin.lat, lon: origin.lon, team, radius, limit: 5 })
+          ? await api.aiRecommendations({ city, lat: origin.lat, lon: origin.lon, team, radius, mode: recMode })
           : null,
       );
     } catch (err) {
@@ -78,7 +80,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [city, origin.lat, origin.lon, radius, team, kind]);
+  }, [city, origin.lat, origin.lon, radius, team, kind, recMode]);
 
   useEffect(() => {
     void load();
@@ -111,7 +113,7 @@ export default function Home() {
 
       {nav === "predictions" && <PredictionsPanel city={city} />}
       {nav === "community" && <CommunityPanel />}
-      {selected && <VenueDetail venue={selected} onClose={() => setSelected(null)} />}
+      {selected && <VenueDetail venue={selected} city={city} onClose={() => setSelected(null)} />}
 
       {nav === "discover" && (
         <>
@@ -212,7 +214,14 @@ export default function Home() {
               Fan events ({events.length})
             </button>
           </h2>
-          {tab === "recs" ? <RecommendationPanel rec={rec} /> : <EventsPanel events={events} />}
+          {tab === "recs" ? (
+            <RecommendationPanel rec={rec} mode={recMode} onMode={setRecMode} />
+          ) : (
+            <>
+              <CreateEventForm city={city} origin={origin} onCreated={load} />
+              <EventsPanel events={events} />
+            </>
+          )}
           {view === "map" && (
             <>
               <h2>Ranked list</h2>

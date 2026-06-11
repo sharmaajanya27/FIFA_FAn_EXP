@@ -3,38 +3,54 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
-import type { CheckIn, CrowdLevel, CrowdStatus, Photo, RankedVenue, Review } from "@/lib/types";
+import type {
+  CheckIn,
+  CrowdEstimate,
+  CrowdLevel,
+  CrowdStatus,
+  Photo,
+  RankedVenue,
+  Review,
+  VenueListing,
+} from "@/lib/types";
 import { formatDistance } from "@/lib/format";
 import { teamLabel } from "@/lib/teams";
 
 const CROWD_LEVELS: CrowdLevel[] = ["empty", "quiet", "lively", "packed"];
 const CROWD_EMOJI: Record<CrowdLevel, string> = { empty: "🪑", quiet: "🙂", lively: "🎉", packed: "🔥" };
 
-export function VenueDetail({ venue, onClose }: { venue: RankedVenue; onClose: () => void }) {
+export function VenueDetail({ venue, city, onClose }: { venue: RankedVenue; city: string; onClose: () => void }) {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [avg, setAvg] = useState<number | null>(null);
   const [checkins, setCheckins] = useState<CheckIn[]>([]);
   const [crowd, setCrowd] = useState<CrowdStatus | null>(null);
+  const [estimate, setEstimate] = useState<CrowdEstimate | null>(null);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [listing, setListing] = useState<VenueListing | null>(null);
+  const [bizName, setBizName] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   const reload = useCallback(async () => {
-    const [r, c, cr, p] = await Promise.all([
+    const [r, c, cr, est, p, lst] = await Promise.all([
       api.listReviews(venue.id),
       api.listCheckIns(venue.id),
       api.crowdStatus(venue.id),
+      api.crowdEstimate(venue.id, city),
       api.listPhotos(venue.id),
+      api.venueListing(venue.id),
     ]);
     setReviews(r.reviews);
     setAvg(r.averageRating);
     setCheckins(c.checkins);
     setCrowd(cr);
+    setEstimate(est);
     setPhotos(p.photos);
-  }, [venue.id]);
+    setListing(lst);
+  }, [venue.id, city]);
 
   useEffect(() => {
     void reload();
@@ -98,6 +114,9 @@ export function VenueDetail({ venue, onClose }: { venue: RankedVenue; onClose: (
             {avg !== null ? ` · ★ ${avg}` : ""}
           </div>
           <div className="badges" style={{ marginTop: 8 }}>
+            {(venue.featured || listing?.featured) && (
+              <span className="badge" style={{ color: "var(--accent)", borderColor: "var(--accent)" }}>★ Featured</span>
+            )}
             {venue.supportsTeams.map((t) => (
               <span key={t} className="badge team">{teamLabel(t)}</span>
             ))}
@@ -110,7 +129,14 @@ export function VenueDetail({ venue, onClose }: { venue: RankedVenue; onClose: (
         <div className="rec">
           <div style={{ marginBottom: 8 }}>
             {crowd?.level ? (
-              <strong>{CROWD_EMOJI[crowd.level]} {crowd.level} <span className="muted">({crowd.recentReports} recent)</span></strong>
+              <strong>{CROWD_EMOJI[crowd.level]} {crowd.level} <span className="muted">({crowd.recentReports} recent reports)</span></strong>
+            ) : estimate ? (
+              <span>
+                <strong>{CROWD_EMOJI[estimate.level]} Likely {estimate.level}</strong>{" "}
+                <span className="badge" style={{ color: "var(--accent-2)", borderColor: "var(--accent-2)" }}>
+                  estimated · {Math.round(estimate.confidence * 100)}% conf
+                </span>
+              </span>
             ) : (
               <span className="muted">No recent reports — be the first.</span>
             )}
@@ -169,7 +195,48 @@ export function VenueDetail({ venue, onClose }: { venue: RankedVenue; onClose: (
           {photos.length === 0 && <span className="muted">No photos yet.</span>}
         </div>
 
-        {!user && <div className="empty" style={{ color: "var(--accent-2)" }}>Log in to review, check in, report crowd, or add photos.</div>}
+        {/* Business / sponsorship */}
+        <h2>For businesses</h2>
+        <div className="rec">
+          {listing?.claimed ? (
+            <div className="muted">
+              Claimed by <strong>{listing.businessName}</strong>
+              {listing.featured ? " · ★ Featured listing active" : ""}
+            </div>
+          ) : (
+            <div className="row" style={{ gap: 8 }}>
+              <input
+                style={{ flex: 1 }}
+                value={bizName}
+                onChange={(e) => setBizName(e.target.value)}
+                placeholder="Your business name"
+              />
+              <button
+                disabled={busy || !bizName.trim()}
+                onClick={guard(async () => {
+                  await api.claimVenue(venue.id, bizName.trim());
+                  setBizName("");
+                })}
+              >
+                Claim
+              </button>
+            </div>
+          )}
+          {listing?.claimed && !listing.featured && (
+            <button
+              className="primary"
+              style={{ marginTop: 8 }}
+              disabled={busy}
+              onClick={guard(async () => {
+                await api.featureVenue(venue.id, "premium", 30);
+              })}
+            >
+              ★ Promote (feature for 30 days)
+            </button>
+          )}
+        </div>
+
+        {!user && <div className="empty" style={{ color: "var(--accent-2)" }}>Log in to review, check in, report crowd, add photos, or claim this venue.</div>}
         {error && <div className="empty" style={{ color: "var(--danger)" }}>{error}</div>}
       </aside>
     </div>
