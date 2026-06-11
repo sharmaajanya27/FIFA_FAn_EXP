@@ -31,6 +31,7 @@ import {
   listMyPredictions,
 } from "../handlers/predictions.js";
 import { createPost, listFeed, toggleLike } from "../handlers/communities.js";
+import { getCrowd, reportCrowd } from "../handlers/crowd.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -117,6 +118,9 @@ function buildRoutes(c: Container): Route[] {
     route("POST", "/communities/:team/posts", createPost(c)),
     route("GET", "/communities/:team/posts", listFeed(c)),
     route("POST", "/posts/:id/like", toggleLike(c)),
+    // Live crowd levels
+    route("POST", "/venues/:id/crowd", reportCrowd(c)),
+    route("GET", "/venues/:id/crowd", getCrowd(c)),
   ];
 }
 
