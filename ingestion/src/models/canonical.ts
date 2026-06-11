@@ -62,9 +62,72 @@ export const VenueSchema = z.object({
   capacity: z.number().int().positive().optional(),
   /** Country/team codes this venue is known to support (enrichment). */
   supportsTeams: z.array(z.string()).default([]),
+  /**
+   * Engagement signal (e.g. social mentions) once enrichment attaches it.
+   * Placeholder until a social connector lands; feeds the Score stage.
+   */
+  engagement: z.number().min(0).optional(),
+  /**
+   * Precomputed static ranking score (0..1). Combines source-side signals
+   * (rating, capacity, engagement). Query-time signals — distance and
+   * team-fan-match — are applied at discovery time in Phase 1 (PRD §6.5).
+   */
+  score: z.number().min(0).max(1).optional(),
   /** Provenance — one entry per source that contributed to this record. */
   sources: z.array(SourceSchema).min(1),
 });
 export type Venue = z.infer<typeof VenueSchema>;
 
 export const VenueArraySchema = z.array(VenueSchema);
+
+/** A national team / club. Country code is FIFA/ISO-style (e.g. "ARG"). */
+export const TeamSchema = z.object({
+  /** Stable code, e.g. "ARG", "ENG", "USA". */
+  code: z.string().min(2),
+  name: z.string().min(1),
+  country: z.string().min(1),
+  /** Lowercased alternate names used for matching in enrichment/normalize. */
+  aliases: z.array(z.string()).default([]),
+});
+export type Team = z.infer<typeof TeamSchema>;
+
+/** A fixture in some competition. Competition-agnostic (WC, EPL, UCL, …). */
+export const MatchSchema = z.object({
+  id: z.string(),
+  /** e.g. "FIFA World Cup 2026", "Premier League". */
+  competition: z.string().min(1),
+  /** Team codes. */
+  homeTeam: z.string().min(2),
+  awayTeam: z.string().min(2),
+  /** ISO 8601 kickoff timestamp (UTC). */
+  kickoff: z.string().datetime(),
+  /** Optional stage/round, e.g. "Group A", "Round of 16". */
+  stage: z.string().optional(),
+  sources: z.array(SourceSchema).min(1),
+});
+export type Match = z.infer<typeof MatchSchema>;
+
+/** A fan event: viewing party, community watch, official fan zone. */
+export const EventSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  kind: z.enum(["viewing_party", "fan_zone", "community_watch", "other"]),
+  geo: GeoPointSchema,
+  geohash: z.string(),
+  /** ISO 8601 start time (UTC). */
+  startTime: z.string().datetime(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  /** FanMatch venue id this event is hosted at, if resolved. */
+  venueId: z.string().optional(),
+  /** FanMatch match id this event shows, if known. */
+  matchId: z.string().optional(),
+  /** Team codes this event is oriented toward. */
+  teams: z.array(z.string()).default([]),
+  estAttendance: z.number().int().nonnegative().optional(),
+  sources: z.array(SourceSchema).min(1),
+});
+export type Event = z.infer<typeof EventSchema>;
+
+export const MatchArraySchema = z.array(MatchSchema);
+export const EventArraySchema = z.array(EventSchema);

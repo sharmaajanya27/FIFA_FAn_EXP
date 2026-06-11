@@ -22,3 +22,16 @@ export interface SourceConnector {
   /** Collect raw venue records for a city. */
   collectVenues(city: City): Promise<RawRecord[]>;
 }
+
+/** Connector that collects match fixtures for a competition. */
+export interface MatchConnector {
+  readonly id: string;
+  /** Collect raw fixture records (city-agnostic — fixtures are global). */
+  collectMatches(): Promise<RawRecord[]>;
+}
+
+/** Connector that collects fan events for a city. */
+export interface EventConnector {
+  readonly id: string;
+  collectEvents(city: City): Promise<RawRecord[]>;
+}
