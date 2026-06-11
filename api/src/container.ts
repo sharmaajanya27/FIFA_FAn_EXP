@@ -11,6 +11,7 @@ import { Store } from "./store/jsonStore.js";
 import { DiscoveryService } from "./services/discovery.js";
 import { RecommendationService } from "./services/recommendations.js";
 import { ReviewService } from "./services/reviews.js";
+import { AiRecommendationService } from "./services/aiRecommendations.js";
 
 export interface Container {
   env: ApiEnv;
@@ -21,12 +22,14 @@ export interface Container {
   reviews: ReviewService;
   discovery: DiscoveryService;
   recommendations: RecommendationService;
+  aiRecommendations: AiRecommendationService;
 }
 
 export function buildContainer(env: ApiEnv, repo: Repository): Container {
   const store = new Store(env.dataDir);
   const auth = new AuthService(store.collection<User>("users"));
   const reviews = new ReviewService(store);
+  const recommendations = new RecommendationService(repo, reviews);
 
   return {
     env,
@@ -35,6 +38,7 @@ export function buildContainer(env: ApiEnv, repo: Repository): Container {
     auth,
     reviews,
     discovery: new DiscoveryService(repo, reviews),
-    recommendations: new RecommendationService(repo, reviews),
+    recommendations,
+    aiRecommendations: new AiRecommendationService(recommendations, env),
   };
 }
