@@ -36,6 +36,7 @@ import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
 import { createEvent, listEvents } from "../handlers/events.js";
 import { claimVenue, featureVenue, getListing } from "../handlers/sponsorship.js";
+import { listMetros } from "../handlers/metros.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -94,6 +95,7 @@ function buildRoutes(c: Container): Route[] {
   return [
     route("GET", "/health", async () => ({ status: 200, body: { ok: true } })),
     route("GET", "/cities", listCities(c)),
+    route("GET", "/metros", listMetros(c)),
     route("GET", "/venues/nearby", nearbyVenues(c)),
     route("GET", "/venues/:id", venueById(c)),
     route("GET", "/matches", matches(c)),
