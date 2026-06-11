@@ -9,6 +9,10 @@ import type { FanEvent, RankedVenue, Recommendation } from "@/lib/types";
 import { VenueList } from "@/components/VenueList";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
 import { EventsPanel } from "@/components/EventsPanel";
+import { AuthBar } from "@/components/AuthBar";
+import { VenueDetail } from "@/components/VenueDetail";
+import { PredictionsPanel } from "@/components/PredictionsPanel";
+import { CommunityPanel } from "@/components/CommunityPanel";
 
 // Leaflet touches window — load the map only on the client.
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
@@ -28,6 +32,8 @@ export default function Home() {
   const [activeId, setActiveId] = useState<string | undefined>();
   const [view, setView] = useState<"map" | "list">("map");
   const [tab, setTab] = useState<"recs" | "events">("recs");
+  const [nav, setNav] = useState<"discover" | "predictions" | "community">("discover");
+  const [selected, setSelected] = useState<RankedVenue | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -85,12 +91,30 @@ export default function Home() {
 
   return (
     <main className="container">
-      <div className="header">
-        <h1>
-          <span className="brand">Fan</span>Match
-        </h1>
-        <span className="tagline">Find the best place to watch the match.</span>
+      <div className="header" style={{ justifyContent: "space-between", position: "relative" }}>
+        <div className="row" style={{ gap: 12 }}>
+          <h1>
+            <span className="brand">Fan</span>Match
+          </h1>
+          <span className="tagline">Find the best place to watch the match.</span>
+        </div>
+        <AuthBar />
       </div>
+
+      <div className="tabs" style={{ marginBottom: 16 }}>
+        {(["discover", "predictions", "community"] as const).map((n) => (
+          <button key={n} className={`toggle ${nav === n ? "active" : ""}`} onClick={() => setNav(n)}>
+            {n === "discover" ? "Discover" : n === "predictions" ? "Predictions" : "Community"}
+          </button>
+        ))}
+      </div>
+
+      {nav === "predictions" && <PredictionsPanel city={city} />}
+      {nav === "community" && <CommunityPanel />}
+      {selected && <VenueDetail venue={selected} onClose={() => setSelected(null)} />}
+
+      {nav === "discover" && (
+        <>
 
       <div className="controls">
         <div className="field">
@@ -167,7 +191,7 @@ export default function Home() {
           {view === "map" ? (
             <MapView center={origin} radiusMeters={radius} venues={venues} activeId={activeId} />
           ) : (
-            <VenueList venues={venues} activeId={activeId} onHover={setActiveId} />
+            <VenueList venues={venues} activeId={activeId} onHover={setActiveId} onSelect={setSelected} />
           )}
         </div>
 
@@ -192,11 +216,13 @@ export default function Home() {
           {view === "map" && (
             <>
               <h2>Ranked list</h2>
-              <VenueList venues={venues.slice(0, 20)} activeId={activeId} onHover={setActiveId} />
+              <VenueList venues={venues.slice(0, 20)} activeId={activeId} onHover={setActiveId} onSelect={setSelected} />
             </>
           )}
         </div>
       </div>
+        </>
+      )}
     </main>
   );
 }
