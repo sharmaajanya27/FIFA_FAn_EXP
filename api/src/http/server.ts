@@ -24,6 +24,12 @@ import {
   listUserCheckIns,
   listVenueCheckIns,
 } from "../handlers/checkins.js";
+import {
+  createPrediction,
+  leaderboard,
+  listMatchPredictions,
+  listMyPredictions,
+} from "../handlers/predictions.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -101,6 +107,11 @@ function buildRoutes(c: Container): Route[] {
     route("POST", "/venues/:id/checkins", createCheckIn(c)),
     route("GET", "/venues/:id/checkins", listVenueCheckIns(c)),
     route("GET", "/users/:id/checkins", listUserCheckIns(c)),
+    // Predictions
+    route("GET", "/predictions/leaderboard", leaderboard(c)),
+    route("POST", "/matches/:id/predictions", createPrediction(c)),
+    route("GET", "/matches/:id/predictions", listMatchPredictions(c)),
+    route("GET", "/me/predictions", listMyPredictions(c)),
   ];
 }
 
