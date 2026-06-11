@@ -31,8 +31,12 @@ import {
   listMyPredictions,
 } from "../handlers/predictions.js";
 import { createPost, listFeed, toggleLike } from "../handlers/communities.js";
-import { getCrowd, reportCrowd } from "../handlers/crowd.js";
+import { estimateCrowd, getCrowd, reportCrowd } from "../handlers/crowd.js";
 import { listPhotos, uploadPhoto } from "../handlers/photos.js";
+import { aiRecommendations } from "../handlers/ai.js";
+import { createEvent, listEvents } from "../handlers/events.js";
+import { claimVenue, featureVenue, getListing } from "../handlers/sponsorship.js";
+import { listMetros } from "../handlers/metros.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -91,11 +95,17 @@ function buildRoutes(c: Container): Route[] {
   return [
     route("GET", "/health", async () => ({ status: 200, body: { ok: true } })),
     route("GET", "/cities", listCities(c)),
+    route("GET", "/metros", listMetros(c)),
     route("GET", "/venues/nearby", nearbyVenues(c)),
     route("GET", "/venues/:id", venueById(c)),
     route("GET", "/matches", matches(c)),
     route("GET", "/events/nearby", nearbyEvents(c)),
+    // Event creation (Phase 3)
+    route("POST", "/events", createEvent(c)),
+    route("GET", "/events", listEvents(c)),
     route("GET", "/recommendations", recommendations(c)),
+    // AI recommendations (Phase 3)
+    route("GET", "/ai/recommendations", aiRecommendations(c)),
     // Auth
     route("POST", "/auth/register", register(c)),
     route("POST", "/auth/login", login(c)),
@@ -122,9 +132,14 @@ function buildRoutes(c: Container): Route[] {
     // Live crowd levels
     route("POST", "/venues/:id/crowd", reportCrowd(c)),
     route("GET", "/venues/:id/crowd", getCrowd(c)),
+    route("GET", "/venues/:id/crowd/estimate", estimateCrowd(c)),
     // Fan photos
     route("POST", "/venues/:id/photos", uploadPhoto(c)),
     route("GET", "/venues/:id/photos", listPhotos(c)),
+    // Sponsorship marketplace (Phase 3 / §8)
+    route("POST", "/venues/:id/claim", claimVenue(c)),
+    route("POST", "/venues/:id/feature", featureVenue(c)),
+    route("GET", "/venues/:id/listing", getListing(c)),
   ];
 }
 

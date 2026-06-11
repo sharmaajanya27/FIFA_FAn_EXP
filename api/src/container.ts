@@ -11,6 +11,10 @@ import { Store } from "./store/jsonStore.js";
 import { DiscoveryService } from "./services/discovery.js";
 import { RecommendationService } from "./services/recommendations.js";
 import { ReviewService } from "./services/reviews.js";
+import { AiRecommendationService } from "./services/aiRecommendations.js";
+import { CrowdEstimationService } from "./services/crowdEstimation.js";
+import { EventService } from "./services/events.js";
+import { CompositeVenueOverlay, SponsorshipService } from "./services/sponsorship.js";
 
 export interface Container {
   env: ApiEnv;
@@ -21,12 +25,21 @@ export interface Container {
   reviews: ReviewService;
   discovery: DiscoveryService;
   recommendations: RecommendationService;
+  aiRecommendations: AiRecommendationService;
+  crowdEstimation: CrowdEstimationService;
+  events: EventService;
+  sponsorship: SponsorshipService;
 }
 
 export function buildContainer(env: ApiEnv, repo: Repository): Container {
   const store = new Store(env.dataDir);
   const auth = new AuthService(store.collection<User>("users"));
   const reviews = new ReviewService(store);
+  const events = new EventService(store);
+  const sponsorship = new SponsorshipService(store);
+  // Reviews set the rating-based score; sponsorship then boosts featured venues.
+  const venueOverlay = new CompositeVenueOverlay([reviews, sponsorship]);
+  const recommendations = new RecommendationService(repo, venueOverlay);
 
   return {
     env,
@@ -34,7 +47,11 @@ export function buildContainer(env: ApiEnv, repo: Repository): Container {
     store,
     auth,
     reviews,
-    discovery: new DiscoveryService(repo, reviews),
-    recommendations: new RecommendationService(repo, reviews),
+    discovery: new DiscoveryService(repo, venueOverlay, events),
+    recommendations,
+    aiRecommendations: new AiRecommendationService(recommendations, env),
+    crowdEstimation: new CrowdEstimationService(repo, store),
+    events,
+    sponsorship,
   };
 }

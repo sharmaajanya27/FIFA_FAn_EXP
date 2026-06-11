@@ -122,7 +122,7 @@ export default function Home() {
           <select value={city} onChange={(e) => onCityChange(e.target.value)}>
             {CITIES.map((c) => (
               <option key={c.slug} value={c.slug}>
-                {c.name}
+                {c.country} {c.name}
               </option>
             ))}
           </select>

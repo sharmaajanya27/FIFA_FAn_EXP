@@ -34,6 +34,37 @@ export const CITIES: Record<string, City> = {
     country: "GB",
     bbox: [51.48, -0.18, 51.55, -0.05],
   },
+  // International expansion (Phase 3) — adding a metro is config-only.
+  "buenos-aires": {
+    slug: "buenos-aires",
+    name: "Buenos Aires",
+    country: "AR",
+    bbox: [-34.64, -58.45, -34.56, -58.36],
+  },
+  "sao-paulo": {
+    slug: "sao-paulo",
+    name: "São Paulo",
+    country: "BR",
+    bbox: [-23.59, -46.69, -23.52, -46.6],
+  },
+  madrid: {
+    slug: "madrid",
+    name: "Madrid",
+    country: "ES",
+    bbox: [40.38, -3.74, 40.46, -3.65],
+  },
+  "mexico-city": {
+    slug: "mexico-city",
+    name: "Mexico City",
+    country: "MX",
+    bbox: [19.39, -99.18, 19.46, -99.12],
+  },
+  tokyo: {
+    slug: "tokyo",
+    name: "Tokyo",
+    country: "JP",
+    bbox: [35.65, 139.69, 35.72, 139.78],
+  },
 };
 
 export function getCity(slug: string): City {

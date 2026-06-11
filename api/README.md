@@ -48,6 +48,17 @@ ingestion `scoring.json`.
 | GET | `/matches` | `city[,team]` | Fixtures |
 | GET | `/events/nearby` | `city,lat,lon[,radius,team]` | Fan events near a point |
 | GET | `/recommendations` | `city,lat,lon,team[,radius,limit]` | Personalized venue recs |
+| GET | `/ai/recommendations` | `city,lat,lon,team[,radius,limit,mode]` | Matchday pitch (Phase 3) |
+
+### Matchday recommendations (Phase 3)
+
+`/ai/recommendations` returns the same data as `/recommendations` plus a
+natural-language `aiSummary`. **Default `mode=smart`** returns a deterministic
+pitch (`aiStatus: "available"`). `mode=ai` is reserved for the Claude-backed
+workflow and currently returns `aiStatus: "coming_soon"` with the smart picks
+as a placeholder — the Claude path (`claude-opus-4-8` via the Anthropic SDK,
+`ANTHROPIC_API_KEY` / `AI_MODEL`) is scaffolded but intentionally not wired in
+yet.
 
 ### Phase 2 — engagement (user-generated, write APIs)
 

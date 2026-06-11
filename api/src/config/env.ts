@@ -10,6 +10,10 @@ export interface ApiEnv {
   dataDir: string;
   /** Default search radius (meters) when a request omits one. */
   defaultRadiusMeters: number;
+  /** Anthropic API key for AI recommendations; absent → heuristic fallback. */
+  anthropicApiKey?: string;
+  /** Claude model id for AI recommendations. */
+  aiModel: string;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -20,5 +24,7 @@ export function loadApiEnv(): ApiEnv {
       ? resolve(process.env.DATA_DIR)
       : resolve(process.cwd(), "..", "ingestion", "data"),
     defaultRadiusMeters: Number(process.env.DEFAULT_RADIUS_M ?? 5000),
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
+    aiModel: process.env.AI_MODEL ?? "claude-opus-4-8",
   };
 }
