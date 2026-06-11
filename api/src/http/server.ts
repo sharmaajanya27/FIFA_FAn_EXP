@@ -31,7 +31,7 @@ import {
   listMyPredictions,
 } from "../handlers/predictions.js";
 import { createPost, listFeed, toggleLike } from "../handlers/communities.js";
-import { getCrowd, reportCrowd } from "../handlers/crowd.js";
+import { estimateCrowd, getCrowd, reportCrowd } from "../handlers/crowd.js";
 import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
@@ -125,6 +125,7 @@ function buildRoutes(c: Container): Route[] {
     // Live crowd levels
     route("POST", "/venues/:id/crowd", reportCrowd(c)),
     route("GET", "/venues/:id/crowd", getCrowd(c)),
+    route("GET", "/venues/:id/crowd/estimate", estimateCrowd(c)),
     // Fan photos
     route("POST", "/venues/:id/photos", uploadPhoto(c)),
     route("GET", "/venues/:id/photos", listPhotos(c)),

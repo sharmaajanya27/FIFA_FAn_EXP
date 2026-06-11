@@ -12,6 +12,7 @@ import { DiscoveryService } from "./services/discovery.js";
 import { RecommendationService } from "./services/recommendations.js";
 import { ReviewService } from "./services/reviews.js";
 import { AiRecommendationService } from "./services/aiRecommendations.js";
+import { CrowdEstimationService } from "./services/crowdEstimation.js";
 
 export interface Container {
   env: ApiEnv;
@@ -23,6 +24,7 @@ export interface Container {
   discovery: DiscoveryService;
   recommendations: RecommendationService;
   aiRecommendations: AiRecommendationService;
+  crowdEstimation: CrowdEstimationService;
 }
 
 export function buildContainer(env: ApiEnv, repo: Repository): Container {
@@ -40,5 +42,6 @@ export function buildContainer(env: ApiEnv, repo: Repository): Container {
     discovery: new DiscoveryService(repo, reviews),
     recommendations,
     aiRecommendations: new AiRecommendationService(recommendations, env),
+    crowdEstimation: new CrowdEstimationService(repo, store),
   };
 }

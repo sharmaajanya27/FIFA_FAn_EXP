@@ -36,3 +36,13 @@ export const getCrowd =
     const svc = new CrowdService(c.store);
     return ok(await svc.status(req.params.id ?? ""));
   };
+
+/** GET /venues/:id/crowd/estimate?city — predicted live crowd (Phase 3). */
+export const estimateCrowd =
+  (c: Container) =>
+  async (req: ApiRequest): Promise<ApiResponse> => {
+    const city = req.query.city?.trim();
+    if (!city) throw new ApiError(400, "Missing query param: city");
+    const estimate = await c.crowdEstimation.estimate(city, req.params.id ?? "");
+    return ok(estimate);
+  };
