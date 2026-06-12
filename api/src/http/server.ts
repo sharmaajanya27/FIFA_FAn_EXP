@@ -37,6 +37,7 @@ import { aiRecommendations } from "../handlers/ai.js";
 import { createEvent, listEvents } from "../handlers/events.js";
 import { claimVenue, featureVenue, getListing } from "../handlers/sponsorship.js";
 import { listMetros } from "../handlers/metros.js";
+import { analyticsSummary, recordPageView } from "../handlers/analytics.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
 
@@ -140,6 +141,9 @@ function buildRoutes(c: Container): Route[] {
     route("POST", "/venues/:id/claim", claimVenue(c)),
     route("POST", "/venues/:id/feature", featureVenue(c)),
     route("GET", "/venues/:id/listing", getListing(c)),
+    // Traffic analytics (public beacon + admin summary)
+    route("POST", "/analytics/pageview", recordPageView(c)),
+    route("GET", "/analytics/summary", analyticsSummary(c)),
   ];
 }
 

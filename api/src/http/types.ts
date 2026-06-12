@@ -37,6 +37,9 @@ export function unauthorized(message = "Authentication required"): ApiResponse {
 export function notFound(message: string): ApiResponse {
   return { status: 404, body: { error: message } };
 }
+export function forbidden(message = "Forbidden"): ApiResponse {
+  return { status: 403, body: { error: message } };
+}
 
 export class ApiError extends Error {
   constructor(
@@ -61,6 +64,19 @@ export function requireFloat(req: ApiRequest, key: string): number {
 export function requireUser(req: ApiRequest): User {
   if (!req.user) throw new ApiError(401, "Authentication required");
   return req.user;
+}
+
+/**
+ * Return the authenticated user only if their email is in the admin allowlist
+ * (env ADMIN_EMAILS), else throw 401/403. No role field on the user model is
+ * needed — the allowlist is the gate for the analytics/admin surface.
+ */
+export function requireAdmin(req: ApiRequest, adminEmails: string[]): User {
+  const user = requireUser(req);
+  if (!adminEmails.includes(user.email.toLowerCase())) {
+    throw new ApiError(403, "Admin access required");
+  }
+  return user;
 }
 
 /** Read a required field from the JSON body, throwing 400 if absent. */

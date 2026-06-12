@@ -5,6 +5,12 @@ export interface TeamOption {
   flag: string;
 }
 
+/** Case-insensitive lookup of a team by its 3-letter code (e.g. "arg" → ARG). */
+export function teamByCode(code: string): TeamOption | undefined {
+  const c = code.toUpperCase();
+  return TEAMS.find((t) => t.code === c);
+}
+
 export const TEAMS: TeamOption[] = [
   { code: "ARG", name: "Argentina", flag: "🇦🇷" },
   { code: "BRA", name: "Brazil", flag: "🇧🇷" },

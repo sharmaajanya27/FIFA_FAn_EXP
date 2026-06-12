@@ -171,3 +171,75 @@ export interface VenueListing {
   featuredUntil?: string;
   package?: string;
 }
+
+// ---- SEO (server-rendered landing pages) ----
+/** A venue as returned by GET /venues/:id (no query-time distance/score). */
+export interface VenueDetail {
+  id: string;
+  name: string;
+  kind: string;
+  geo: GeoPoint;
+  address?: string;
+  city?: string;
+  country?: string;
+  phone?: string;
+  website?: string;
+  hours?: string;
+  ratingAvg?: number;
+  capacity?: number;
+  supportsTeams: string[];
+  showsMatches?: number;
+  score?: number;
+  featured?: boolean;
+  claimed?: boolean;
+}
+
+export interface ReviewsResponse {
+  venueId: string;
+  count: number;
+  averageRating: number | null;
+  reviews: Review[];
+}
+
+// ---- Traffic analytics (admin dashboard) ----
+export type AnalyticsRange = "today" | "7d" | "30d";
+
+export interface PageContext {
+  type: "city" | "team" | "venue" | "home" | "other";
+  city?: string;
+  team?: string;
+  venueId?: string;
+}
+
+export interface PageViewPayload {
+  path: string;
+  sessionId: string;
+  referrerHost?: string;
+  context?: PageContext;
+  utm?: { source?: string; medium?: string; campaign?: string };
+}
+
+export interface AnalyticsCountEntry {
+  key: string;
+  count: number;
+}
+
+export interface AnalyticsDailyPoint {
+  date: string;
+  views: number;
+  sessions: number;
+}
+
+export interface AnalyticsSummary {
+  rangeDays: number;
+  generatedAt: string;
+  totalViews: number;
+  uniqueSessions: number;
+  topPaths: AnalyticsCountEntry[];
+  topCities: AnalyticsCountEntry[];
+  topTeams: AnalyticsCountEntry[];
+  topVenues: AnalyticsCountEntry[];
+  topReferrers: AnalyticsCountEntry[];
+  topSources: AnalyticsCountEntry[];
+  daily: AnalyticsDailyPoint[];
+}

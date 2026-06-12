@@ -14,6 +14,8 @@ export interface ApiEnv {
   anthropicApiKey?: string;
   /** Claude model id for AI recommendations. */
   aiModel: string;
+  /** Lowercased emails allowed to read the analytics/admin dashboard. */
+  adminEmails: string[];
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -26,5 +28,9 @@ export function loadApiEnv(): ApiEnv {
     defaultRadiusMeters: Number(process.env.DEFAULT_RADIUS_M ?? 5000),
     anthropicApiKey: process.env.ANTHROPIC_API_KEY || undefined,
     aiModel: process.env.AI_MODEL ?? "claude-opus-4-8",
+    adminEmails: (process.env.ADMIN_EMAILS ?? "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean),
   };
 }

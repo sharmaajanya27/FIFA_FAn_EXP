@@ -1,0 +1,326 @@
+/* Scoped styling for the server-rendered SEO landing pages. Uses the global
+   brand tokens from globals.css (:root) so it matches the app, but stays light:
+   no client JS, fast LCP. */
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.brand {
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand span {
+  color: var(--accent-2);
+}
+.nav {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.92rem;
+}
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.nav a:hover {
+  color: var(--text);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem) 4rem;
+}
+
+.breadcrumb {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+.breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+.breadcrumb span {
+  margin: 0 0.4rem;
+  opacity: 0.6;
+}
+
+.hero {
+  background: var(--hero-grad);
+  color: #eafff4;
+  border-radius: var(--radius);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  margin-bottom: 2rem;
+}
+.h1 {
+  font-size: clamp(1.6rem, 4.5vw, 2.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.6rem;
+}
+.lede {
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  line-height: 1.55;
+  margin: 0;
+  color: #cdeede;
+  max-width: 60ch;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--gold-grad);
+  color: #3a2600;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #b00020;
+  box-shadow: 0 0 0 0 rgba(176, 0, 32, 0.6);
+}
+
+.section {
+  margin: 2.5rem 0;
+}
+.h2 {
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+}
+.prose {
+  line-height: 1.65;
+  color: var(--text);
+  max-width: 68ch;
+}
+.prose p {
+  margin: 0 0 1rem;
+}
+
+/* Card grid (cities + venues) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+.card {
+  display: block;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  text-decoration: none;
+  color: var(--text);
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.card:hover {
+  border-color: var(--accent-2);
+  transform: translateY(-2px);
+}
+.cardTitle {
+  font-weight: 700;
+  font-size: 1.02rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cardMeta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+/* Ranked venue list */
+.venueList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.venue {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+.venue:hover {
+  border-color: var(--accent-2);
+}
+.rank {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--accent-deep);
+  width: 1.8rem;
+  text-align: center;
+  flex: none;
+}
+.venueBody {
+  flex: 1;
+  min-width: 0;
+}
+.venueName {
+  font-weight: 650;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.venueMeta {
+  color: var(--muted);
+  font-size: 0.84rem;
+  margin-top: 0.15rem;
+}
+.badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.4rem;
+  border-radius: 6px;
+  background: var(--gold-grad);
+  color: #3a2600;
+}
+.star {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Team quick-links */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.pill:hover {
+  border-color: var(--accent-2);
+}
+
+/* Matches */
+.matchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.92rem;
+}
+.matchRow:last-child {
+  border-bottom: none;
+}
+.matchTeams {
+  font-weight: 600;
+}
+.matchKick {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+/* FAQ */
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.faqItem {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 0.9rem 1.1rem;
+}
+.faqQ {
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+.faqA {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* CTA */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent-2);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+}
+.cta:hover {
+  filter: brightness(1.05);
+}
+
+.empty {
+  background: var(--panel-2);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 1.2rem;
+  color: var(--muted);
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem clamp(1rem, 4vw, 3rem);
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  justify-content: space-between;
+}
+.footer a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.footer a:hover {
+  color: var(--text);
+}
