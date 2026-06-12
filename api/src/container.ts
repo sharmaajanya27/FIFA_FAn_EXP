@@ -15,6 +15,7 @@ import { AiRecommendationService } from "./services/aiRecommendations.js";
 import { CrowdEstimationService } from "./services/crowdEstimation.js";
 import { EventService } from "./services/events.js";
 import { CompositeVenueOverlay, SponsorshipService } from "./services/sponsorship.js";
+import { AnalyticsService } from "./services/analytics.js";
 
 export interface Container {
   env: ApiEnv;
@@ -29,6 +30,7 @@ export interface Container {
   crowdEstimation: CrowdEstimationService;
   events: EventService;
   sponsorship: SponsorshipService;
+  analytics: AnalyticsService;
 }
 
 export function buildContainer(env: ApiEnv, repo: Repository): Container {
@@ -53,5 +55,6 @@ export function buildContainer(env: ApiEnv, repo: Repository): Container {
     crowdEstimation: new CrowdEstimationService(repo, store),
     events,
     sponsorship,
+    analytics: new AnalyticsService(env.dataDir),
   };
 }

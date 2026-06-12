@@ -87,6 +87,19 @@ export default function Home() {
     );
   };
 
+  // Deep-link hydration: the SEO landing pages link here with ?city=&team= so
+  // the app opens pre-focused on that selection. Read once on mount from the
+  // URL directly (client-only) — this avoids needing a Suspense boundary that
+  // useSearchParams would otherwise require for static rendering.
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const c = sp.get("city");
+    if (c && cityBySlug(c)) onCityChange(c);
+    const t = sp.get("team");
+    if (t) setTeam(t.toUpperCase());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(undefined);

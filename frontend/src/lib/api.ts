@@ -1,6 +1,8 @@
 /** Typed client for the FanWatch discovery + engagement API. */
 import type {
   AiRecommendation,
+  AnalyticsRange,
+  AnalyticsSummary,
   AuthResult,
   CheckIn,
   CommunityPost,
@@ -11,6 +13,7 @@ import type {
   FanEvent,
   LeaderboardEntry,
   NearbyVenuesResponse,
+  PageViewPayload,
   Photo,
   Prediction,
   PublicUser,
@@ -147,4 +150,12 @@ export const api = {
     request<{ id: string }>("POST", `/venues/${venueId}/claim`, { body: { businessName } }),
   featureVenue: (venueId: string, pkg: string, days?: number) =>
     request<{ id: string }>("POST", `/venues/${venueId}/feature`, { body: { package: pkg, days } }),
+
+  // ---- traffic analytics ----
+  /** Fire-and-forget pageview beacon (public, no auth). */
+  recordPageView: (payload: PageViewPayload) =>
+    request<{ ok: boolean }>("POST", "/analytics/pageview", { body: payload }),
+  /** Admin-only traffic summary (requires an admin bearer token). */
+  analyticsSummary: (range: AnalyticsRange) =>
+    get<AnalyticsSummary>("/analytics/summary", { range }),
 };

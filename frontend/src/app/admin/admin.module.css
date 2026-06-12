@@ -1,0 +1,189 @@
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2rem) 4rem;
+  color: var(--text);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.sub {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+.ranges {
+  display: flex;
+  gap: 0.4rem;
+}
+.rangeBtn {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.rangeBtnActive {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: #fff;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+.kpiCard {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+}
+.kpiNum {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.kpiLabel {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0.2rem;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.2rem;
+}
+.panelTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.2rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.table td {
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.table tr:last-child td {
+  border-bottom: none;
+}
+.table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.key {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
+}
+.muted {
+  color: var(--muted);
+}
+
+/* Time-series bars (inline SVG, no chart dependency) */
+.chart {
+  width: 100%;
+  height: 180px;
+}
+.bar {
+  fill: var(--accent-2);
+}
+.barLabel {
+  fill: var(--muted);
+  font-size: 10px;
+}
+
+/* Login / access gate */
+.gate {
+  max-width: 380px;
+  margin: 4rem auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  text-align: center;
+}
+.gate h1 {
+  font-size: 1.3rem;
+  margin: 0 0 0.5rem;
+}
+.gate p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  margin-bottom: 0.9rem;
+}
+.field input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: var(--bg-2);
+  color: var(--text);
+}
+.btn {
+  width: 100%;
+  background: var(--accent-2);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+.empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+}
