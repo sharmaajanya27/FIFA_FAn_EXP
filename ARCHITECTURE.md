@@ -267,3 +267,50 @@ the frontend drops the `localStorage` token in
 
 Each step is isolated by a seam in §2, so it ships independently without
 destabilizing the rest of the app.
+
+---
+
+## 9. SEO & traffic analytics
+
+### 9.1 Programmatic SEO (frontend)
+
+The app at `/` is a client-rendered SPA — invisible to search. To rank for
+high-intent queries ("where to watch the World Cup in {city}"), the frontend
+also serves **server-rendered, ISR-cached** (`revalidate=3600`) landing pages
+generated from the city/team registries + discovery API:
+
+| Route | Targets | JSON-LD |
+| ----- | ------- | ------- |
+| `/watch` | watch-party hub | WebSite, ItemList, FAQ |
+| `/watch/[city]` | "watch the World Cup in {city}" | Breadcrumb, ItemList, FAQ |
+| `/watch/[city]/[team]` | "watch {team} in {city}" | Breadcrumb, ItemList, FAQ |
+| `/venue/[city]/[id]` | venue detail + long-tail | LocalBusiness (geo, rating) |
+
+Each page renders real content (H1, venue lists, FAQ, breadcrumbs), canonical
+URLs, OpenGraph/Twitter tags, and a dynamic OG image (`next/og`). `sitemap.ts`
+and `robots.ts` are generated; the homepage hydrates `?city=`/`?team=`
+deep-links. Server-only fetchers (`lib/server/fetchers.ts`) use Next's fetch
+cache so pages stay static-fast. **Indexation gates** mark thin pages `noindex`
+and drop them from the sitemap (city ≥3 venues, city×team ≥3 team-tagged
+venues, venue needs address + rating/website). Set `NEXT_PUBLIC_SITE_URL` to the
+absolute origin used for canonical/OG/sitemap.
+
+The venue route is `/venue/[city]/[id]` (not `/venue/[id]`) because the
+discovery dataset is partitioned per-city — the city is required to load a venue.
+
+### 9.2 First-party analytics
+
+A pageview beacon (`components/Analytics.tsx`, in the root layout) posts to
+`POST /analytics/pageview` on each route change. The API's `AnalyticsService`
+**appends** events to `<DATA_DIR>/analytics/<YYYY-MM-DD>.jsonl` — append-only
+JSONL, deliberately not the `Collection` store (§2.2), which rewrites whole
+files and wouldn't scale to pageview volume. Summaries (`GET /analytics/summary`)
+are aggregated in memory from recent day-files with a ~60s cache and surfaced in
+the `noindex` **`/admin`** dashboard (KPIs, daily trend, top
+pages/cities/teams/referrers).
+
+**Admin gating** reuses the existing bearer-token auth (§7): `requireAdmin`
+checks `user.email` against the `ADMIN_EMAILS` allowlist — no role field is
+added to the user model. Like the other seams, the JSONL sink swaps for a real
+analytics store (e.g. ClickHouse, or a managed product) without touching the
+handlers.
