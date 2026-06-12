@@ -26,6 +26,39 @@ Maps URL (no SDK/key).
 
 All engagement writes require login; the bearer token is kept in `localStorage`.
 
+## SEO landing pages (programmatic, server-rendered)
+
+Beyond the single client-rendered app at `/`, the following routes are
+**server-rendered + ISR-cached** (`revalidate=3600`) so they're indexable and
+fast. Built from the city/team registries and the discovery API.
+
+| Route | Targets | Structured data |
+|-------|---------|-----------------|
+| `/watch` | "world cup watch parties" hub | WebSite, ItemList, FAQ |
+| `/watch/[city]` | "where to watch the World Cup in {city}" | Breadcrumb, ItemList, FAQ |
+| `/watch/[city]/[team]` | "watch {team} in {city}" | Breadcrumb, ItemList, FAQ |
+| `/venue/[city]/[id]` | venue detail + long-tail | LocalBusiness (geo, rating) |
+
+The venue route is `/venue/[city]/[id]` because the API partitions venue data
+per-city. Each page emits canonical URLs, OpenGraph/Twitter tags, a **dynamic OG
+share-image** (`next/og`), and JSON-LD. `sitemap.ts` and `robots.ts` are
+generated; the homepage hydrates `?city=`/`?team=` deep-links from the SEO pages.
+
+**Indexation gates** (thin pages get `noindex` + are dropped from the sitemap):
+city ≥3 venues, city×team ≥3 team-tagged venues, venue needs address +
+rating/website.
+
+Set `NEXT_PUBLIC_SITE_URL` to the absolute origin (canonical/OG/sitemap) — see
+`.env.local.example`.
+
+## Traffic analytics + admin dashboard
+
+A pageview beacon (`components/Analytics.tsx`, mounted in the root layout) posts
+to the API on each route change. The **`/admin`** dashboard (client-rendered,
+`noindex`) reads the admin-only summary and shows KPIs, a daily-trend chart, and
+top pages/cities/teams/referrers. Access requires logging in with an account
+whose email is in the API's `ADMIN_EMAILS` allowlist.
+
 ## Run
 
 The app needs the discovery API running (default `http://localhost:3001`) with

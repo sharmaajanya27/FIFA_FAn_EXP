@@ -78,6 +78,24 @@ DynamoDB) and require a bearer token from register/login (dev-stub auth in
 | POST/GET | `/matches/:id/predictions` · `/predictions/leaderboard` | ✓(POST) | Predictions |
 | POST/GET | `/communities/:team/posts` · `/posts/:id/like` | ✓(POST) | Team communities |
 
+### Traffic analytics (first-party)
+
+A lightweight, dependency-free pageview pipeline that powers the frontend
+`/admin` dashboard. Events are appended one-per-line to
+`<DATA_DIR>/analytics/<YYYY-MM-DD>.jsonl` (append-only, not the JSON store —
+which rewrites whole files and wouldn't scale to pageview volume). Summaries are
+aggregated in memory from the recent day-files with a ~60s cache.
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| POST | `/analytics/pageview` | — | Record a pageview (public beacon) |
+| GET | `/analytics/summary` | admin | KPIs + top pages/cities/teams/referrers + daily series; `?range=today\|7d\|30d` |
+
+**Admin gating:** `/analytics/summary` requires a bearer token whose email is in
+the `ADMIN_EMAILS` allowlist (comma-separated, case-insensitive). There is no
+role field — `requireAdmin` checks the email. Unset `ADMIN_EMAILS` → no admin
+access. See `.env.example`.
+
 ## Usage
 
 ```bash
