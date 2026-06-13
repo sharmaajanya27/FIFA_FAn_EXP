@@ -10,6 +10,8 @@ export interface Env {
   dataDir: string;
   /** Optional live fixtures JSON URL; falls back to the bundled seed. */
   fixturesUrl?: string;
+  /** Postgres/Supabase connection string. Set → also upsert into the DB. */
+  databaseUrl?: string;
 }
 
 export function loadEnv(): Env {
@@ -22,5 +24,6 @@ export function loadEnv(): Env {
     overpassThrottleMs: Number(process.env.OVERPASS_THROTTLE_MS ?? 1500),
     dataDir: process.env.DATA_DIR ?? "data",
     fixturesUrl: process.env.FIXTURES_URL || undefined,
+    databaseUrl: process.env.DATABASE_URL || undefined,
   };
 }

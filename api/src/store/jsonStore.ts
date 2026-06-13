@@ -17,7 +17,25 @@ export interface Identified {
   id: string;
 }
 
-export class Collection<T extends Identified> {
+/**
+ * Storage-agnostic collection surface. `JsonCollection` (files) and
+ * `PgCollection` (Postgres) both implement it, so services depend on this
+ * interface and never on a concrete backend (ARCHITECTURE §2.2).
+ */
+export interface Collection<T extends Identified> {
+  all(): Promise<T[]>;
+  find(predicate: (item: T) => boolean): Promise<T[]>;
+  findOne(predicate: (item: T) => boolean): Promise<T | undefined>;
+  insert(item: Omit<T, "id"> & { id?: string }): Promise<T>;
+  update(id: string, patch: Partial<T>): Promise<T | undefined>;
+}
+
+/** The write store: hands out collections by name. */
+export interface Store {
+  collection<T extends Identified>(name: string): Collection<T>;
+}
+
+export class JsonCollection<T extends Identified> implements Collection<T> {
   private items: T[] | null = null;
   private writeChain: Promise<void> = Promise.resolve();
   private readonly file: string;
@@ -76,14 +94,14 @@ export class Collection<T extends Identified> {
   }
 }
 
-export class Store {
+export class JsonStore implements Store {
   private collections = new Map<string, Collection<Identified>>();
   constructor(private readonly dataDir: string) {}
 
   collection<T extends Identified>(name: string): Collection<T> {
     const existing = this.collections.get(name);
     if (existing) return existing as unknown as Collection<T>;
-    const created = new Collection<T>(this.dataDir, name);
+    const created = new JsonCollection<T>(this.dataDir, name);
     this.collections.set(name, created as unknown as Collection<Identified>);
     return created;
   }
