@@ -1,26 +1,33 @@
 :root {
-  /* FIFA World Cup 2026 — bold tri-host tournament theme. Light, airy base
-     with vibrant accents; the page background is tinted per selected city. */
-  --bg: #eef3f1;
-  --bg-2: #ffffff;
-  --panel: #ffffff;
-  --panel-2: #f1f6f2;
-  --border: #e2e9e4;
-  --text: #0d1f17;
-  --muted: #5f7468;
-  --accent: #f4a300; /* trophy gold */
-  --accent-deep: #d98a00;
-  --accent-2: #0aa15a; /* pitch green */
-  --accent-3: #e0245e; /* host magenta */
-  --accent-4: #1893c6; /* host cyan */
-  --ink: #06140d; /* deep tournament navy-green for the hero */
-  --danger: #e5484d;
-  --radius: 16px;
+  /* Claude-inspired warm editorial theme, tuned for World Cup fan energy.
+     A paper-cream canvas with a clay/coral primary and warm espresso ink; the
+     tournament's gold and pitch-green live on as lively secondary accents. The
+     page background is still tinted per selected city. */
+  --bg: #faf7f1; /* warm paper */
+  --bg-2: #fffdf8; /* raised card surface */
+  --panel: #fffdf8;
+  --panel-2: #f3ece1; /* warm sunken fill */
+  --border: #e8dfd0; /* warm hairline */
+  --border-strong: #daccb6;
+  --text: #211c16; /* warm espresso ink */
+  --muted: #6f6557; /* warm taupe */
+  --accent: #d97757; /* Claude clay — primary */
+  --accent-deep: #b85c3e; /* deeper clay for hovers / contrast */
+  --accent-2: #2f8f5b; /* pitch green (secondary fan accent) */
+  --accent-3: #c4456b; /* host magenta, warmed */
+  --accent-4: #2a7d9b; /* host teal, used for links */
+  --ink: #1c150f; /* deep espresso for the hero base */
+  --danger: #c0392b;
+  --radius: 18px;
+  /* Editorial serif for display headings — Fraunces when the webfont loads
+     (see layout head), otherwise a warm system serif. Zero build dependency. */
+  --font-serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Book Antiqua", Georgia, serif;
   /* Overridden per selected city via inline style on .city-bg. */
-  --city-accent: #0aa15a;
-  --gold-grad: linear-gradient(135deg, #ffd966 0%, #f4a300 55%, #d98a00 100%);
-  --host-grad: linear-gradient(90deg, #e0245e 0%, #f4a300 50%, #1893c6 100%);
-  --hero-grad: linear-gradient(125deg, #06140d 0%, #0c3b27 45%, #0a6b41 100%);
+  --city-accent: #d97757;
+  --gold-grad: linear-gradient(135deg, #eaa07d 0%, #d97757 52%, #b85c3e 100%);
+  --host-grad: linear-gradient(90deg, #d97757 0%, #e0a44e 50%, #2f8f5b 100%);
+  --hero-grad: linear-gradient(125deg, #1c150f 0%, #3a271c 45%, #6e3f28 100%);
 }
 
 * {
@@ -76,7 +83,7 @@ body {
   background-color: var(--city-accent);
   -webkit-mask: url("/football-pattern.svg") center / contain no-repeat;
   mask: url("/football-pattern.svg") center / contain no-repeat;
-  opacity: 0.22;
+  opacity: 0.13;
   pointer-events: none;
 }
 .city-skyline {
@@ -86,7 +93,7 @@ body {
   bottom: 0;
   height: min(42vh, 380px);
   background-color: var(--city-accent);
-  opacity: 0.22;
+  opacity: 0.16;
   /* Tint the silhouette SVG with the city accent via a mask. */
   -webkit-mask: var(--city-shape) bottom center / cover no-repeat;
   mask: var(--city-shape) bottom center / cover no-repeat;
@@ -138,7 +145,7 @@ a:hover {
   right: -10%;
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle, rgba(244, 163, 0, 0.35), transparent 62%);
+  background: radial-gradient(circle, rgba(217, 119, 87, 0.42), transparent 62%);
   pointer-events: none;
 }
 .hero-top {
@@ -166,11 +173,12 @@ a:hover {
   flex-shrink: 0;
 }
 .hero h1 {
-  font-size: 34px;
+  font-family: var(--font-serif);
+  font-size: 38px;
   margin: 0;
-  letter-spacing: -0.02em;
-  font-weight: 900;
-  line-height: 1;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+  line-height: 1.02;
   color: #fff;
 }
 .hero .brand {
@@ -227,18 +235,18 @@ a:hover {
   height: 8px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(244, 163, 0, 0.6);
+  box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.6);
   animation: season-pulse 1.8s ease-out infinite;
 }
 @keyframes season-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(244, 163, 0, 0.55);
+    box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.55);
   }
   70% {
-    box-shadow: 0 0 0 8px rgba(244, 163, 0, 0);
+    box-shadow: 0 0 0 8px rgba(217, 119, 87, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(244, 163, 0, 0);
+    box-shadow: 0 0 0 0 rgba(217, 119, 87, 0);
   }
 }
 .season-flags {
@@ -254,7 +262,7 @@ a:hover {
   padding: 2px 9px;
   border-radius: 999px;
   background: var(--gold-grad);
-  color: var(--ink);
+  color: #fff;
   font-weight: 800;
   letter-spacing: 0.01em;
 }
@@ -266,18 +274,18 @@ a:hover {
   flex-wrap: wrap;
   margin-bottom: 4px;
 }
+.header h1,
+.header h2 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
 .header h1 {
   font-size: 32px;
   margin: 0;
-  letter-spacing: -0.02em;
-  font-weight: 800;
+  font-weight: 600;
 }
 .header .brand {
-  background: linear-gradient(
-    135deg,
-    var(--accent-2) 0%,
-    var(--accent-deep) 100%
-  );
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -329,7 +337,13 @@ button {
   font-size: 14px;
 }
 input[type="range"] {
-  accent-color: var(--accent-2);
+  accent-color: var(--accent);
+}
+select:focus,
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.18);
 }
 button {
   cursor: pointer;
@@ -340,17 +354,21 @@ button {
     transform 0.05s ease;
 }
 button:hover {
-  border-color: var(--accent-2);
+  border-color: var(--accent);
 }
 button:active {
   transform: translateY(1px);
 }
 button.primary {
   background: var(--gold-grad);
-  color: #3a2600;
+  color: #fff;
   border-color: var(--accent-deep);
   font-weight: 700;
-  box-shadow: 0 6px 16px rgba(244, 163, 0, 0.28);
+  box-shadow: 0 6px 18px rgba(217, 119, 87, 0.34);
+}
+button.primary:hover {
+  border-color: var(--accent-deep);
+  box-shadow: 0 8px 22px rgba(217, 119, 87, 0.42);
 }
 button.toggle.active {
   background: var(--accent-2);
@@ -399,9 +417,14 @@ button.toggle.active {
   border-bottom: 1px solid var(--border);
   display: flex;
   gap: 12px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 .venue:hover {
   background: var(--panel-2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.venue .name:hover {
+  color: var(--accent-deep);
 }
 .rank {
   font-variant-numeric: tabular-nums;
@@ -439,7 +462,7 @@ button.toggle.active {
 .badge.team {
   color: var(--accent-deep);
   border-color: var(--accent);
-  background: #fff7e6;
+  background: #fbeee7;
 }
 .badge.kind {
   text-transform: capitalize;
@@ -454,7 +477,7 @@ button.toggle.active {
 .score-bar > span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  background: linear-gradient(90deg, var(--accent), #e0a44e);
 }
 
 .map {
@@ -528,8 +551,8 @@ button.toggle.active {
 }
 .nav-tabs .toggle.active {
   color: #fff;
-  background: var(--hero-grad);
-  box-shadow: 0 6px 16px rgba(10, 107, 65, 0.32);
+  background: var(--gold-grad);
+  box-shadow: 0 6px 16px rgba(217, 119, 87, 0.34);
 }
 
 /* Site-wide copyright footer. */
@@ -544,8 +567,9 @@ button.toggle.active {
   text-align: center;
 }
 .site-footer .footer-brand {
-  font-weight: 800;
-  font-size: 16px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 18px;
   letter-spacing: -0.01em;
   color: var(--text);
 }

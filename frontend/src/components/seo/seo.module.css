@@ -19,14 +19,15 @@
   background: var(--bg-2);
 }
 .brand {
-  font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
   color: var(--text);
   text-decoration: none;
 }
 .brand span {
-  color: var(--accent-2);
+  color: var(--accent);
 }
 .nav {
   display: flex;
@@ -68,22 +69,24 @@
 
 .hero {
   background: var(--hero-grad);
-  color: #eafff4;
+  color: #fbf3ea;
   border-radius: var(--radius);
   padding: clamp(1.5rem, 4vw, 2.5rem);
   margin-bottom: 2rem;
 }
 .h1 {
-  font-size: clamp(1.6rem, 4.5vw, 2.6rem);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: clamp(1.7rem, 4.5vw, 2.7rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
   margin: 0 0 0.6rem;
 }
 .lede {
   font-size: clamp(1rem, 2.2vw, 1.15rem);
   line-height: 1.55;
   margin: 0;
-  color: #cdeede;
+  color: #e9ddd0;
   max-width: 60ch;
 }
 .chip {
@@ -91,7 +94,7 @@
   align-items: center;
   gap: 0.4rem;
   background: var(--gold-grad);
-  color: #3a2600;
+  color: #fff;
   font-weight: 700;
   font-size: 0.78rem;
   padding: 0.3rem 0.7rem;
@@ -110,8 +113,10 @@
   margin: 2.5rem 0;
 }
 .h2 {
-  font-size: 1.3rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
   margin: 0 0 1rem;
 }
 .prose {
@@ -142,8 +147,9 @@
     transform 0.15s ease;
 }
 .card:hover {
-  border-color: var(--accent-2);
+  border-color: var(--accent);
   transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(33, 28, 22, 0.08);
 }
 .cardTitle {
   font-weight: 700;
@@ -179,7 +185,7 @@
   color: var(--text);
 }
 .venue:hover {
-  border-color: var(--accent-2);
+  border-color: var(--accent);
 }
 .rank {
   font-weight: 800;
@@ -212,7 +218,7 @@
   padding: 0.12rem 0.4rem;
   border-radius: 6px;
   background: var(--gold-grad);
-  color: #3a2600;
+  color: #fff;
 }
 .star {
   color: var(--accent);
@@ -238,7 +244,7 @@
   font-size: 0.9rem;
 }
 .pill:hover {
-  border-color: var(--accent-2);
+  border-color: var(--accent);
 }
 
 /* Matches */
@@ -288,7 +294,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--accent-2);
+  background: var(--gold-grad);
   color: #fff;
   font-weight: 700;
   text-decoration: none;

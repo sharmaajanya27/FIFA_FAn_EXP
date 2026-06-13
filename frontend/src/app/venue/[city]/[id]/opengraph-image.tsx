@@ -28,12 +28,12 @@ export default async function Image({
           justifyContent: "space-between",
           padding: "72px",
           background:
-            "linear-gradient(125deg, #06140d 0%, #0c3b27 45%, #0a6b41 100%)",
-          color: "#eafff4",
-          fontFamily: "sans-serif",
+            "linear-gradient(125deg, #1c150f 0%, #3a271c 45%, #6e3f28 100%)",
+          color: "#fbf3ea",
+          fontFamily: "serif",
         }}
       >
-        <div style={{ display: "flex", fontSize: "40px", fontWeight: 800, color: "#0aa15a" }}>
+        <div style={{ display: "flex", fontSize: "40px", fontWeight: 700, color: "#e0a44e" }}>
           FanWatch
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -42,17 +42,17 @@ export default async function Image({
               display: "flex",
               fontSize: "30px",
               fontWeight: 700,
-              color: "#f4a300",
+              color: "#d97757",
               marginBottom: "16px",
             }}
           >
             Watch the World Cup in {city?.name ?? "your city"}
           </div>
-          <div style={{ display: "flex", fontSize: "84px", fontWeight: 800 }}>
+          <div style={{ display: "flex", fontSize: "84px", fontWeight: 700 }}>
             {name}
           </div>
         </div>
-        <div style={{ display: "flex", fontSize: "30px", color: "#cdeede" }}>
+        <div style={{ display: "flex", fontSize: "30px", color: "#e9ddd0" }}>
           FIFA World Cup 2026
         </div>
       </div>
