@@ -24,6 +24,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Editorial display serif (Claude-style). Loaded as a plain stylesheet
+            link so it enhances when online and falls back to a warm system
+            serif otherwise — no build-time font dependency. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         <JsonLd data={websiteLd()} />
         <AuthProvider>{children}</AuthProvider>

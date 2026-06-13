@@ -20,12 +20,12 @@ export default function Image({ params }: { params: { city: string } }) {
           justifyContent: "space-between",
           padding: "72px",
           background:
-            "linear-gradient(125deg, #06140d 0%, #0c3b27 45%, #0a6b41 100%)",
-          color: "#eafff4",
-          fontFamily: "sans-serif",
+            "linear-gradient(125deg, #1c150f 0%, #3a271c 45%, #6e3f28 100%)",
+          color: "#fbf3ea",
+          fontFamily: "serif",
         }}
       >
-        <div style={{ display: "flex", fontSize: "40px", fontWeight: 800, color: "#0aa15a" }}>
+        <div style={{ display: "flex", fontSize: "40px", fontWeight: 700, color: "#e0a44e" }}>
           FanWatch
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
@@ -34,17 +34,17 @@ export default function Image({ params }: { params: { city: string } }) {
               display: "flex",
               fontSize: "34px",
               fontWeight: 700,
-              color: "#f4a300",
+              color: "#d97757",
               marginBottom: "16px",
             }}
           >
             Where to watch the World Cup
           </div>
-          <div style={{ display: "flex", fontSize: "96px", fontWeight: 800 }}>
+          <div style={{ display: "flex", fontSize: "96px", fontWeight: 700 }}>
             {city?.name ?? "Find your city"}
           </div>
         </div>
-        <div style={{ display: "flex", fontSize: "30px", color: "#cdeede" }}>
+        <div style={{ display: "flex", fontSize: "30px", color: "#e9ddd0" }}>
           {city?.stadium?.name ?? "FIFA World Cup 2026"}
         </div>
       </div>
