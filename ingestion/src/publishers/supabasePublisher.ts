@@ -12,6 +12,17 @@ import type { PublishContext, Publisher } from "./types.js";
 
 type Sql = ReturnType<typeof postgres>;
 
+// Postgres caps a single statement at 65534 bind parameters. The widest table
+// (venues, 8 columns) would blow that at ~8191 rows, so we chunk multi-row
+// upserts; 2000 rows ≈ 16k params, comfortably under the limit for every table.
+const CHUNK = 2000;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
 export class SupabasePublisher implements Publisher {
   readonly id = "supabase";
 
@@ -19,22 +30,24 @@ export class SupabasePublisher implements Publisher {
 
   async publishVenues(venues: Venue[], ctx: PublishContext): Promise<void> {
     if (venues.length === 0) return;
-    const rows = venues.map((v) => ({
-      id: v.id,
-      city_slug: ctx.citySlug,
-      name: v.name,
-      kind: v.kind,
-      lat: v.geo.lat,
-      lon: v.geo.lon,
-      geohash: v.geohash,
-      data: this.sql.json(v as never),
-    }));
-    await this.sql`
-      insert into venues ${this.sql(rows, "id", "city_slug", "name", "kind", "lat", "lon", "geohash", "data")}
-      on conflict (id) do update set
-        city_slug = excluded.city_slug, name = excluded.name, kind = excluded.kind,
-        lat = excluded.lat, lon = excluded.lon, geohash = excluded.geohash,
-        data = excluded.data, updated_at = now()`;
+    for (const batch of chunk(venues, CHUNK)) {
+      const rows = batch.map((v) => ({
+        id: v.id,
+        city_slug: ctx.citySlug,
+        name: v.name,
+        kind: v.kind,
+        lat: v.geo.lat,
+        lon: v.geo.lon,
+        geohash: v.geohash,
+        data: this.sql.json(v as never),
+      }));
+      await this.sql`
+        insert into venues ${this.sql(rows, "id", "city_slug", "name", "kind", "lat", "lon", "geohash", "data")}
+        on conflict (city_slug, id) do update set
+          name = excluded.name, kind = excluded.kind,
+          lat = excluded.lat, lon = excluded.lon, geohash = excluded.geohash,
+          data = excluded.data, updated_at = now()`;
+    }
     log.info("supabase: upserted venues", { city: ctx.citySlug, count: venues.length });
   }
 
@@ -61,15 +74,17 @@ export class SupabasePublisher implements Publisher {
 
   async publishEvents(events: Event[], ctx: PublishContext): Promise<void> {
     if (events.length === 0) return;
-    const rows = events.map((e) => ({
-      id: e.id,
-      city_slug: ctx.citySlug,
-      data: this.sql.json(e as never),
-    }));
-    await this.sql`
-      insert into events ${this.sql(rows, "id", "city_slug", "data")}
-      on conflict (id) do update set
-        city_slug = excluded.city_slug, data = excluded.data, updated_at = now()`;
+    for (const batch of chunk(events, CHUNK)) {
+      const rows = batch.map((e) => ({
+        id: e.id,
+        city_slug: ctx.citySlug,
+        data: this.sql.json(e as never),
+      }));
+      await this.sql`
+        insert into events ${this.sql(rows, "id", "city_slug", "data")}
+        on conflict (city_slug, id) do update set
+          data = excluded.data, updated_at = now()`;
+    }
     log.info("supabase: upserted events", { city: ctx.citySlug, count: events.length });
   }
 }
