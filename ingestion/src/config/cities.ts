@@ -268,6 +268,74 @@ export const CITIES: Record<string, City> = {
       bbox: [25.65, -100.26, 25.69, -100.22],
     },
   },
+  // Additional major US metros (non-host) — broader fan-experience coverage.
+  // Anchor is the city's primary stadium, used as a UI search origin.
+  chicago: {
+    slug: "chicago",
+    name: "Chicago",
+    country: "US",
+    bbox: [41.85, -87.68, 41.93, -87.58],
+    stadium: { name: "Soldier Field", center: { lat: 41.8623, lon: -87.6167 } },
+  },
+  "washington-dc": {
+    slug: "washington-dc",
+    name: "Washington, D.C.",
+    country: "US",
+    bbox: [38.86, -77.06, 38.93, -76.97],
+    stadium: { name: "Audi Field", center: { lat: 38.8688, lon: -77.0125 } },
+  },
+  phoenix: {
+    slug: "phoenix",
+    name: "Phoenix",
+    country: "US",
+    bbox: [33.42, -112.1, 33.49, -112.03],
+    stadium: { name: "Chase Field", center: { lat: 33.4455, lon: -112.0667 } },
+  },
+  detroit: {
+    slug: "detroit",
+    name: "Detroit",
+    country: "US",
+    bbox: [42.31, -83.08, 42.37, -83.01],
+    stadium: { name: "Ford Field", center: { lat: 42.34, lon: -83.0456 } },
+  },
+  minneapolis: {
+    slug: "minneapolis",
+    name: "Minneapolis",
+    country: "US",
+    bbox: [44.96, -93.3, 45.01, -93.23],
+    stadium: {
+      name: "U.S. Bank Stadium",
+      center: { lat: 44.9737, lon: -93.2575 },
+    },
+  },
+  "san-diego": {
+    slug: "san-diego",
+    name: "San Diego",
+    country: "US",
+    bbox: [32.69, -117.18, 32.75, -117.11],
+    stadium: { name: "Petco Park", center: { lat: 32.7073, lon: -117.1566 } },
+  },
+  denver: {
+    slug: "denver",
+    name: "Denver",
+    country: "US",
+    bbox: [39.71, -105.03, 39.78, -104.95],
+    stadium: {
+      name: "Empower Field at Mile High",
+      center: { lat: 39.7439, lon: -105.0201 },
+    },
+  },
+  tampa: {
+    slug: "tampa",
+    name: "Tampa",
+    country: "US",
+    bbox: [27.93, -82.47, 27.97, -82.43],
+    stadium: {
+      name: "Raymond James Stadium",
+      center: { lat: 27.9759, lon: -82.5033 },
+      bbox: [27.96, -82.52, 28.0, -82.48],
+    },
+  },
 };
 
 export function getCity(slug: string): City {
