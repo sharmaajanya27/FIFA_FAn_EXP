@@ -71,23 +71,33 @@ interface Repository {
 
 - **Local:** `FileRepository` reads the JSONL the ingestion pipeline wrote to
   `ingestion/data/<city>/`.
-- **Production:** a `PostgresRepository` (PostGIS `ST_DWithin` radius query) or
-  `DynamoRepository` implements the same four methods. Handlers don't change.
+- **Postgres/Supabase:** [`PgRepository`](./api/src/data/pgRepository.ts) reads
+  the `venues` / `matches` / `events` tables that ingestion upserts. The full
+  canonical object lives in a `data` jsonb column, so a row maps straight back
+  to the domain type — same contract as the JSONL. Plain Postgres (no PostGIS):
+  the extracted columns (`city_slug`, `kickoff`, …) exist only for filtering;
+  geo-radius stays in JS, matching `FileRepository`.
 
-The container takes the repo as a parameter — `buildContainer(env, repo)` in
-[`container.ts`](./api/src/container.ts) — so swapping is a one-line change at
-the composition root.
+The composition root selects the backend on `DATABASE_URL` and passes the repo
+(and store) into `buildContainer(env, repo, store)` —
+[`server.ts`](./api/src/http/server.ts) / [`container.ts`](./api/src/container.ts).
 
 ### 2.2 Write seam — `Store` / `Collection`
 
 Engagement writes (users, reviews, check-ins, predictions, posts, photos) go
-through [`Store.collection<T>()`](./api/src/store/jsonStore.ts), a tiny CRUD
-surface (`all` / `find` / `findOne` / `insert` / `update`).
+through `Store.collection<T>()`, a tiny CRUD surface
+(`all` / `find` / `findOne` / `insert` / `update`). `Store` and `Collection`
+are now interfaces in [`jsonStore.ts`](./api/src/store/jsonStore.ts); services
+depend on the interface, never a concrete backend.
 
-- **Local:** full-file-rewrite JSON under `data/engagement/<name>.json`.
-  Single-process only — explicitly **not** safe for concurrent/multi-instance.
-- **Production:** a `PostgresCollection` (or Dynamo) implementing the same
-  methods. Services and handlers are untouched.
+- **Local:** `JsonStore` / `JsonCollection` — full-file-rewrite JSON under
+  `data/engagement/<name>.json`. Single-process only — explicitly **not** safe
+  for concurrent/multi-instance.
+- **Postgres/Supabase:** [`PgStore` / `PgCollection`](./api/src/store/pgStore.ts)
+  store every record in a generic `engagement` table keyed by `(collection, id)`
+  with the record in a `data` jsonb column. `find` / `findOne` load the
+  collection's rows and filter in JS — identical semantics to the file store.
+  `insert` upserts (`on conflict do update`). Services and handlers are untouched.
 
 ### 2.3 Auth seam — `AuthService.resolveUser`
 
@@ -121,8 +131,8 @@ zero-config local defaults. Hosting = setting env vars, not editing code:
 | Var                    | Local default               | Production                |
 | ---------------------- | --------------------------- | ------------------------- |
 | `PORT`                 | 3001                        | platform-assigned         |
-| `DATA_DIR`             | `../ingestion/data`         | DB connection (repo swap) |
-| `DATABASE_URL`         | _(unused yet)_              | managed Postgres          |
+| `DATA_DIR`             | `../ingestion/data`         | unused when DB is set     |
+| `DATABASE_URL`         | _(unset → local files)_     | managed Postgres/Supabase |
 | `ANTHROPIC_API_KEY`    | absent → heuristic fallback | secret store              |
 | `NEXT_PUBLIC_API_BASE` | `http://localhost:3001`     | API public URL            |
 
@@ -173,10 +183,12 @@ flowchart LR
     CRON --> PG
 ```
 
-Changes vs. local: ingestion writes to **Postgres** instead of JSONL; the API
-reads venues/events from Postgres with **PostGIS** doing geo-radius in SQL;
-auth verifies JWTs from a managed IdP; photos use presigned object-storage
-uploads.
+Changes vs. local: ingestion dual-writes to **Postgres/Supabase** (the
+`SupabasePublisher`, JSONL still emitted as source of truth + rollback); the API
+reads venues/events from Postgres when `DATABASE_URL` is set. Geo-radius runs in
+JS today (plain Postgres, no PostGIS) — moving it into SQL with PostGIS
+`ST_DWithin` is a later optimization. Still ahead: JWT auth from a managed IdP
+and presigned object-storage photo uploads.
 
 ---
 
@@ -203,12 +215,20 @@ when traffic/cost justifies it. The seams above make A → B migration cheap.
 
 ## 6. Database (target)
 
-A single **Postgres + PostGIS** instance serves both datasets:
+**Shipped** ([`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)):
+a portable plain-Postgres schema (no PostGIS, no DB-side uuid defaults — the app
+supplies all ids) that runs identically on Supabase, a local Postgres, and a
+PGlite harness. Each row carries the full canonical object in a `data` jsonb
+column; extracted columns exist only for filtering.
 
-- **Discovery (ingestion target):** `venues`, `events`, `matches` with
-  `GEOGRAPHY(Point)` + GiST index for `ST_DWithin` radius search.
-- **Engagement (app writes):** `users`, `reviews`, `check_ins`, `predictions`,
-  `community_posts`, `photos` — maps 1:1 from today's `Store` collections.
+- **Discovery (ingestion target):** `venues`, `events`, `matches`, keyed by id
+  with `city_slug` / `kickoff` indexes. Radius search runs in JS for now.
+- **Engagement (app writes):** a single generic `engagement` table keyed by
+  `(collection, id)` — maps 1:1 from today's `Store` collections.
+
+**Deferred:** PostGIS `GEOGRAPHY(Point)` + GiST index to push `ST_DWithin`
+radius search into SQL; per-table engagement schemas if/when query patterns need
+them.
 
 Discovery does not _require_ a DB (read-only JSONL works), but engagement does
 the moment there are real concurrent users — the file store corrupts under
@@ -258,8 +278,9 @@ the frontend drops the `localStorage` token in
 
 ## 8. Suggested sequencing
 
-1. **Postgres + PostGIS** — implement `PostgresRepository` + `PostgresCollection`
-   behind the existing interfaces; point ingestion at the DB.
+1. ~~**Postgres** — implement `PgRepository` + `PgStore` behind the existing
+   interfaces; dual-write ingestion to the DB.~~ ✅ Shipped (plain Postgres /
+   Supabase; PostGIS radius search still deferred — see §6).
 2. **Real auth** — JWT verification in `resolveUser` (Clerk/Cognito).
 3. **Hardening** — zod validation at boundaries, CORS lockdown, rate limiting.
 4. **Deploy** — Vercel + Render + Neon + GitHub Actions cron.

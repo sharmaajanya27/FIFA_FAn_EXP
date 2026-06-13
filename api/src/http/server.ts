@@ -7,7 +7,11 @@
 import { createServer, type IncomingMessage } from "node:http";
 import { loadApiEnv } from "../config/env.js";
 import { buildContainer, type Container } from "../container.js";
-import { FileRepository } from "../data/repository.js";
+import { FileRepository, type Repository } from "../data/repository.js";
+import { PgRepository } from "../data/pgRepository.js";
+import { getSql } from "../data/db.js";
+import { JsonStore, type Store } from "../store/jsonStore.js";
+import { PgStore } from "../store/pgStore.js";
 import {
   listCities,
   matches,
@@ -148,9 +152,29 @@ function buildRoutes(c: Container): Route[] {
 }
 
 async function main(): Promise<void> {
+  // Load .env (DATABASE_URL, ADMIN_EMAILS, …). Built-in, no dependency.
+  try {
+    process.loadEnvFile();
+  } catch {
+    // No .env file — rely on the process environment.
+  }
   const env = loadApiEnv();
-  const repo = new FileRepository(env.dataDir);
-  const c = buildContainer(env, repo);
+
+  // Storage swap (ARCHITECTURE §2): DATABASE_URL → Postgres, else local files.
+  let repo: Repository;
+  let store: Store;
+  if (env.databaseUrl) {
+    const sql = getSql(env.databaseUrl);
+    repo = new PgRepository(sql);
+    store = new PgStore(sql);
+    log.info("api: data layer = postgres");
+  } else {
+    repo = new FileRepository(env.dataDir);
+    store = new JsonStore(env.dataDir);
+    log.info("api: data layer = files", { dataDir: env.dataDir });
+  }
+
+  const c = buildContainer(env, repo, store);
   const routes = buildRoutes(c);
 
   const server = createServer(async (req, res) => {

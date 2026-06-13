@@ -9,11 +9,13 @@
   },
   "scripts": {
     "ingest": "tsx src/cli/run.ts",
+    "migrate": "tsx src/cli/migrate.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
+    "postgres": "^3.4.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {

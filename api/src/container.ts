@@ -7,7 +7,7 @@ import type { ApiEnv } from "./config/env.js";
 import type { Repository } from "./data/repository.js";
 import { AuthService } from "./auth/auth.js";
 import type { User } from "./domain/engagement.js";
-import { Store } from "./store/jsonStore.js";
+import type { Store } from "./store/jsonStore.js";
 import { DiscoveryService } from "./services/discovery.js";
 import { RecommendationService } from "./services/recommendations.js";
 import { ReviewService } from "./services/reviews.js";
@@ -33,8 +33,11 @@ export interface Container {
   analytics: AnalyticsService;
 }
 
-export function buildContainer(env: ApiEnv, repo: Repository): Container {
-  const store = new Store(env.dataDir);
+export function buildContainer(
+  env: ApiEnv,
+  repo: Repository,
+  store: Store,
+): Container {
   const auth = new AuthService(store.collection<User>("users"));
   const reviews = new ReviewService(store);
   const events = new EventService(store);

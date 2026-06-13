@@ -16,6 +16,8 @@ export interface ApiEnv {
   aiModel: string;
   /** Lowercased emails allowed to read the analytics/admin dashboard. */
   adminEmails: string[];
+  /** Postgres/Supabase connection string. Set → DB-backed; unset → local files. */
+  databaseUrl?: string;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -32,5 +34,6 @@ export function loadApiEnv(): ApiEnv {
       .split(",")
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean),
+    databaseUrl: process.env.DATABASE_URL || undefined,
   };
 }

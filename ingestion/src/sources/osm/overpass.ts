@@ -56,8 +56,8 @@ export class OverpassConnector implements SourceConnector {
     const seen = new Set<string>();
     const records: RawRecord[] = [];
 
-    for (let i = 0; i < bboxes.length; i++) {
-      const query = buildQuery(bboxes[i]);
+    for (const [i, bbox] of bboxes.entries()) {
+      const query = buildQuery(bbox);
       log.info("Overpass: querying venues", {
         city: city.slug,
         bbox: i + 1,
