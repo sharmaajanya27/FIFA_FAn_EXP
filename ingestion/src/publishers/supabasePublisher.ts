@@ -31,8 +31,8 @@ export class SupabasePublisher implements Publisher {
     }));
     await this.sql`
       insert into venues ${this.sql(rows, "id", "city_slug", "name", "kind", "lat", "lon", "geohash", "data")}
-      on conflict (id) do update set
-        city_slug = excluded.city_slug, name = excluded.name, kind = excluded.kind,
+      on conflict (city_slug, id) do update set
+        name = excluded.name, kind = excluded.kind,
         lat = excluded.lat, lon = excluded.lon, geohash = excluded.geohash,
         data = excluded.data, updated_at = now()`;
     log.info("supabase: upserted venues", { city: ctx.citySlug, count: venues.length });
@@ -68,8 +68,8 @@ export class SupabasePublisher implements Publisher {
     }));
     await this.sql`
       insert into events ${this.sql(rows, "id", "city_slug", "data")}
-      on conflict (id) do update set
-        city_slug = excluded.city_slug, data = excluded.data, updated_at = now()`;
+      on conflict (city_slug, id) do update set
+        data = excluded.data, updated_at = now()`;
     log.info("supabase: upserted events", { city: ctx.citySlug, count: events.length });
   }
 }
