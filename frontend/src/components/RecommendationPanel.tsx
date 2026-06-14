@@ -3,6 +3,7 @@
 import type { AiRecommendation } from "@/lib/types";
 import { teamLabel } from "@/lib/teams";
 import { formatKickoff } from "@/lib/format";
+import { AI_PITCH_ENABLED } from "@/lib/flags";
 
 interface Props {
   rec: AiRecommendation | null;
@@ -18,26 +19,30 @@ export function RecommendationPanel({ rec, mode, onMode }: Props) {
           <span className="muted" style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.04em" }}>
             Matchday pick
           </span>
-          <div className="tabs">
-            <button
-              className={`toggle ${mode === "smart" ? "active" : ""}`}
-              style={{ padding: "3px 9px", fontSize: 11 }}
-              onClick={() => onMode("smart")}
-            >
-              Smart
-            </button>
-            <button
-              className={`toggle ${mode === "ai" ? "active" : ""}`}
-              style={{ padding: "3px 9px", fontSize: 11 }}
-              onClick={() => onMode("ai")}
-            >
-              ✨ AI
-            </button>
-          </div>
+          {/* AI matchday pitch — kept for a future launch, hidden until the
+              Claude workflow ships (see lib/flags.ts). */}
+          {AI_PITCH_ENABLED && (
+            <div className="tabs">
+              <button
+                className={`toggle ${mode === "smart" ? "active" : ""}`}
+                style={{ padding: "3px 9px", fontSize: 11 }}
+                onClick={() => onMode("smart")}
+              >
+                Smart
+              </button>
+              <button
+                className={`toggle ${mode === "ai" ? "active" : ""}`}
+                style={{ padding: "3px 9px", fontSize: 11 }}
+                onClick={() => onMode("ai")}
+              >
+                ✨ AI
+              </button>
+            </div>
+          )}
         </div>
         {!rec ? (
           <div className="muted">Pick a team to get personalized recommendations.</div>
-        ) : (
+        ) : AI_PITCH_ENABLED ? (
           <>
             {rec.aiStatus === "coming_soon" && (
               <div
@@ -49,6 +54,8 @@ export function RecommendationPanel({ rec, mode, onMode }: Props) {
             )}
             <div style={{ fontSize: 15, lineHeight: 1.5 }}>{rec.aiSummary}</div>
           </>
+        ) : (
+          <div style={{ fontSize: 15, lineHeight: 1.5 }}>{rec.rationale}</div>
         )}
       </div>
 

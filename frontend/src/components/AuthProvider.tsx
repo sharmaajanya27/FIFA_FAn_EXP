@@ -4,10 +4,20 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import { api, setToken } from "@/lib/api";
 import type { PublicUser } from "@/lib/types";
 
+interface RegisterOptions {
+  accountType?: "fan" | "business";
+  businessName?: string;
+}
+
 interface AuthState {
   user: PublicUser | null;
   loading: boolean;
-  register: (email: string, displayName: string, favoriteTeams: string[]) => Promise<void>;
+  register: (
+    email: string,
+    displayName: string,
+    favoriteTeams: string[],
+    opts?: RegisterOptions,
+  ) => Promise<void>;
   login: (email: string) => Promise<void>;
   logout: () => void;
   refresh: () => Promise<void>;
@@ -33,11 +43,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void refresh().finally(() => setLoading(false));
   }, [refresh]);
 
-  const register = useCallback(async (email: string, displayName: string, favoriteTeams: string[]) => {
-    const res = await api.register({ email, displayName, favoriteTeams });
-    setToken(res.token);
-    setUser(res.user);
-  }, []);
+  const register = useCallback(
+    async (
+      email: string,
+      displayName: string,
+      favoriteTeams: string[],
+      opts?: RegisterOptions,
+    ) => {
+      const res = await api.register({
+        email,
+        displayName,
+        favoriteTeams,
+        accountType: opts?.accountType,
+        businessName: opts?.businessName,
+      });
+      setToken(res.token);
+      setUser(res.user);
+    },
+    [],
+  );
 
   const login = useCallback(async (email: string) => {
     const res = await api.login(email);

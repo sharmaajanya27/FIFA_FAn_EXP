@@ -63,12 +63,16 @@ export interface Recommendation {
 }
 
 // ---- Phase 2 engagement ----
+export type AccountType = "fan" | "business";
+
 export interface PublicUser {
   id: string;
   displayName: string;
   favoriteTeams: string[];
   homeCity?: string;
   bio?: string;
+  accountType?: AccountType;
+  businessName?: string;
   createdAt: string;
 }
 
@@ -170,6 +174,58 @@ export interface VenueListing {
   featured: boolean;
   featuredUntil?: string;
   package?: string;
+}
+
+// ---- Business accounts (PRD §8) ----
+/** A zip/neighborhood/address resolved to a point. */
+export interface GeocodeResult {
+  lat: number;
+  lon: number;
+  label: string;
+  kind?: string;
+}
+
+/** A business-submitted venue listing (shows up in watch spots). */
+export interface BusinessListing {
+  id: string;
+  name: string;
+  kind: string;
+  geo: GeoPoint;
+  address?: string;
+  city?: string;
+  country?: string;
+  website?: string;
+  phone?: string;
+  capacity?: number;
+  supportsTeams: string[];
+  business?: boolean;
+  claimed?: boolean;
+  ownerId: string;
+  ownerName: string;
+  ownerBusinessName?: string;
+  createdAt: string;
+}
+
+/** A user/business-created fan event, with provenance (admin view). */
+export interface CreatedEvent {
+  id: string;
+  title: string;
+  kind: string;
+  geo: GeoPoint;
+  startTime: string;
+  city?: string;
+  teams: string[];
+  estAttendance?: number;
+  matchId?: string;
+  createdBy: string;
+  createdByName: string;
+  createdAt: string;
+}
+
+export interface AdminBusinessSummary {
+  listings: BusinessListing[];
+  events: CreatedEvent[];
+  counts: { listings: number; events: number };
 }
 
 // ---- SEO (server-rendered landing pages) ----

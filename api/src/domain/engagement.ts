@@ -2,6 +2,9 @@
  * Phase 2 engagement entities (user-generated). These are written via the API
  * (unlike the read-only Phase 0/1 models) and persisted in the write store.
  */
+/** "fan" = regular user; "business" = venue owner / organizer (PRD §8). */
+export type AccountType = "fan" | "business";
+
 export interface User {
   id: string;
   email: string;
@@ -9,6 +12,10 @@ export interface User {
   favoriteTeams: string[];
   homeCity?: string;
   bio?: string;
+  /** Account type — fans by default; business owners get the §8 surfaces. */
+  accountType?: AccountType;
+  /** Trading name for business accounts. */
+  businessName?: string;
   createdAt: string;
 }
 
@@ -19,6 +26,8 @@ export interface PublicUser {
   favoriteTeams: string[];
   homeCity?: string;
   bio?: string;
+  accountType?: AccountType;
+  businessName?: string;
   createdAt: string;
 }
 
@@ -90,6 +99,8 @@ export function toPublicUser(u: User): PublicUser {
     favoriteTeams: u.favoriteTeams,
     homeCity: u.homeCity,
     bio: u.bio,
+    accountType: u.accountType ?? "fan",
+    businessName: u.businessName,
     createdAt: u.createdAt,
   };
 }

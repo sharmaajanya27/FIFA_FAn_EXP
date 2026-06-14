@@ -8,7 +8,7 @@
  * `requireUser` helper).
  */
 import type { Collection } from "../store/jsonStore.js";
-import type { User } from "../domain/engagement.js";
+import type { AccountType, User } from "../domain/engagement.js";
 
 const TOKEN_PREFIX = "fmtok_";
 
@@ -24,6 +24,8 @@ export class AuthService {
     displayName: string;
     favoriteTeams?: string[];
     homeCity?: string;
+    accountType?: AccountType;
+    businessName?: string;
   }): Promise<{ token: string; user: User }> {
     const email = input.email.trim().toLowerCase();
     const existing = await this.users.findOne((u) => u.email === email);
@@ -31,11 +33,16 @@ export class AuthService {
       // Idempotent for dev: treat as login.
       return { token: this.tokenFor(existing.id), user: existing };
     }
+    const accountType: AccountType =
+      input.accountType === "business" ? "business" : "fan";
     const user = await this.users.insert({
       email,
       displayName: input.displayName.trim() || email.split("@")[0]!,
       favoriteTeams: input.favoriteTeams ?? [],
       homeCity: input.homeCity,
+      accountType,
+      businessName:
+        accountType === "business" ? input.businessName?.trim() : undefined,
       createdAt: new Date().toISOString(),
     });
     return { token: this.tokenFor(user.id), user };

@@ -43,6 +43,7 @@ ingestion `scoring.json`.
 |--------|------|-------|---------|
 | GET | `/health` | — | Liveness |
 | GET | `/cities` | — | Ingested cities |
+| GET | `/geocode` | `q[,city]` | Resolve a zip/neighborhood/address to a point (city-biased) |
 | GET | `/venues/nearby` | `city,lat,lon[,radius,team,kind,limit]` | Ranked nearby venues |
 | GET | `/venues/:id` | `city` | Venue detail |
 | GET | `/matches` | `city[,team]` | Fixtures |
@@ -77,6 +78,20 @@ DynamoDB) and require a bearer token from register/login (dev-stub auth in
 | POST/GET | `/venues/:id/photos` | ✓(POST) | Fan photos |
 | POST/GET | `/matches/:id/predictions` · `/predictions/leaderboard` | ✓(POST) | Predictions |
 | POST/GET | `/communities/:team/posts` · `/posts/:id/like` | ✓(POST) | Team communities |
+
+### Business accounts (§8)
+
+Register with `accountType: "business"` (+ `businessName`) to get the owner
+surfaces. Business-submitted venue listings are merged into discovery, so they
+appear in the ranked watch-spots list and on the map alongside Phase 0 venues.
+Owners post fan events through the existing `POST /events`. Platform admins
+review all of it at the admin-gated summary (frontend `/admin/business`).
+
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| POST | `/business/listings` | business | Create a venue listing (shows in watch spots) |
+| GET | `/business/listings/mine` | ✓ | The signed-in business's listings |
+| GET | `/admin/business` | admin | All business listings + posted events |
 
 ### Traffic analytics (first-party)
 

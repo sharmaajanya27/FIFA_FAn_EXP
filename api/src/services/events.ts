@@ -67,4 +67,11 @@ export class EventService {
       a.startTime.localeCompare(b.startTime),
     );
   }
+
+  /** Every user/business event — the admin review surface. */
+  async all(): Promise<UserEvent[]> {
+    return (await this.events.all()).sort((a, b) =>
+      b.createdAt.localeCompare(a.createdAt),
+    );
+  }
 }

@@ -15,6 +15,7 @@ recommendations.
 ## Documentation
 
 - [`PRD.md`](./PRD.md) — Product Requirements Document
+- [`FEATURES.md`](./FEATURES.md) — Feature inventory by user type, with build status
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — How it's built, the seams, and the production target
 - [`WORKFLOW.md`](./WORKFLOW.md) — Workflow & architecture diagrams for the dev team
 - [`api/README.md`](./api/README.md) · [`frontend/README.md`](./frontend/README.md) — per-package docs & endpoints
@@ -27,7 +28,12 @@ Three TypeScript packages (see [`ARCHITECTURE.md`](./ARCHITECTURE.md)):
 - **`api/`** — discovery API (location/team search, ranking, recommendations), Phase 2 engagement writes (accounts, reviews, check-ins, crowd, predictions, communities), Phase 3 (AI rec scaffold, crowd estimation, user events, sponsorship), and **first-party traffic analytics** (`/analytics/*`, admin-gated by `ADMIN_EMAILS`).
 - **`frontend/`** — the interactive map/list discovery app, plus **programmatic SEO landing pages** (`/watch`, `/watch/[city]`, `/watch/[city]/[team]`, `/venue/[city]/[id]` — server-rendered with metadata, JSON-LD, sitemap/robots) and a **`/admin` traffic dashboard**.
 
-> **Data coverage:** only `jersey-city` is currently ingested, so it's the only fully-populated city; other city pages render but stay `noindex` until ingestion is run for them. Run Phase 0 ingestion to light up more cities.
+> **Data coverage:** all 30 metros have been ingested and carry venue data
+> (hundreds to thousands each — e.g. Tokyo ~10k, London/New York ~7k). City pages
+> become indexable once they clear a small venue threshold, which every ingested
+> metro does. **Fan events** are still sparse — only a handful of cities have seed
+> events — so event discovery is thin outside those metros even though venue
+> discovery is rich everywhere.
 
 ## Status
 
