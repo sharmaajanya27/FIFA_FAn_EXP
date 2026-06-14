@@ -6,9 +6,11 @@ for how it's built.
 
 **Legend:** ✅ Done (built & runnable) · 🟡 Partial / scaffolded · 🔴 Not built (in PRD, no code)
 
-> **Data coverage:** only `jersey-city` is fully ingested today, so it's the only
-> fully-populated city. Other city pages render but stay `noindex` until Phase 0
-> ingestion is run for them.
+> **Data coverage:** all 30 metros are ingested with rich venue data (hundreds to
+> thousands of venues each), in both the local JSONL and the Postgres backend.
+> City pages clear the indexation threshold everywhere. **Fan events** are still
+> sparse — only a few cities have seed events — so event discovery is thin outside
+> those metros even though venue discovery is fully populated.
 
 ---
 
