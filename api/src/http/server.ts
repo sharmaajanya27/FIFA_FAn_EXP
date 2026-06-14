@@ -40,6 +40,12 @@ import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
 import { createEvent, listEvents } from "../handlers/events.js";
 import { claimVenue, featureVenue, getListing } from "../handlers/sponsorship.js";
+import {
+  adminBusinessSummary,
+  createListing,
+  listMyListings,
+} from "../handlers/business.js";
+import { geocode } from "../handlers/geocode.js";
 import { listMetros } from "../handlers/metros.js";
 import { analyticsSummary, recordPageView } from "../handlers/analytics.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
@@ -101,6 +107,7 @@ function buildRoutes(c: Container): Route[] {
     route("GET", "/health", async () => ({ status: 200, body: { ok: true } })),
     route("GET", "/cities", listCities(c)),
     route("GET", "/metros", listMetros(c)),
+    route("GET", "/geocode", geocode(c)),
     route("GET", "/venues/nearby", nearbyVenues(c)),
     route("GET", "/venues/:id", venueById(c)),
     route("GET", "/matches", matches(c)),
@@ -145,6 +152,10 @@ function buildRoutes(c: Container): Route[] {
     route("POST", "/venues/:id/claim", claimVenue(c)),
     route("POST", "/venues/:id/feature", featureVenue(c)),
     route("GET", "/venues/:id/listing", getListing(c)),
+    // Business accounts: venue listings + admin review (§8)
+    route("POST", "/business/listings", createListing(c)),
+    route("GET", "/business/listings/mine", listMyListings(c)),
+    route("GET", "/admin/business", adminBusinessSummary(c)),
     // Traffic analytics (public beacon + admin summary)
     route("POST", "/analytics/pageview", recordPageView(c)),
     route("GET", "/analytics/summary", analyticsSummary(c)),

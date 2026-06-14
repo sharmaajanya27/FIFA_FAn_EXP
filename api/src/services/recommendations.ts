@@ -12,7 +12,7 @@
  */
 import type { Repository } from "../data/repository.js";
 import type { GeoPoint, Match, RankedVenue } from "../domain/models.js";
-import { DiscoveryService } from "./discovery.js";
+import { DiscoveryService, type VenueOverlay, type VenueSource } from "./discovery.js";
 
 export interface RecommendationQuery {
   city: string;
@@ -36,9 +36,10 @@ export class RecommendationService {
 
   constructor(
     private readonly repo: Repository,
-    overlay?: import("./discovery.js").VenueOverlay,
+    overlay?: VenueOverlay,
+    venueSource?: VenueSource,
   ) {
-    this.discovery = new DiscoveryService(repo, overlay);
+    this.discovery = new DiscoveryService(repo, overlay, undefined, venueSource);
   }
 
   async recommend(q: RecommendationQuery): Promise<Recommendation> {

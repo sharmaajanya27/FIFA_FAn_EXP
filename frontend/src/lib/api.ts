@@ -1,9 +1,12 @@
 /** Typed client for the FanWatch discovery + engagement API. */
 import type {
+  AccountType,
+  AdminBusinessSummary,
   AiRecommendation,
   AnalyticsRange,
   AnalyticsSummary,
   AuthResult,
+  BusinessListing,
   CheckIn,
   CommunityPost,
   CrowdEstimate,
@@ -11,6 +14,7 @@ import type {
   CrowdStatus,
   EventsResponse,
   FanEvent,
+  GeocodeResult,
   LeaderboardEntry,
   NearbyVenuesResponse,
   PageViewPayload,
@@ -87,10 +91,19 @@ export const api = {
     get<Recommendation>("/recommendations", { ...a }),
   matches: (city: string, team?: string) =>
     get<{ count: number; matches: import("./types").Match[] }>("/matches", { city, team }),
+  /** Resolve a zip code / neighborhood / address to a point (PRD §6.1). */
+  geocode: (q: string, city?: string) =>
+    get<GeocodeResult>("/geocode", { q, city }),
 
   // ---- auth + profile ----
-  register: (body: { email: string; displayName: string; favoriteTeams?: string[]; homeCity?: string }) =>
-    request<AuthResult>("POST", "/auth/register", { body }),
+  register: (body: {
+    email: string;
+    displayName: string;
+    favoriteTeams?: string[];
+    homeCity?: string;
+    accountType?: AccountType;
+    businessName?: string;
+  }) => request<AuthResult>("POST", "/auth/register", { body }),
   login: (email: string) => request<AuthResult>("POST", "/auth/login", { body: { email } }),
   me: () => get<{ user: PublicUser }>("/me"),
   updateProfile: (body: Partial<Pick<PublicUser, "displayName" | "favoriteTeams" | "homeCity" | "bio">>) =>
@@ -150,6 +163,17 @@ export const api = {
     request<{ id: string }>("POST", `/venues/${venueId}/claim`, { body: { businessName } }),
   featureVenue: (venueId: string, pkg: string, days?: number) =>
     request<{ id: string }>("POST", `/venues/${venueId}/feature`, { body: { package: pkg, days } }),
+
+  // ---- business accounts (PRD §8) ----
+  createBusinessListing: (body: {
+    name: string; city: string; lat: number; lon: number;
+    kind?: string; address?: string; website?: string; phone?: string;
+    country?: string; supportsTeams?: string[]; capacity?: number;
+  }) => request<BusinessListing>("POST", "/business/listings", { body }),
+  myBusinessListings: () =>
+    get<{ count: number; listings: BusinessListing[] }>("/business/listings/mine"),
+  /** Admin-only review of all business listings + events. */
+  adminBusiness: () => get<AdminBusinessSummary>("/admin/business"),
 
   // ---- traffic analytics ----
   /** Fire-and-forget pageview beacon (public, no auth). */

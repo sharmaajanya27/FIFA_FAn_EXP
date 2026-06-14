@@ -33,15 +33,25 @@ export interface EventOverlay {
   forCity(city: string): Promise<Event[]>;
 }
 
+/** Optional source of additional (business-submitted) venues to merge in. */
+export interface VenueSource {
+  forCity(city: string): Promise<Venue[]>;
+}
+
 export class DiscoveryService {
   constructor(
     private readonly repo: Repository,
     private readonly overlay?: VenueOverlay,
     private readonly eventOverlay?: EventOverlay,
+    private readonly venueSource?: VenueSource,
   ) {}
 
   private async loadVenues(city: string): Promise<Venue[]> {
-    const venues = await this.repo.venues(city);
+    const [base, extra] = await Promise.all([
+      this.repo.venues(city),
+      this.venueSource ? this.venueSource.forCity(city) : Promise.resolve([]),
+    ]);
+    const venues = [...base, ...extra];
     return this.overlay ? this.overlay.applyOverlay(venues) : venues;
   }
 

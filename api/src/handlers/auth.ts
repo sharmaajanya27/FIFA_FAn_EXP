@@ -23,6 +23,8 @@ export const register =
       displayName,
       favoriteTeams: (body.favoriteTeams as string[]) ?? [],
       homeCity: body.homeCity as string | undefined,
+      accountType: body.accountType === "business" ? "business" : "fan",
+      businessName: body.businessName as string | undefined,
     });
     return created({ token: result.token, user: toPublicUser(result.user) });
   };

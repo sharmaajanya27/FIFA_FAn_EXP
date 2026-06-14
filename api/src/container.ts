@@ -15,6 +15,8 @@ import { AiRecommendationService } from "./services/aiRecommendations.js";
 import { CrowdEstimationService } from "./services/crowdEstimation.js";
 import { EventService } from "./services/events.js";
 import { CompositeVenueOverlay, SponsorshipService } from "./services/sponsorship.js";
+import { BusinessService } from "./services/business.js";
+import { GeocodeService } from "./services/geocode.js";
 import { AnalyticsService } from "./services/analytics.js";
 
 export interface Container {
@@ -30,6 +32,10 @@ export interface Container {
   crowdEstimation: CrowdEstimationService;
   events: EventService;
   sponsorship: SponsorshipService;
+  /** Business-submitted venue listings (PRD §8). */
+  business: BusinessService;
+  /** Zip/neighborhood → point geocoding (PRD §6.1). */
+  geocode: GeocodeService;
   analytics: AnalyticsService;
 }
 
@@ -42,9 +48,11 @@ export function buildContainer(
   const reviews = new ReviewService(store);
   const events = new EventService(store);
   const sponsorship = new SponsorshipService(store);
+  const business = new BusinessService(store);
   // Reviews set the rating-based score; sponsorship then boosts featured venues.
   const venueOverlay = new CompositeVenueOverlay([reviews, sponsorship]);
-  const recommendations = new RecommendationService(repo, venueOverlay);
+  // Business listings are merged into discovery alongside Phase 0 venues.
+  const recommendations = new RecommendationService(repo, venueOverlay, business);
 
   return {
     env,
@@ -52,12 +60,14 @@ export function buildContainer(
     store,
     auth,
     reviews,
-    discovery: new DiscoveryService(repo, venueOverlay, events),
+    discovery: new DiscoveryService(repo, venueOverlay, events, business),
     recommendations,
     aiRecommendations: new AiRecommendationService(recommendations, env),
     crowdEstimation: new CrowdEstimationService(repo, store),
     events,
     sponsorship,
+    business,
+    geocode: new GeocodeService(),
     analytics: new AnalyticsService(env.dataDir),
   };
 }

@@ -33,6 +33,8 @@ export interface Venue {
   featured?: boolean;
   /** True when a business has claimed this venue. */
   claimed?: boolean;
+  /** True when this listing was submitted by a business owner (not Phase 0). */
+  business?: boolean;
 }
 
 export interface Match {

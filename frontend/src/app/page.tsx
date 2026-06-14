@@ -48,6 +48,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  // Zip / neighborhood search (PRD §6.1): resolve free text to a search origin.
+  const [placeQuery, setPlaceQuery] = useState("");
+  const [placeLabel, setPlaceLabel] = useState<string | undefined>();
+  const [geoBusy, setGeoBusy] = useState(false);
+
   // Seasonal World Cup banner status. Computed on the client (after mount) so
   // the date-based message stays accurate without causing a hydration
   // mismatch with the server-rendered HTML.
@@ -60,6 +65,7 @@ export default function Home() {
   const onCityChange = (slug: string) => {
     setCity(slug);
     setOriginMode("downtown");
+    setPlaceLabel(undefined);
     const c = cityBySlug(slug);
     if (c) setOrigin(c.center);
   };
@@ -67,10 +73,34 @@ export default function Home() {
   // Switch the search origin between downtown and the stadium.
   const onOriginModeChange = (mode: "downtown" | "stadium") => {
     setOriginMode(mode);
+    setPlaceLabel(undefined);
     const c = cityBySlug(city);
     if (!c) return;
     if (mode === "stadium" && c.stadium) setOrigin(c.stadium.center);
     else setOrigin(c.center);
+  };
+
+  // Resolve a zip code / neighborhood / address to a search origin.
+  const searchPlace = async () => {
+    const q = placeQuery.trim();
+    if (!q) return;
+    setGeoBusy(true);
+    setError(undefined);
+    try {
+      const r = await api.geocode(q, city);
+      setOriginMode("custom");
+      setOrigin({ lat: r.lat, lon: r.lon });
+      setPlaceLabel(r.label);
+    } catch (e) {
+      setPlaceLabel(undefined);
+      setError(
+        e instanceof Error
+          ? `Couldn't find "${q}" — try a zip code or neighborhood name.`
+          : "Place lookup failed.",
+      );
+    } finally {
+      setGeoBusy(false);
+    }
   };
 
   const useMyLocation = () => {
@@ -81,6 +111,7 @@ export default function Home() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setOriginMode("custom");
+        setPlaceLabel(undefined);
         setOrigin({ lat: pos.coords.latitude, lon: pos.coords.longitude });
       },
       () => setError("Could not get your location — using city center."),
@@ -270,6 +301,21 @@ export default function Home() {
               </select>
             </div>
             <div className="field">
+              <label>Zip or neighborhood</label>
+              <div className="row" style={{ gap: 6 }}>
+                <input
+                  value={placeQuery}
+                  onChange={(e) => setPlaceQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && searchPlace()}
+                  placeholder="e.g. 07302 or Downtown"
+                  style={{ flex: 1, minWidth: 0 }}
+                />
+                <button onClick={searchPlace} disabled={geoBusy || !placeQuery.trim()}>
+                  {geoBusy ? "…" : "Go"}
+                </button>
+              </div>
+            </div>
+            <div className="field">
               <label>Favorite team</label>
               <select value={team} onChange={(e) => setTeam(e.target.value)}>
                 <option value="">All teams</option>
@@ -324,9 +370,16 @@ export default function Home() {
           </div>
 
           <div className="header" style={{ justifyContent: "space-between" }}>
-            <h2 style={{ fontSize: 18, margin: 0 }}>
-              {loading ? "Searching…" : headline}
-            </h2>
+            <div>
+              <h2 style={{ fontSize: 18, margin: 0 }}>
+                {loading ? "Searching…" : headline}
+              </h2>
+              {placeLabel && (
+                <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
+                  📍 Centered on {placeLabel}
+                </div>
+              )}
+            </div>
             <div className="tabs">
               <button
                 className={`toggle ${view === "map" ? "active" : ""}`}

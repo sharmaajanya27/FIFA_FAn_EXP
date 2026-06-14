@@ -15,6 +15,7 @@ recommendations.
 ## Documentation
 
 - [`PRD.md`](./PRD.md) — Product Requirements Document
+- [`FEATURES.md`](./FEATURES.md) — Feature inventory by user type, with build status
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — How it's built, the seams, and the production target
 - [`WORKFLOW.md`](./WORKFLOW.md) — Workflow & architecture diagrams for the dev team
 - [`api/README.md`](./api/README.md) · [`frontend/README.md`](./frontend/README.md) — per-package docs & endpoints
