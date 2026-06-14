@@ -15,13 +15,13 @@ HTTP / API Gateway → Handler → Service → Repository → Phase 0 JSONL
                                   ↳ Ranking engine (query-time)
 ```
 
-| Layer | File(s) | Role |
-|-------|---------|------|
-| Handlers | `src/handlers/index.ts` | Lambda-style request → response, validation |
-| Services | `src/services/*` | Discovery + recommendations orchestration |
-| Ranking | `src/ranking/rank.ts` | Query-time score (distance + team-fan-match) |
-| Repository | `src/data/repository.ts` | Loads venues/matches/events; swap for Aurora/S3 |
-| Transport | `src/http/server.ts` | Local dev server (replaced by Lambda adapter in prod) |
+| Layer      | File(s)                  | Role                                                  |
+| ---------- | ------------------------ | ----------------------------------------------------- |
+| Handlers   | `src/handlers/index.ts`  | Lambda-style request → response, validation           |
+| Services   | `src/services/*`         | Discovery + recommendations orchestration             |
+| Ranking    | `src/ranking/rank.ts`    | Query-time score (distance + team-fan-match)          |
+| Repository | `src/data/repository.ts` | Loads venues/matches/events; swap for Aurora/S3       |
+| Transport  | `src/http/server.ts`     | Local dev server (replaced by Lambda adapter in prod) |
 
 ### Ranking (PRD §6.5)
 
@@ -39,17 +39,33 @@ ingestion `scoring.json`.
 
 ## Endpoints
 
-| Method | Path | Query | Purpose |
-|--------|------|-------|---------|
-| GET | `/health` | — | Liveness |
-| GET | `/cities` | — | Ingested cities |
-| GET | `/geocode` | `q[,city]` | Resolve a zip/neighborhood/address to a point (city-biased) |
-| GET | `/venues/nearby` | `city,lat,lon[,radius,team,kind,limit]` | Ranked nearby venues |
-| GET | `/venues/:id` | `city` | Venue detail |
-| GET | `/matches` | `city[,team]` | Fixtures |
-| GET | `/events/nearby` | `city,lat,lon[,radius,team]` | Fan events near a point |
-| GET | `/recommendations` | `city,lat,lon,team[,radius,limit]` | Personalized venue recs |
-| GET | `/ai/recommendations` | `city,lat,lon,team[,radius,limit,mode]` | Matchday pitch (Phase 3) |
+| Method | Path                  | Query                                   | Purpose                                                     |
+| ------ | --------------------- | --------------------------------------- | ----------------------------------------------------------- |
+| GET    | `/health`             | —                                       | Liveness                                                    |
+| GET    | `/cities`             | —                                       | Ingested cities                                             |
+| GET    | `/geocode`            | `q[,city]`                              | Resolve a zip/neighborhood/address to a point (city-biased) |
+| GET    | `/venues/nearby`      | `city,lat,lon[,radius,team,kind,limit]` | Ranked nearby venues                                        |
+| GET    | `/venues/:id`         | `city`                                  | Venue detail                                                |
+| GET    | `/matches`            | `city[,team]`                           | Fixtures                                                    |
+| GET    | `/events/nearby`      | `city,lat,lon[,radius,team]`            | Fan events near a point                                     |
+| GET    | `/recommendations`    | `city,lat,lon,team[,radius,limit]`      | Personalized venue recs                                     |
+| GET    | `/ai/recommendations` | `city,lat,lon,team[,radius,limit,mode]` | Matchday pitch (Phase 3)                                    |
+| GET    | `/live/events`        | —                                       | Live + upcoming scores across leagues (ESPN-backed)         |
+
+### Live sporting events (`/live/events`)
+
+A public, read-only ticker. [`LiveEventsService`](./src/services/liveEvents.ts)
+aggregates ESPN's public scoreboard JSON across several leagues (soccer,
+basketball, baseball, hockey), normalizes each game to a stable `LiveEvent`
+shape, and sorts live games first. The fetch is server-side (no browser CORS,
+upstream shape hidden behind our contract); a failing league is skipped, never
+fatal.
+
+> **⚠️ Production:** ESPN's endpoint is **unofficial, undocumented, and
+> rate-limited** — great for local/demo, not SLA-grade. Before launch, swap to a
+> licensed provider (football-data.org / Sportradar / API-Football, keyed via
+> the config seam) or add a short-TTL cache + graceful fallback. Only
+> `liveEvents.ts` changes. See [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.6.
 
 ### Matchday recommendations (Phase 3)
 
@@ -67,17 +83,17 @@ Writes go through a pluggable JSON store (`src/store`, swap for Postgres/
 DynamoDB) and require a bearer token from register/login (dev-stub auth in
 `src/auth`). Reviews overlay onto venue ratings, so they feed the §6.5 ranking.
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| POST | `/auth/register` · `/auth/login` | — | Get a bearer token |
-| GET | `/me` | ✓ | Current user |
-| GET/PUT | `/users/:id` · `/me/profile` | ✓(PUT) | Fan profiles |
-| POST/GET | `/venues/:id/reviews` | ✓(POST) | Reviews (+ rating overlay) |
-| POST/GET | `/venues/:id/checkins` | ✓(POST) | Check-ins |
-| POST/GET | `/venues/:id/crowd` | ✓(POST) | Live crowd level |
-| POST/GET | `/venues/:id/photos` | ✓(POST) | Fan photos |
-| POST/GET | `/matches/:id/predictions` · `/predictions/leaderboard` | ✓(POST) | Predictions |
-| POST/GET | `/communities/:team/posts` · `/posts/:id/like` | ✓(POST) | Team communities |
+| Method   | Path                                                    | Auth    | Purpose                    |
+| -------- | ------------------------------------------------------- | ------- | -------------------------- |
+| POST     | `/auth/register` · `/auth/login`                        | —       | Get a bearer token         |
+| GET      | `/me`                                                   | ✓       | Current user               |
+| GET/PUT  | `/users/:id` · `/me/profile`                            | ✓(PUT)  | Fan profiles               |
+| POST/GET | `/venues/:id/reviews`                                   | ✓(POST) | Reviews (+ rating overlay) |
+| POST/GET | `/venues/:id/checkins`                                  | ✓(POST) | Check-ins                  |
+| POST/GET | `/venues/:id/crowd`                                     | ✓(POST) | Live crowd level           |
+| POST/GET | `/venues/:id/photos`                                    | ✓(POST) | Fan photos                 |
+| POST/GET | `/matches/:id/predictions` · `/predictions/leaderboard` | ✓(POST) | Predictions                |
+| POST/GET | `/communities/:team/posts` · `/posts/:id/like`          | ✓(POST) | Team communities           |
 
 ### Business accounts (§8)
 
@@ -87,11 +103,11 @@ appear in the ranked watch-spots list and on the map alongside Phase 0 venues.
 Owners post fan events through the existing `POST /events`. Platform admins
 review all of it at the admin-gated summary (frontend `/admin/business`).
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| POST | `/business/listings` | business | Create a venue listing (shows in watch spots) |
-| GET | `/business/listings/mine` | ✓ | The signed-in business's listings |
-| GET | `/admin/business` | admin | All business listings + posted events |
+| Method | Path                      | Auth     | Purpose                                       |
+| ------ | ------------------------- | -------- | --------------------------------------------- |
+| POST   | `/business/listings`      | business | Create a venue listing (shows in watch spots) |
+| GET    | `/business/listings/mine` | ✓        | The signed-in business's listings             |
+| GET    | `/admin/business`         | admin    | All business listings + posted events         |
 
 ### Traffic analytics (first-party)
 
@@ -101,10 +117,10 @@ A lightweight, dependency-free pageview pipeline that powers the frontend
 which rewrites whole files and wouldn't scale to pageview volume). Summaries are
 aggregated in memory from the recent day-files with a ~60s cache.
 
-| Method | Path | Auth | Purpose |
-|--------|------|------|---------|
-| POST | `/analytics/pageview` | — | Record a pageview (public beacon) |
-| GET | `/analytics/summary` | admin | KPIs + top pages/cities/teams/referrers + daily series; `?range=today\|7d\|30d` |
+| Method | Path                  | Auth  | Purpose                                                                         |
+| ------ | --------------------- | ----- | ------------------------------------------------------------------------------- |
+| POST   | `/analytics/pageview` | —     | Record a pageview (public beacon)                                               |
+| GET    | `/analytics/summary`  | admin | KPIs + top pages/cities/teams/referrers + daily series; `?range=today\|7d\|30d` |
 
 **Admin gating:** `/analytics/summary` requires a bearer token whose email is in
 the `ADMIN_EMAILS` allowlist (comma-separated, case-insensitive). There is no

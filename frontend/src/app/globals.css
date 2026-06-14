@@ -21,7 +21,8 @@
   --radius: 18px;
   /* Editorial serif for display headings — Fraunces when the webfont loads
      (see layout head), otherwise a warm system serif. Zero build dependency. */
-  --font-serif: "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino,
+  --font-serif:
+    "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino,
     "Book Antiqua", Georgia, serif;
   /* Overridden per selected city via inline style on .city-bg. */
   --city-accent: #d97757;
@@ -145,7 +146,11 @@ a:hover {
   right: -10%;
   width: 420px;
   height: 420px;
-  background: radial-gradient(circle, rgba(217, 119, 87, 0.42), transparent 62%);
+  background: radial-gradient(
+    circle,
+    rgba(217, 119, 87, 0.42),
+    transparent 62%
+  );
   pointer-events: none;
 }
 .hero-top {
@@ -253,6 +258,19 @@ a:hover {
   font-size: 13px;
   letter-spacing: 0;
 }
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  vertical-align: middle;
+}
+.live-pill .season-live,
+.badge .season-live {
+  display: inline-block;
+}
 .season-title {
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -285,7 +303,11 @@ a:hover {
   font-weight: 600;
 }
 .header .brand {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-deep) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -417,7 +439,9 @@ button.toggle.active {
   border-bottom: 1px solid var(--border);
   display: flex;
   gap: 12px;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .venue:hover {
   background: var(--panel-2);

@@ -54,6 +54,30 @@ export interface EventsResponse {
   count: number;
   events: FanEvent[];
 }
+
+export type LiveEventState = "pre" | "in" | "post";
+export interface LiveEventTeam {
+  name: string;
+  abbreviation: string;
+  logo?: string;
+  score?: string;
+}
+export interface LiveEvent {
+  id: string;
+  sport: string;
+  league: string;
+  state: LiveEventState;
+  detail: string;
+  clock?: string;
+  startTime: string;
+  venue?: string;
+  home: LiveEventTeam;
+  away: LiveEventTeam;
+}
+export interface LiveEventsResponse {
+  count: number;
+  events: LiveEvent[];
+}
 export interface Recommendation {
   team: string;
   city: string;

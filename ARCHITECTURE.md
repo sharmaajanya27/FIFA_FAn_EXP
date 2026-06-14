@@ -136,6 +136,22 @@ zero-config local defaults. Hosting = setting env vars, not editing code:
 | `ANTHROPIC_API_KEY`    | absent → heuristic fallback | secret store              |
 | `NEXT_PUBLIC_API_BASE` | `http://localhost:3001`     | API public URL            |
 
+### 2.6 External data dependency — live scores
+
+[`LiveEventsService`](./api/src/services/liveEvents.ts) (`GET /live/events`)
+proxies ESPN's public, **unofficial/undocumented** scoreboard JSON across a few
+leagues. The fetch is kept server-side (avoids browser CORS and shields the
+upstream shape behind our own `LiveEvent` contract); per-league failures are
+tolerated so a single upstream blip never breaks the panel.
+
+- **Local / demo:** fine as-is — no key, no setup.
+- **Production:** **do not rely on the ESPN endpoint for an SLA.** It is
+  undocumented, unversioned, rate-limited, and can change or disappear without
+  notice. Before going live, either (a) swap to a licensed provider behind the
+  same service interface (e.g. football-data.org, Sportradar, API-Football —
+  add an API key via the config seam), or (b) add a short-TTL server-side cache
+  - graceful "scores unavailable" fallback. Only this one service file changes.
+
 ---
 
 ## 3. Current local architecture
@@ -300,12 +316,12 @@ high-intent queries ("where to watch the World Cup in {city}"), the frontend
 also serves **server-rendered, ISR-cached** (`revalidate=3600`) landing pages
 generated from the city/team registries + discovery API:
 
-| Route | Targets | JSON-LD |
-| ----- | ------- | ------- |
-| `/watch` | watch-party hub | WebSite, ItemList, FAQ |
-| `/watch/[city]` | "watch the World Cup in {city}" | Breadcrumb, ItemList, FAQ |
-| `/watch/[city]/[team]` | "watch {team} in {city}" | Breadcrumb, ItemList, FAQ |
-| `/venue/[city]/[id]` | venue detail + long-tail | LocalBusiness (geo, rating) |
+| Route                  | Targets                         | JSON-LD                     |
+| ---------------------- | ------------------------------- | --------------------------- |
+| `/watch`               | watch-party hub                 | WebSite, ItemList, FAQ      |
+| `/watch/[city]`        | "watch the World Cup in {city}" | Breadcrumb, ItemList, FAQ   |
+| `/watch/[city]/[team]` | "watch {team} in {city}"        | Breadcrumb, ItemList, FAQ   |
+| `/venue/[city]/[id]`   | venue detail + long-tail        | LocalBusiness (geo, rating) |
 
 Each page renders real content (H1, venue lists, FAQ, breadcrumbs), canonical
 URLs, OpenGraph/Twitter tags, and a dynamic OG image (`next/og`). `sitemap.ts`

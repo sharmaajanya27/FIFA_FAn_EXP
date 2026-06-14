@@ -224,3 +224,30 @@ export const CITIES: CityOption[] = [
 export function cityBySlug(slug: string): CityOption | undefined {
   return CITIES.find((c) => c.slug === slug);
 }
+
+/** Great-circle distance between two points, in kilometers. */
+function distanceKm(
+  a: { lat: number; lon: number },
+  b: { lat: number; lon: number },
+): number {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLon = ((b.lon - a.lon) * Math.PI) / 180;
+  const lat1 = (a.lat * Math.PI) / 180;
+  const lat2 = (b.lat * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/**
+ * The supported city whose center is closest to a point. Used to snap the
+ * dataset to the user's real location when they share geolocation — venues are
+ * stored per-city, so the city must match the search origin to return results.
+ */
+export function nearestCity(point: { lat: number; lon: number }): CityOption {
+  return CITIES.reduce((best, c) =>
+    distanceKm(point, c.center) < distanceKm(point, best.center) ? c : best,
+  );
+}

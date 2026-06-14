@@ -14,10 +14,14 @@ import { ReviewService } from "./services/reviews.js";
 import { AiRecommendationService } from "./services/aiRecommendations.js";
 import { CrowdEstimationService } from "./services/crowdEstimation.js";
 import { EventService } from "./services/events.js";
-import { CompositeVenueOverlay, SponsorshipService } from "./services/sponsorship.js";
+import {
+  CompositeVenueOverlay,
+  SponsorshipService,
+} from "./services/sponsorship.js";
 import { BusinessService } from "./services/business.js";
 import { GeocodeService } from "./services/geocode.js";
 import { AnalyticsService } from "./services/analytics.js";
+import { LiveEventsService } from "./services/liveEvents.js";
 
 export interface Container {
   env: ApiEnv;
@@ -37,6 +41,8 @@ export interface Container {
   /** Zip/neighborhood → point geocoding (PRD §6.1). */
   geocode: GeocodeService;
   analytics: AnalyticsService;
+  /** Live sporting events ticker (ESPN-backed, read-only). */
+  liveEvents: LiveEventsService;
 }
 
 export function buildContainer(
@@ -52,7 +58,11 @@ export function buildContainer(
   // Reviews set the rating-based score; sponsorship then boosts featured venues.
   const venueOverlay = new CompositeVenueOverlay([reviews, sponsorship]);
   // Business listings are merged into discovery alongside Phase 0 venues.
-  const recommendations = new RecommendationService(repo, venueOverlay, business);
+  const recommendations = new RecommendationService(
+    repo,
+    venueOverlay,
+    business,
+  );
 
   return {
     env,
@@ -69,5 +79,6 @@ export function buildContainer(
     business,
     geocode: new GeocodeService(),
     analytics: new AnalyticsService(env.dataDir),
+    liveEvents: new LiveEventsService(),
   };
 }

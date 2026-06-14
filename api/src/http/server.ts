@@ -39,7 +39,11 @@ import { estimateCrowd, getCrowd, reportCrowd } from "../handlers/crowd.js";
 import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
 import { createEvent, listEvents } from "../handlers/events.js";
-import { claimVenue, featureVenue, getListing } from "../handlers/sponsorship.js";
+import {
+  claimVenue,
+  featureVenue,
+  getListing,
+} from "../handlers/sponsorship.js";
 import {
   adminBusinessSummary,
   createListing,
@@ -47,6 +51,7 @@ import {
 } from "../handlers/business.js";
 import { geocode } from "../handlers/geocode.js";
 import { listMetros } from "../handlers/metros.js";
+import { listLiveEvents } from "../handlers/liveEvents.js";
 import { analyticsSummary, recordPageView } from "../handlers/analytics.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
 import { log } from "../util/logger.js";
@@ -86,7 +91,8 @@ function readBody(req: IncomingMessage): Promise<unknown> {
     req.on("data", (c: Buffer) => {
       size += c.length;
       // 12 MB cap (room for a base64 photo upload in dev).
-      if (size > 12 * 1024 * 1024) reject(new ApiError(413, "Payload too large"));
+      if (size > 12 * 1024 * 1024)
+        reject(new ApiError(413, "Payload too large"));
       else chunks.push(c);
     });
     req.on("end", () => {
@@ -159,6 +165,8 @@ function buildRoutes(c: Container): Route[] {
     // Traffic analytics (public beacon + admin summary)
     route("POST", "/analytics/pageview", recordPageView(c)),
     route("GET", "/analytics/summary", analyticsSummary(c)),
+    // Live sporting events ticker (public, ESPN-backed)
+    route("GET", "/live/events", listLiveEvents(c)),
   ];
 }
 
@@ -223,7 +231,8 @@ async function main(): Promise<void> {
       }
       send(404, { error: `No route for ${method} ${url.pathname}` });
     } catch (err) {
-      if (err instanceof ApiError) return send(err.status, { error: err.message });
+      if (err instanceof ApiError)
+        return send(err.status, { error: err.message });
       log.error("server: unhandled error", {
         error: err instanceof Error ? err.message : String(err),
       });

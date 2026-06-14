@@ -16,6 +16,7 @@ import type {
   FanEvent,
   GeocodeResult,
   LeaderboardEntry,
+  LiveEventsResponse,
   NearbyVenuesResponse,
   PageViewPayload,
   Photo,
@@ -27,7 +28,8 @@ import type {
 } from "./types";
 
 const BASE =
-  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ?? "http://localhost:3001";
+  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ??
+  "http://localhost:3001";
 
 const TOKEN_KEY = "fanwatch_token";
 
@@ -44,7 +46,10 @@ export function setToken(token: string | null): void {
 async function request<T>(
   method: string,
   path: string,
-  opts: { params?: Record<string, string | number | undefined>; body?: unknown } = {},
+  opts: {
+    params?: Record<string, string | number | undefined>;
+    body?: unknown;
+  } = {},
 ): Promise<T> {
   const url = new URL(BASE + path);
   for (const [k, v] of Object.entries(opts.params ?? {})) {
@@ -61,14 +66,18 @@ async function request<T>(
   });
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
-    throw new Error((detail as { error?: string }).error ?? `Request failed: ${res.status}`);
+    throw new Error(
+      (detail as { error?: string }).error ?? `Request failed: ${res.status}`,
+    );
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
-const get = <T>(path: string, params?: Record<string, string | number | undefined>) =>
-  request<T>("GET", path, { params });
+const get = <T>(
+  path: string,
+  params?: Record<string, string | number | undefined>,
+) => request<T>("GET", path, { params });
 
 export interface NearbyArgs {
   city: string;
@@ -85,12 +94,26 @@ export const api = {
   cities: () => get<{ cities: string[] }>("/cities"),
   nearbyVenues: (a: NearbyArgs) =>
     get<NearbyVenuesResponse>("/venues/nearby", { ...a }),
-  nearbyEvents: (a: { city: string; lat: number; lon: number; radius: number; team?: string }) =>
-    get<EventsResponse>("/events/nearby", { ...a }),
-  recommendations: (a: { city: string; lat: number; lon: number; team: string; radius: number; limit?: number }) =>
-    get<Recommendation>("/recommendations", { ...a }),
+  nearbyEvents: (a: {
+    city: string;
+    lat: number;
+    lon: number;
+    radius: number;
+    team?: string;
+  }) => get<EventsResponse>("/events/nearby", { ...a }),
+  recommendations: (a: {
+    city: string;
+    lat: number;
+    lon: number;
+    team: string;
+    radius: number;
+    limit?: number;
+  }) => get<Recommendation>("/recommendations", { ...a }),
   matches: (city: string, team?: string) =>
-    get<{ count: number; matches: import("./types").Match[] }>("/matches", { city, team }),
+    get<{ count: number; matches: import("./types").Match[] }>("/matches", {
+      city,
+      team,
+    }),
   /** Resolve a zip code / neighborhood / address to a point (PRD §6.1). */
   geocode: (q: string, city?: string) =>
     get<GeocodeResult>("/geocode", { q, city }),
@@ -104,18 +127,29 @@ export const api = {
     accountType?: AccountType;
     businessName?: string;
   }) => request<AuthResult>("POST", "/auth/register", { body }),
-  login: (email: string) => request<AuthResult>("POST", "/auth/login", { body: { email } }),
+  login: (email: string) =>
+    request<AuthResult>("POST", "/auth/login", { body: { email } }),
   me: () => get<{ user: PublicUser }>("/me"),
-  updateProfile: (body: Partial<Pick<PublicUser, "displayName" | "favoriteTeams" | "homeCity" | "bio">>) =>
-    request<PublicUser>("PUT", "/me/profile", { body }),
+  updateProfile: (
+    body: Partial<
+      Pick<PublicUser, "displayName" | "favoriteTeams" | "homeCity" | "bio">
+    >,
+  ) => request<PublicUser>("PUT", "/me/profile", { body }),
   userCheckIns: (userId: string) =>
     get<{ count: number; checkins: CheckIn[] }>(`/users/${userId}/checkins`),
 
   // ---- reviews ----
   listReviews: (venueId: string) =>
-    get<{ venueId: string; count: number; averageRating: number | null; reviews: Review[] }>(`/venues/${venueId}/reviews`),
+    get<{
+      venueId: string;
+      count: number;
+      averageRating: number | null;
+      reviews: Review[];
+    }>(`/venues/${venueId}/reviews`),
   addReview: (venueId: string, rating: number, comment?: string) =>
-    request<Review>("POST", `/venues/${venueId}/reviews`, { body: { rating, comment } }),
+    request<Review>("POST", `/venues/${venueId}/reviews`, {
+      body: { rating, comment },
+    }),
 
   // ---- check-ins ----
   listCheckIns: (venueId: string) =>
@@ -125,21 +159,33 @@ export const api = {
 
   // ---- predictions ----
   listMatchPredictions: (matchId: string) =>
-    get<{ count: number; predictions: Prediction[] }>(`/matches/${matchId}/predictions`),
+    get<{ count: number; predictions: Prediction[] }>(
+      `/matches/${matchId}/predictions`,
+    ),
   predict: (matchId: string, homeScore: number, awayScore: number) =>
-    request<Prediction>("POST", `/matches/${matchId}/predictions`, { body: { homeScore, awayScore } }),
-  myPredictions: () => get<{ count: number; predictions: Prediction[] }>("/me/predictions"),
-  leaderboard: () => get<{ leaderboard: LeaderboardEntry[] }>("/predictions/leaderboard"),
+    request<Prediction>("POST", `/matches/${matchId}/predictions`, {
+      body: { homeScore, awayScore },
+    }),
+  myPredictions: () =>
+    get<{ count: number; predictions: Prediction[] }>("/me/predictions"),
+  leaderboard: () =>
+    get<{ leaderboard: LeaderboardEntry[] }>("/predictions/leaderboard"),
 
   // ---- communities ----
   feed: (team: string) =>
-    get<{ team: string; count: number; posts: CommunityPost[] }>(`/communities/${team}/posts`),
+    get<{ team: string; count: number; posts: CommunityPost[] }>(
+      `/communities/${team}/posts`,
+    ),
   post: (team: string, text: string) =>
-    request<CommunityPost>("POST", `/communities/${team}/posts`, { body: { text } }),
-  likePost: (postId: string) => request<CommunityPost>("POST", `/posts/${postId}/like`, {}),
+    request<CommunityPost>("POST", `/communities/${team}/posts`, {
+      body: { text },
+    }),
+  likePost: (postId: string) =>
+    request<CommunityPost>("POST", `/posts/${postId}/like`, {}),
 
   // ---- crowd ----
-  crowdStatus: (venueId: string) => get<CrowdStatus>(`/venues/${venueId}/crowd`),
+  crowdStatus: (venueId: string) =>
+    get<CrowdStatus>(`/venues/${venueId}/crowd`),
   reportCrowd: (venueId: string, level: CrowdLevel) =>
     request("POST", `/venues/${venueId}/crowd`, { body: { level } }),
 
@@ -147,31 +193,61 @@ export const api = {
   listPhotos: (venueId: string) =>
     get<{ count: number; photos: Photo[] }>(`/venues/${venueId}/photos`),
   uploadPhoto: (venueId: string, dataUrl: string, caption?: string) =>
-    request<Photo>("POST", `/venues/${venueId}/photos`, { body: { dataUrl, caption } }),
+    request<Photo>("POST", `/venues/${venueId}/photos`, {
+      body: { dataUrl, caption },
+    }),
 
   // ---- Phase 3 ----
-  aiRecommendations: (a: { city: string; lat: number; lon: number; team: string; radius: number; mode?: "smart" | "ai" }) =>
-    get<AiRecommendation>("/ai/recommendations", { ...a }),
+  aiRecommendations: (a: {
+    city: string;
+    lat: number;
+    lon: number;
+    team: string;
+    radius: number;
+    mode?: "smart" | "ai";
+  }) => get<AiRecommendation>("/ai/recommendations", { ...a }),
   crowdEstimate: (venueId: string, city: string) =>
     get<CrowdEstimate>(`/venues/${venueId}/crowd/estimate`, { city }),
   createEvent: (body: {
-    city: string; title: string; lat: number; lon: number; startTime: string;
-    kind?: string; teams?: string[]; estAttendance?: number; matchId?: string;
+    city: string;
+    title: string;
+    lat: number;
+    lon: number;
+    startTime: string;
+    kind?: string;
+    teams?: string[];
+    estAttendance?: number;
+    matchId?: string;
   }) => request<FanEvent>("POST", "/events", { body }),
-  venueListing: (venueId: string) => get<VenueListing>(`/venues/${venueId}/listing`),
+  venueListing: (venueId: string) =>
+    get<VenueListing>(`/venues/${venueId}/listing`),
   claimVenue: (venueId: string, businessName: string) =>
-    request<{ id: string }>("POST", `/venues/${venueId}/claim`, { body: { businessName } }),
+    request<{ id: string }>("POST", `/venues/${venueId}/claim`, {
+      body: { businessName },
+    }),
   featureVenue: (venueId: string, pkg: string, days?: number) =>
-    request<{ id: string }>("POST", `/venues/${venueId}/feature`, { body: { package: pkg, days } }),
+    request<{ id: string }>("POST", `/venues/${venueId}/feature`, {
+      body: { package: pkg, days },
+    }),
 
   // ---- business accounts (PRD §8) ----
   createBusinessListing: (body: {
-    name: string; city: string; lat: number; lon: number;
-    kind?: string; address?: string; website?: string; phone?: string;
-    country?: string; supportsTeams?: string[]; capacity?: number;
+    name: string;
+    city: string;
+    lat: number;
+    lon: number;
+    kind?: string;
+    address?: string;
+    website?: string;
+    phone?: string;
+    country?: string;
+    supportsTeams?: string[];
+    capacity?: number;
   }) => request<BusinessListing>("POST", "/business/listings", { body }),
   myBusinessListings: () =>
-    get<{ count: number; listings: BusinessListing[] }>("/business/listings/mine"),
+    get<{ count: number; listings: BusinessListing[] }>(
+      "/business/listings/mine",
+    ),
   /** Admin-only review of all business listings + events. */
   adminBusiness: () => get<AdminBusinessSummary>("/admin/business"),
 
@@ -182,4 +258,7 @@ export const api = {
   /** Admin-only traffic summary (requires an admin bearer token). */
   analyticsSummary: (range: AnalyticsRange) =>
     get<AnalyticsSummary>("/analytics/summary", { range }),
+
+  // ---- live sporting events (ESPN-backed, public) ----
+  liveEvents: () => get<LiveEventsResponse>("/live/events"),
 };

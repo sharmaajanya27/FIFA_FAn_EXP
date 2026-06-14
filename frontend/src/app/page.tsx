@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { api } from "@/lib/api";
-import { CITIES, cityBySlug } from "@/lib/cities";
+import { CITIES, cityBySlug, nearestCity } from "@/lib/cities";
 import { cityTheme, scatterBalls } from "@/lib/cityThemes";
 import { worldCupStatus, type SeasonStatus } from "@/lib/worldCup";
 import { TEAMS } from "@/lib/teams";
@@ -14,7 +14,7 @@ import { EventsPanel } from "@/components/EventsPanel";
 import { AuthBar } from "@/components/AuthBar";
 import { VenueDetail } from "@/components/VenueDetail";
 import { CreateEventForm } from "@/components/CreateEventForm";
-import { PredictionsPanel } from "@/components/PredictionsPanel";
+import { LiveEventsPanel } from "@/components/LiveEventsPanel";
 import { CommunityPanel } from "@/components/CommunityPanel";
 
 // Leaflet touches window — load the map only on the client.
@@ -41,9 +41,7 @@ export default function Home() {
   const [activeId, setActiveId] = useState<string | undefined>();
   const [view, setView] = useState<"map" | "list">("map");
   const [tab, setTab] = useState<"recs" | "events">("recs");
-  const [nav, setNav] = useState<"discover" | "predictions" | "community">(
-    "discover",
-  );
+  const [nav, setNav] = useState<"discover" | "live" | "community">("discover");
   const [selected, setSelected] = useState<RankedVenue | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -110,9 +108,15 @@ export default function Home() {
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+        // Venues are stored per-city, so snap the dataset to the closest
+        // supported city — otherwise searching a far-away city's venues from
+        // here returns nothing within the radius.
+        const near = nearestCity(here);
+        if (near.slug !== city) setCity(near.slug);
         setOriginMode("custom");
-        setPlaceLabel(undefined);
-        setOrigin({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        setPlaceLabel(`Your location · ${near.name}`);
+        setOrigin(here);
       },
       () => setError("Could not get your location — using city center."),
     );
@@ -259,7 +263,7 @@ export default function Home() {
       </header>
 
       <div className="tabs nav-tabs" style={{ marginBottom: 16 }}>
-        {(["discover", "predictions", "community"] as const).map((n) => (
+        {(["discover", "live", "community"] as const).map((n) => (
           <button
             key={n}
             className={`toggle ${nav === n ? "active" : ""}`}
@@ -267,14 +271,14 @@ export default function Home() {
           >
             {n === "discover"
               ? "Discover"
-              : n === "predictions"
-                ? "Predictions"
+              : n === "live"
+                ? "Live scores"
                 : "Community"}
           </button>
         ))}
       </div>
 
-      {nav === "predictions" && <PredictionsPanel city={city} />}
+      {nav === "live" && <LiveEventsPanel />}
       {nav === "community" && <CommunityPanel />}
       {selected && (
         <VenueDetail
@@ -310,7 +314,10 @@ export default function Home() {
                   placeholder="e.g. 07302 or Downtown"
                   style={{ flex: 1, minWidth: 0 }}
                 />
-                <button onClick={searchPlace} disabled={geoBusy || !placeQuery.trim()}>
+                <button
+                  onClick={searchPlace}
+                  disabled={geoBusy || !placeQuery.trim()}
+                >
                   {geoBusy ? "…" : "Go"}
                 </button>
               </div>
