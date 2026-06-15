@@ -1,0 +1,28 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "kansas-city",
+  "venues": [
+    {
+      "name": "No Other Pub",
+      "geo": { "lat": 39.0997, "lon": -94.5833 },
+      "kind": "bar",
+      "teams": ["USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Power & Light District sports bar with a huge screen; central watch-party venue for tournaments. UNVERIFIED affiliation — confirm.",
+      "url": "https://www.powerandlightdistrict.com/"
+    },
+    {
+      "name": "Char Bar",
+      "geo": { "lat": 39.053, "lon": -94.591 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.65,
+      "verified": false,
+      "note": "Westport bar/restaurant with patio screens; shows big matches.",
+      "url": "https://www.charbarkc.com/"
+    }
+  ]
+}

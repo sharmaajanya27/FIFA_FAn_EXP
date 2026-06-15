@@ -1,29 +1,21 @@
 /**
  * Enrich (pipeline stage 5): attach derived signals across entities.
  *
- *  - Venues: infer supported teams from the venue name (supporter-bar signal).
- *    A real implementation would also pull ratings/images from a places API
- *    and social engagement from a social connector — those fields are wired
- *    (ratingAvg, engagement) and fill in when those sources land.
+ *  - Venues: team affiliation is NOT inferred from the venue name. A cuisine
+ *    keyword (e.g. an Italian restaurant) says nothing about which nation's
+ *    fans gather there, so guessing it produced wrong, low-precision data. Real
+ *    `supportsTeams` comes from the curated supporter overlay (pipeline/supporters.ts)
+ *    and, later, supporters'-club listings / social signals. Ratings and social
+ *    engagement (ratingAvg, engagement) fill in when those sources land.
  *  - Events: resolve a seed `matchId` (source external id) to the canonical
  *    Match id, and inherit team affiliation from the linked match.
  */
-import { matchTeamCode } from "../config/teams.js";
 import type { Event, Match, Venue } from "../models/canonical.js";
 import { log } from "../util/logger.js";
 
 export function enrichVenues(venues: Venue[]): Venue[] {
-  let tagged = 0;
-  for (const v of venues) {
-    if (v.supportsTeams.length === 0) {
-      const code = matchTeamCode(v.name);
-      if (code) {
-        v.supportsTeams = [code];
-        tagged++;
-      }
-    }
-  }
-  log.info("enrich: venue team affiliation", { venues: venues.length, tagged });
+  // Team affiliation is applied by the supporter overlay, not guessed here.
+  log.info("enrich: venues", { venues: venues.length });
   return venues;
 }
 

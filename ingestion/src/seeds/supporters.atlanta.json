@@ -1,0 +1,83 @@
+{
+  "_comment": "Curated supporter-venue ground truth for Atlanta (WC 2026 host). This is the MOAT layer: human-verified 'where do <team> fans actually watch, and does this place really show matches' — the signal Google/OSM do not structure. Maintained by hand from supporters'-club listings, venue sites, and local knowledge; expand per city. `teams` are FIFA codes from config/teams.ts. `showsMatches` is a confidence 0..1. `officialFanZone` promotes the venue kind to fan_zone. Each entry carries a `note` documenting the basis so claims stay auditable.",
+  "city": "atlanta",
+  "venues": [
+    {
+      "name": "Brewhouse Café",
+      "geo": { "lat": 33.7649, "lon": -84.3494 },
+      "kind": "bar",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.95,
+      "verified": true,
+      "note": "Little Five Points institution and long-established English-football supporters' bar (Liverpool FC home pub). Opens early for kickoffs.",
+      "url": "https://brewhousebar.com/"
+    },
+    {
+      "name": "Fadó Irish Pub",
+      "geo": { "lat": 33.8402, "lon": -84.379 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": true,
+      "note": "Buckhead Irish pub; multi-screen soccer destination that opens for international fixtures. Neutral ground — shows all nations.",
+      "url": "https://www.fadoirishpub.com/atlanta/"
+    },
+    {
+      "name": "The Famous Pub & Sports Palace",
+      "geo": { "lat": 33.8129, "lon": -84.3215 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": true,
+      "note": "Toco Hills sports pub and a recognized English-football supporters' venue in Atlanta.",
+      "url": "https://thefamouspub.com/"
+    },
+    {
+      "name": "Meehan's Public House",
+      "geo": { "lat": 33.7533, "lon": -84.3905 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": true,
+      "note": "Downtown Irish public house; reliably shows international matches. Neutral soccer venue.",
+      "url": "https://www.meehanspublichouse.com/"
+    },
+    {
+      "name": "Hudson Grille",
+      "geo": { "lat": 33.7813, "lon": -84.3835 },
+      "kind": "bar",
+      "teams": ["USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.8,
+      "verified": true,
+      "note": "Midtown sports bar with wall-to-wall screens; a default USMNT watch spot during tournaments.",
+      "url": "https://hudsongrille.com/"
+    },
+    {
+      "name": "Park Tavern",
+      "geo": { "lat": 33.7849, "lon": -84.3681 },
+      "kind": "fan_zone",
+      "teams": ["USA"],
+      "officialFanZone": true,
+      "showsMatches": 0.85,
+      "verified": true,
+      "note": "Piedmont Park venue that hosts large outdoor watch parties / fan-zone events for major tournaments.",
+      "url": "https://parktavern.com/"
+    },
+    {
+      "name": "Taqueria del Sol",
+      "geo": { "lat": 33.7796, "lon": -84.4115 },
+      "kind": "restaurant",
+      "teams": ["MEX"],
+      "officialFanZone": false,
+      "showsMatches": 0.6,
+      "verified": false,
+      "note": "Westside Mexican spot in a strong Mexican-American community corridor; plausible El Tri gathering point. UNVERIFIED — confirm with venue before launch.",
+      "url": "https://taqueriadelsol.com/"
+    }
+  ]
+}

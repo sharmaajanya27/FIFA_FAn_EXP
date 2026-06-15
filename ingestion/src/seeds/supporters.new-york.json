@@ -1,0 +1,50 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for the schema and intent. Entries are well-known soccer-watching venues; verified:false means it still needs a local confirmation pass (hours, current affiliation) before launch.",
+  "city": "new-york",
+  "venues": [
+    {
+      "name": "The Football Factory at Legends",
+      "geo": { "lat": 40.7505, "lon": -73.9859 },
+      "kind": "bar",
+      "teams": ["ENG", "USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.97,
+      "verified": false,
+      "note": "Midtown basement bar long known as NYC's home for national-team supporters' clubs; many countries' fan groups meet here for big matches.",
+      "url": "https://www.thefootballfactorynyc.com/"
+    },
+    {
+      "name": "Smithfield Hall",
+      "geo": { "lat": 40.7432, "lon": -73.9889 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Flatiron multi-screen sports bar that opens for soccer kickoffs; neutral ground for most nations.",
+      "url": "https://www.smithfieldnyc.com/"
+    },
+    {
+      "name": "Carragher's Pub & Restaurant",
+      "geo": { "lat": 40.7541, "lon": -73.9932 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Midtown West pub with a Liverpool/English-football following; opens early for Premier League and internationals.",
+      "url": "https://www.carraghers.com/"
+    },
+    {
+      "name": "Banter",
+      "geo": { "lat": 40.7332, "lon": -74.0009 },
+      "kind": "cafe",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Greenwich Village Australian cafe that screens football; daytime kickoff crowd.",
+      "url": "https://www.banternyc.com/"
+    }
+  ]
+}

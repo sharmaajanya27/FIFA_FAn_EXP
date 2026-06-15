@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "dallas",
+  "venues": [
+    {
+      "name": "Trinity Hall Irish Pub",
+      "geo": { "lat": 32.8369, "lon": -96.7706 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Mockingbird Station Irish pub; well-known Dallas soccer-watching venue that opens for internationals.",
+      "url": "https://www.trinityhall.tv/"
+    },
+    {
+      "name": "The Londoner",
+      "geo": { "lat": 32.7969, "lon": -96.8008 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "British pub group with an English-football following; opens early for Premier League and national-team matches.",
+      "url": "https://www.thelondoner.us/"
+    },
+    {
+      "name": "Frankie's Downtown",
+      "geo": { "lat": 32.7846, "lon": -96.8016 },
+      "kind": "bar",
+      "teams": ["USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.75,
+      "verified": false,
+      "note": "Downtown Dallas sports bar with many screens; default USMNT/tournament spot. UNVERIFIED affiliation — confirm.",
+      "url": "https://www.frankiesbar.com/"
+    }
+  ]
+}

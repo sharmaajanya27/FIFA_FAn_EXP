@@ -21,6 +21,7 @@ import { geocode } from "./geocode.js";
 import { mergeById } from "./merge.js";
 import { normalizeEvents, normalizeOsm } from "./normalize.js";
 import { scoreVenues } from "./score.js";
+import { applySupporters } from "./supporters.js";
 import {
   buildQualityReport,
   writeQualityReport,
@@ -65,12 +66,19 @@ export async function runPipeline(
   // 4. Deduplicate & match
   const deduped = dedup(geocoded);
 
-  // 5. Enrich (team affiliation; link events to matches)
+  // 5. Enrich (link events to matches; team affiliation comes from the overlay)
   const enrichedVenues = enrichVenues(deduped);
   const enrichedEvents = enrichEvents(events, matches);
 
+  // 5b. Supporter overlay (the moat layer): apply curated, verified supporter
+  // venues + team affiliations onto the scraped set before scoring.
+  const { venues: overlaidVenues } = await applySupporters(
+    enrichedVenues,
+    city,
+  );
+
   // 6. Score (static venue score)
-  const scoredVenues = scoreVenues(enrichedVenues, scoring);
+  const scoredVenues = scoreVenues(overlaidVenues, scoring);
 
   // 6b. Merge with previously published data (incremental, non-destructive).
   // Fresh records win on id collision; records only present on disk are kept.

@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "philadelphia",
+  "venues": [
+    {
+      "name": "Misconduct Tavern",
+      "geo": { "lat": 39.95, "lon": -75.172 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Rittenhouse/Center City sports bar; opens for internationals with many screens.",
+      "url": "https://www.misconducttavern.com/"
+    },
+    {
+      "name": "Cavanaugh's Rittenhouse",
+      "geo": { "lat": 39.948, "lon": -75.173 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.8,
+      "verified": false,
+      "note": "Center City pub that opens early for soccer; tournament crowd.",
+      "url": "https://www.cavsrittenhouse.com/"
+    },
+    {
+      "name": "The Field House",
+      "geo": { "lat": 39.9558, "lon": -75.16 },
+      "kind": "bar",
+      "teams": ["USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.75,
+      "verified": false,
+      "note": "Sports bar near the Convention Center with a big screen wall; default USMNT spot. UNVERIFIED affiliation — confirm.",
+      "url": "https://www.fieldhousephilly.com/"
+    }
+  ]
+}

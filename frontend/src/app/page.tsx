@@ -7,6 +7,7 @@ import { CITIES, cityBySlug, nearestCity } from "@/lib/cities";
 import { cityTheme, scatterBalls } from "@/lib/cityThemes";
 import { worldCupStatus, type SeasonStatus } from "@/lib/worldCup";
 import { TEAMS } from "@/lib/teams";
+import { FEATURES } from "@/lib/features";
 import type { AiRecommendation, FanEvent, RankedVenue } from "@/lib/types";
 import { VenueList } from "@/components/VenueList";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
@@ -248,7 +249,7 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <AuthBar />
+          {FEATURES.auth && <AuthBar />}
         </div>
         {season?.show && (
           <div className="season-banner" role="note">
@@ -263,23 +264,25 @@ export default function Home() {
       </header>
 
       <div className="tabs nav-tabs" style={{ marginBottom: 16 }}>
-        {(["discover", "live", "community"] as const).map((n) => (
-          <button
-            key={n}
-            className={`toggle ${nav === n ? "active" : ""}`}
-            onClick={() => setNav(n)}
-          >
-            {n === "discover"
-              ? "Discover"
-              : n === "live"
-                ? "Live scores"
-                : "Community"}
-          </button>
-        ))}
+        {(["discover", "live", "community"] as const)
+          .filter((n) => n !== "community" || FEATURES.community)
+          .map((n) => (
+            <button
+              key={n}
+              className={`toggle ${nav === n ? "active" : ""}`}
+              onClick={() => setNav(n)}
+            >
+              {n === "discover"
+                ? "Discover"
+                : n === "live"
+                  ? "Live scores"
+                  : "Community"}
+            </button>
+          ))}
       </div>
 
       {nav === "live" && <LiveEventsPanel />}
-      {nav === "community" && <CommunityPanel />}
+      {FEATURES.community && nav === "community" && <CommunityPanel />}
       {selected && (
         <VenueDetail
           venue={selected}
@@ -459,11 +462,13 @@ export default function Home() {
                 />
               ) : (
                 <>
-                  <CreateEventForm
-                    city={city}
-                    origin={origin}
-                    onCreated={load}
-                  />
+                  {FEATURES.business && (
+                    <CreateEventForm
+                      city={city}
+                      origin={origin}
+                      onCreated={load}
+                    />
+                  )}
                   <EventsPanel events={events} />
                 </>
               )}

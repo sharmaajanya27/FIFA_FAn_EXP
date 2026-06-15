@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "vancouver",
+  "venues": [
+    {
+      "name": "The Pint Public House",
+      "geo": { "lat": 49.282, "lon": -123.109 },
+      "kind": "pub",
+      "teams": ["CAN"],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Gastown sports pub; a central Vancouver soccer-watching venue that opens early for big matches.",
+      "url": "https://www.thepint.ca/"
+    },
+    {
+      "name": "Doolin's Irish Pub",
+      "geo": { "lat": 49.281, "lon": -123.1228 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Downtown Irish pub; multi-screen internationals and Premier League.",
+      "url": "https://www.doolins.ca/"
+    },
+    {
+      "name": "Library Square Public House",
+      "geo": { "lat": 49.28, "lon": -123.117 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.75,
+      "verified": false,
+      "note": "Downtown pub near the library; shows big matches, convenient for the host city centre.",
+      "url": "https://www.donnellygroup.ca/library-square/"
+    }
+  ]
+}

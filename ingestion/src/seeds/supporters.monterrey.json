@@ -1,0 +1,28 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch. Monterrey starter entries should be prioritized for local verification.",
+  "city": "monterrey",
+  "venues": [
+    {
+      "name": "McCarthy's Irish Pub Monterrey",
+      "geo": { "lat": 25.6515, "lon": -100.3686 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.65,
+      "verified": false,
+      "note": "Irish-pub concept in a strong fútbol city; plausible match-viewing venue. UNVERIFIED — confirm before launch.",
+      "url": ""
+    },
+    {
+      "name": "Wings Army Monterrey",
+      "geo": { "lat": 25.6678, "lon": -100.31 },
+      "kind": "restaurant",
+      "teams": ["MEX"],
+      "officialFanZone": false,
+      "showsMatches": 0.6,
+      "verified": false,
+      "note": "Sports-bar/wings chain that shows matches. UNVERIFIED location/affiliation — confirm before launch.",
+      "url": ""
+    }
+  ]
+}

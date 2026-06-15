@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "houston",
+  "venues": [
+    {
+      "name": "Lucky's Pub",
+      "geo": { "lat": 29.748, "lon": -95.356 },
+      "kind": "bar",
+      "teams": ["USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "EaDo/downtown Houston sports bar with a large screen wall; a default USMNT and tournament watch spot. UNVERIFIED affiliation — confirm.",
+      "url": "https://www.luckyspub.com/"
+    },
+    {
+      "name": "The Phoenix on Westheimer",
+      "geo": { "lat": 29.7434, "lon": -95.4403 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Montrose British pub; opens early for European fixtures, strong soccer following.",
+      "url": "https://www.thephoenixhouston.com/"
+    },
+    {
+      "name": "Little Woodrow's Midtown",
+      "geo": { "lat": 29.743, "lon": -95.39 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Midtown icehouse/sports bar; shows big matches on the patio screens.",
+      "url": "https://littlewoodrows.com/"
+    }
+  ]
+}

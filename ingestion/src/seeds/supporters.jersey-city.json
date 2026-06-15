@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "jersey-city",
+  "venues": [
+    {
+      "name": "Zeppelin Hall Beer Garden",
+      "geo": { "lat": 40.7158, "lon": -74.0378 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.8,
+      "verified": false,
+      "note": "Large Jersey City beer hall with many screens; communal big-match viewing near the MetLife host metro.",
+      "url": "https://www.zeppelinhall.com/"
+    },
+    {
+      "name": "O'Hara's Downtown",
+      "geo": { "lat": 40.7185, "lon": -74.0415 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Downtown JC pub that opens for soccer; convenient to the PATH for fans heading to MetLife.",
+      "url": "https://oharasrestaurantandpub.com/"
+    },
+    {
+      "name": "Lucky 7 Tavern",
+      "geo": { "lat": 40.7216, "lon": -74.0466 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.6,
+      "verified": false,
+      "note": "Neighborhood Jersey City tavern; shows matches on demand.",
+      "url": "https://www.lucky7tavern.com/"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "los-angeles",
+  "venues": [
+    {
+      "name": "Tom Bergin's",
+      "geo": { "lat": 34.0625, "lon": -118.353 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Historic Fairfax Irish pub; long-standing soccer-watching crowd for internationals.",
+      "url": "https://www.tombergins.com/"
+    },
+    {
+      "name": "The Greyhound Bar & Grill",
+      "geo": { "lat": 34.1118, "lon": -118.1925 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.75,
+      "verified": false,
+      "note": "Highland Park bar that opens for big matches; neighborhood soccer following.",
+      "url": "https://www.thegreyhoundbar.com/"
+    },
+    {
+      "name": "The Parlor Hollywood",
+      "geo": { "lat": 34.0905, "lon": -118.3617 },
+      "kind": "bar",
+      "teams": ["USA"],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Hosts large national-team and tournament watch parties; UNVERIFIED affiliation, confirm before launch.",
+      "url": "https://www.theparlorhollywood.com/"
+    }
+  ]
+}

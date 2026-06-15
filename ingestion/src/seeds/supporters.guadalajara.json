@@ -1,0 +1,28 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch. Guadalajara is Chivas country; these are starter entries that should be prioritized for local verification.",
+  "city": "guadalajara",
+  "venues": [
+    {
+      "name": "La Chata de Guadalajara",
+      "geo": { "lat": 20.6736, "lon": -103.3445 },
+      "kind": "restaurant",
+      "teams": ["MEX"],
+      "officialFanZone": false,
+      "showsMatches": 0.6,
+      "verified": false,
+      "note": "Centro restaurant in a passionate fútbol city; plausible El Tri match-day spot. UNVERIFIED — confirm screens/hours before launch.",
+      "url": ""
+    },
+    {
+      "name": "Hooligans Sports Bar",
+      "geo": { "lat": 20.6755, "lon": -103.39 },
+      "kind": "bar",
+      "teams": ["MEX"],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Sports bar concept catering to match viewing. UNVERIFIED existence/affiliation — confirm before launch.",
+      "url": ""
+    }
+  ]
+}

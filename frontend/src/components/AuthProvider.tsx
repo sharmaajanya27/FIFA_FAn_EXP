@@ -1,7 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { api, setToken } from "@/lib/api";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { api, getToken, setToken } from "@/lib/api";
 import type { PublicUser } from "@/lib/types";
 
 interface RegisterOptions {
@@ -30,6 +36,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
+    // No stored token → not signed in; skip the (otherwise 401) /me call.
+    if (!getToken()) {
+      setUser(null);
+      return;
+    }
     try {
       const { user } = await api.me();
       setUser(user);
@@ -75,7 +86,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, logout, refresh }}>
+    <AuthContext.Provider
+      value={{ user, loading, register, login, logout, refresh }}
+    >
       {children}
     </AuthContext.Provider>
   );

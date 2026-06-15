@@ -1,0 +1,50 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "san-francisco",
+  "venues": [
+    {
+      "name": "Mad Dog in the Fog",
+      "geo": { "lat": 37.7716, "lon": -122.4309 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.97,
+      "verified": false,
+      "note": "Lower Haight British pub that is a legendary SF soccer institution; opens early for English and international fixtures.",
+      "url": "https://www.maddoginthefog.com/"
+    },
+    {
+      "name": "Kezar Pub",
+      "geo": { "lat": 37.7672, "lon": -122.4533 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Haight-Ashbury pub by Kezar Stadium; long-standing soccer-watching crowd.",
+      "url": "https://www.kezarpub.com/"
+    },
+    {
+      "name": "Danny Coyle's",
+      "geo": { "lat": 37.7712, "lon": -122.4463 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Haight Street Irish pub that opens for early kickoffs.",
+      "url": "https://www.dannycoyles.com/"
+    },
+    {
+      "name": "The Chieftain Irish Pub",
+      "geo": { "lat": 37.782, "lon": -122.4041 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.8,
+      "verified": false,
+      "note": "SoMa Irish pub; shows Premier League and internationals, central for downtown fans.",
+      "url": "https://www.thechieftain.com/"
+    }
+  ]
+}

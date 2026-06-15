@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "toronto",
+  "venues": [
+    {
+      "name": "The Football Factory",
+      "geo": { "lat": 43.6441, "lon": -79.4002 },
+      "kind": "bar",
+      "teams": ["ENG", "CAN"],
+      "officialFanZone": false,
+      "showsMatches": 0.95,
+      "verified": false,
+      "note": "King West soccer bar dedicated to football; supporters' groups for many nations meet here for internationals.",
+      "url": "https://www.thefootballfactory.ca/"
+    },
+    {
+      "name": "Scallywags",
+      "geo": { "lat": 43.7063, "lon": -79.398 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Yonge & Eglinton soccer pub; opens at dawn for European fixtures.",
+      "url": "https://www.scallywags.ca/"
+    },
+    {
+      "name": "The Queen & Beaver Public House",
+      "geo": { "lat": 43.6591, "lon": -79.3833 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Downtown English public house; passionate Three Lions following on match days.",
+      "url": "https://www.queenandbeaverpub.ca/"
+    }
+  ]
+}

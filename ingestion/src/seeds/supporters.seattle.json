@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "seattle",
+  "venues": [
+    {
+      "name": "The George & Dragon Pub",
+      "geo": { "lat": 47.6512, "lon": -122.3502 },
+      "kind": "pub",
+      "teams": ["ENG"],
+      "officialFanZone": false,
+      "showsMatches": 0.97,
+      "verified": false,
+      "note": "Fremont English pub and a legendary Seattle soccer venue; opens at dawn for European fixtures, packed for England and World Cup matches.",
+      "url": "https://www.georgeanddragonpub.com/"
+    },
+    {
+      "name": "The Atlantic Crossing",
+      "geo": { "lat": 47.6762, "lon": -122.3174 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Roosevelt-area pub with a strong early-morning soccer following.",
+      "url": "https://www.atlanticcrossingpub.com/"
+    },
+    {
+      "name": "Fadó Irish Pub",
+      "geo": { "lat": 47.6012, "lon": -122.3336 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.85,
+      "verified": false,
+      "note": "Pioneer Square Irish pub; multi-screen internationals and Premier League, near the stadium district.",
+      "url": "https://www.fadoirishpub.com/seattle/"
+    }
+  ]
+}

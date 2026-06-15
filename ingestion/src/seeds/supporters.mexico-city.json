@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch. Mexico host-city seeds are lighter and should be prioritized for local verification.",
+  "city": "mexico-city",
+  "venues": [
+    {
+      "name": "Salón Corona",
+      "geo": { "lat": 19.435, "lon": -99.138 },
+      "kind": "restaurant",
+      "teams": ["MEX"],
+      "officialFanZone": false,
+      "showsMatches": 0.8,
+      "verified": false,
+      "note": "Historic Centro Histórico cantina; classic El Tri match-day gathering spot. UNVERIFIED — confirm screens/hours.",
+      "url": "https://www.saloncorona.com.mx/"
+    },
+    {
+      "name": "Pinche Gringo BBQ",
+      "geo": { "lat": 19.3953, "lon": -99.1543 },
+      "kind": "restaurant",
+      "teams": ["USA", "MEX"],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Narvarte venue known to host large screened watch parties for major tournaments. UNVERIFIED affiliation — confirm.",
+      "url": "https://www.pinchegringobbq.com/"
+    },
+    {
+      "name": "Pata Negra Condesa",
+      "geo": { "lat": 19.411, "lon": -99.17 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.6,
+      "verified": false,
+      "note": "Condesa bar that screens football; neighborhood match crowd.",
+      "url": "https://www.patanegra.com.mx/"
+    }
+  ]
+}

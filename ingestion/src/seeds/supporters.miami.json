@@ -1,0 +1,39 @@
+{
+  "_comment": "Curated supporter-venue ground truth — see supporters.atlanta.json for schema. verified:false = needs a local confirmation pass before launch.",
+  "city": "miami",
+  "venues": [
+    {
+      "name": "Fadó Irish Pub",
+      "geo": { "lat": 25.766, "lon": -80.1936 },
+      "kind": "pub",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.9,
+      "verified": false,
+      "note": "Brickell/Mary Brickell Village Irish pub; multi-screen internationals and a popular tournament watch spot.",
+      "url": "https://www.fadoirishpub.com/miami/"
+    },
+    {
+      "name": "American Social Brickell",
+      "geo": { "lat": 25.7625, "lon": -80.192 },
+      "kind": "bar",
+      "teams": [],
+      "officialFanZone": false,
+      "showsMatches": 0.8,
+      "verified": false,
+      "note": "Riverside Brickell sports bar with big screens; busy for major matches.",
+      "url": "https://americansocialbar.com/brickell/"
+    },
+    {
+      "name": "Batch Gastropub",
+      "geo": { "lat": 25.767, "lon": -80.193 },
+      "kind": "bar",
+      "teams": ["ARG"],
+      "officialFanZone": false,
+      "showsMatches": 0.7,
+      "verified": false,
+      "note": "Brickell gastropub; in a metro with a huge South-American fan base, a plausible Argentina gathering point. UNVERIFIED affiliation — confirm.",
+      "url": "https://www.batchmiami.com/"
+    }
+  ]
+}
