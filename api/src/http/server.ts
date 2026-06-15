@@ -9,7 +9,7 @@ import { loadApiEnv } from "../config/env.js";
 import { buildContainer, type Container } from "../container.js";
 import { FileRepository, type Repository } from "../data/repository.js";
 import { PgRepository } from "../data/pgRepository.js";
-import { getSql } from "../data/db.js";
+import { closeSql, getSql } from "../data/db.js";
 import { JsonStore, type Store } from "../store/jsonStore.js";
 import { PgStore } from "../store/pgStore.js";
 import {
@@ -196,18 +196,27 @@ async function main(): Promise<void> {
   const c = buildContainer(env, repo, store);
   const routes = buildRoutes(c);
 
+  // CORS: in production restrict to configured origins; in dev allow all.
+  const corsOrigin = (reqOrigin: string | undefined): string => {
+    if (env.allowedOrigins.length === 0) return "*";
+    if (reqOrigin && env.allowedOrigins.includes(reqOrigin)) return reqOrigin;
+    return env.allowedOrigins[0]!;
+  };
+
   const server = createServer(async (req, res) => {
     const method = req.method ?? "GET";
     const url = new URL(req.url ?? "/", "http://localhost");
     const segments = url.pathname.split("/").filter(Boolean);
     const query = Object.fromEntries(url.searchParams.entries());
+    const origin = req.headers.origin;
 
     const send = (status: number, body: unknown) => {
       res.writeHead(status, {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": corsOrigin(origin),
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
+        "X-Content-Type-Options": "nosniff",
       });
       res.end(body === undefined ? "" : JSON.stringify(body));
     };
@@ -241,8 +250,18 @@ async function main(): Promise<void> {
   });
 
   server.listen(env.port, () => {
-    log.info("api: listening", { port: env.port, dataDir: env.dataDir });
+    log.info("api: listening", { port: env.port, env: env.isProduction ? "production" : "development" });
   });
+
+  // Graceful shutdown (PM2 sends SIGINT on restart).
+  const shutdown = async () => {
+    log.info("api: shutting down...");
+    server.close();
+    await closeSql();
+    process.exit(0);
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
 main().catch((err) => {

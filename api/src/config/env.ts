@@ -18,6 +18,10 @@ export interface ApiEnv {
   adminEmails: string[];
   /** Postgres/Supabase connection string. Set → DB-backed; unset → local files. */
   databaseUrl?: string;
+  /** Comma-separated allowed origins for CORS. "*" or unset = allow all (dev). */
+  allowedOrigins: string[];
+  /** true when NODE_ENV=production. */
+  isProduction: boolean;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -35,5 +39,10 @@ export function loadApiEnv(): ApiEnv {
       .map((e) => e.trim().toLowerCase())
       .filter(Boolean),
     databaseUrl: process.env.DATABASE_URL || undefined,
+    allowedOrigins: (process.env.ALLOWED_ORIGINS ?? "")
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean),
+    isProduction: process.env.NODE_ENV === "production",
   };
 }
