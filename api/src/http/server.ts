@@ -228,13 +228,20 @@ async function main(): Promise<void> {
     if (method === "OPTIONS") return send(204, undefined);
 
     // Request-level auth: verify the Supabase anonymous JWT.
-    // Skip for /health (load-balancer probes). When the JWKS is configured,
-    // requests without a valid token are rejected.
+    // Skip for /health (load-balancer probes).
+    // Skip when a valid server-to-server secret is provided (SSG/SSR builds).
+    // When the JWKS is configured, requests without valid auth are rejected.
     if (isJwtVerificationEnabled() && segments[0] !== "health") {
-      const supaToken = (req.headers["x-supabase-auth"] as string) ?? undefined;
-      const jwtPayload = await verifySupabaseJwt(supaToken);
-      if (!jwtPayload) {
-        return send(401, { error: "Invalid or missing request token" });
+      const serverAuth = req.headers["x-server-auth"] as string | undefined;
+      const serverSecret = process.env.SERVER_AUTH_SECRET;
+      const isServerCall = serverSecret && serverAuth === serverSecret;
+
+      if (!isServerCall) {
+        const supaToken = (req.headers["x-supabase-auth"] as string) ?? undefined;
+        const jwtPayload = await verifySupabaseJwt(supaToken);
+        if (!jwtPayload) {
+          return send(401, { error: "Invalid or missing request token" });
+        }
       }
     }
 

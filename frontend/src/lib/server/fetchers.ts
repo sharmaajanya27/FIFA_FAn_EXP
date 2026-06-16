@@ -11,7 +11,9 @@
 import { cityBySlug } from "../cities";
 import type { Match, RankedVenue, ReviewsResponse, VenueDetail } from "../types";
 
-const BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001").replace(
+// Server-only: always use BACKEND_URL (full http:// URL). Exposed via
+// next.config.mjs `env` field to ensure it's available during build.
+const BASE = (process.env.BACKEND_URL || "http://localhost:3001").replace(
   /\/+$/,
   "",
 );
@@ -30,6 +32,12 @@ async function apiGet<T>(
   try {
     const res = await fetch(url.toString(), {
       next: { revalidate: REVALIDATE_SECONDS },
+      headers: {
+        // Server-side calls bypass the browser Supabase session. The backend
+        // skips JWT verification when SUPABASE_URL is unset; in production we
+        // send a service-level bypass header so the JWT gate lets SSG through.
+        "X-Server-Auth": process.env.SERVER_AUTH_SECRET || "",
+      },
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
