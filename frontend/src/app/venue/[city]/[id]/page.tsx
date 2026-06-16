@@ -6,6 +6,7 @@ import { teamByCode } from "@/lib/teams";
 import { getCityVenues, getVenueWithReviews } from "@/lib/server/fetchers";
 import type { VenueDetail } from "@/lib/types";
 import { breadcrumbLd, buildMetadata, paths, venueLd } from "@/lib/seo";
+import { isSafeUrl } from "@/lib/security";
 import { SeoShell } from "@/components/seo/SeoShell";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
@@ -126,10 +127,10 @@ export default async function VenuePage({
               <strong>Phone:</strong> {venue.phone}
             </p>
           )}
-          {venue.website && (
+          {venue.website && isSafeUrl(venue.website) && (
             <p>
               <strong>Website:</strong>{" "}
-              <a href={venue.website} rel="nofollow noopener" target="_blank">
+              <a href={venue.website} rel="nofollow noopener noreferrer" target="_blank">
                 {venue.website}
               </a>
             </p>

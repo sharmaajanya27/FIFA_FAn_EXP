@@ -14,7 +14,7 @@ title: FanWatch AI Agent Guide
 
 | Property | Value |
 |----------|-------|
-| **Tech Stack** | TypeScript (Node.js 20+), Next.js 14, Postgres/Supabase |
+| **Tech Stack** | TypeScript (Node.js 20+), Next.js 16, React 19, Postgres/Supabase |
 | **Module Format** | ESM (`import` / `export`) across all packages |
 | **TypeScript** | Strict mode enabled; `noUncheckedIndexedAccess: true` |
 | **Packages** | 3 monorepo packages: `ingestion/`, `api/`, `frontend/` |
@@ -76,10 +76,12 @@ title: FanWatch AI Agent Guide
 - `DATABASE_URL` set → `PgRepository` (queries Postgres) + `PgStore` (upserts to Postgres)
 - Services depend on interfaces, never concrete backends → **storage is fully swappable**
 
-**Auth (Development):**
-- Token format: `fmtok_<userId>` (hardcoded prefix)
-- `AuthService.resolveUser()` parses token, looks up user
-- Production: swap `AuthService` for JWT verification; handlers unchanged
+**Auth:**
+- **Request-level:** Supabase Anonymous Auth. Every browser visitor gets a
+  signed ES256 JWT (no login). Frontend sends as `X-Supabase-Auth` header.
+  Backend verifies via JWKS (`jose` library). `SUPABASE_URL` unset → disabled.
+- **User-level (dev stub):** `fmtok_<userId>` token for engagement writes.
+  `AuthService.resolveUser()` parses token, looks up user.
 
 **Handler Pattern:**
 ```ts
@@ -101,7 +103,7 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 | Item | Details |
 |------|---------|
 | **Entry** | `src/app/page.tsx` (Next.js App Router) |
-| **Runtime** | Next.js 14 (React 18) with Leaflet for maps |
+| **Runtime** | Next.js 16 (React 19) with Leaflet for maps |
 | **Dev command** | `cd frontend && npm run dev` |
 | **Build command** | `cd frontend && npm run build` |
 | **Start command** | `cd frontend && npm start` |
@@ -159,7 +161,7 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 | Add frontend page | Create `.tsx` in `api/src/app/`, add client components in `src/components/` |
 | Transform ingestion data | Add/modify stage in `ingestion/src/pipeline/`, update `canonical.ts` Zod schema if needed |
 | Add configuration | Add to `src/config/env.ts` with sensible defaults; load from `process.env` |
-| Auth-gate an endpoint | Use `requireUser()` or `requireAdmin()` helper in handler |
+| Auth-gate an endpoint | Use `requireUser()` or `requireAdmin()` helper in handler. Request-level auth (Supabase JWT) is automatic for all routes except `/health` |
 | Swap storage backends | Implement `Repository` or `Store` interface; services unchanged |
 
 ---
@@ -298,6 +300,9 @@ cd ../ingestion && npm install
 
 # Optional: Set DATABASE_URL to use Postgres
 export DATABASE_URL=postgres://...
+
+# Optional: Set SUPABASE_URL to enable request-level JWT verification
+export SUPABASE_URL=https://<ref>.supabase.co
 ```
 
 **Development:**
@@ -323,7 +328,8 @@ cd frontend && npm run dev
 
 - **API errors:** Check `ApiError` in handlers; they follow the pattern `{ status, message }`
 - **Storage backend:** `FileRepository` is used if `DATABASE_URL` is unset; `PgRepository` if set
-- **Auth token:** Must start with `fmtok_<userId>` (e.g., `fmtok_user-123`)
+- **Request auth:** All API requests (except `/health`) need `X-Supabase-Auth` header with a valid Supabase JWT. If `SUPABASE_URL` is unset, verification is disabled.
+- **User auth token:** Engagement writes use `fmtok_<userId>` (e.g., `fmtok_user-123`) as `Authorization: Bearer` header
 - **Admin access:** User email must be in `process.env.ADMIN_EMAILS` (comma-separated, lowercased)
 - **Config defaults:** Check `src/config/env.ts` for all available environment variables and their defaults
 - **Type errors:** Use `npm run typecheck` in any package to catch TypeScript issues early
@@ -332,7 +338,7 @@ cd frontend && npm run dev
 
 ## Project Conventions Summary
 
-1. **One interface, multiple implementations** — Repository, Store, AuthService all follow this pattern
+1. **One interface, multiple implementations** — Repository, Store all follow this pattern
 2. **Handlers are curried** — receive Container once, then handle requests
 3. **No tests yet** — patterns are present (Zod schemas in ingestion, manual validation in API) if you add them
 4. **ESM throughout** — use `import` / `export`, not `require`

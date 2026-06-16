@@ -4,9 +4,9 @@ The fan-facing web app: location-based discovery, interactive map + list,
 team filtering, venue rankings, and recommendations (PRD §6). Consumes the
 Phase 1 discovery API.
 
-**Stack:** Next.js 14 (App Router) + React 18 + TypeScript. Map via
+**Stack:** Next.js 16 (App Router) + React 19 + TypeScript. Map via
 **Leaflet + OpenStreetMap tiles** (free, no API key). Directions via Google
-Maps URL (no SDK/key).
+Maps URL (no SDK/key). Request auth via **Supabase Anonymous Auth** (JWKS).
 
 ## Features (PRD §6)
 
@@ -19,12 +19,14 @@ Maps URL (no SDK/key).
 
 ## Phase 2 — engagement (PRD §7)
 
-- **Accounts** — inline sign up / log in (dev-stub auth), favorite team on signup
-- **Venue detail drawer** — reviews (feed the ranking), check-ins, live crowd reporting, fan-photo upload
+- **Venue detail drawer** — reviews, check-ins, live crowd reporting, fan-photo upload
 - **Predictions** — predict fixture scorelines + leaderboard
 - **Team communities** — per-team feed with posts and likes
 
-All engagement writes require login; the bearer token is kept in `localStorage`.
+Engagement writes use a dev-stub bearer token (`fmtok_<userId>`). Request-level
+auth (proving the request comes from this app) is handled by Supabase Anonymous
+Auth — every visitor automatically gets a signed JWT without login, attached as
+`X-Supabase-Auth` on every API call.
 
 ## SEO landing pages (programmatic, server-rendered)
 

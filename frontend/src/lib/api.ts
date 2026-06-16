@@ -1,11 +1,9 @@
 /** Typed client for the FanWatch discovery + engagement API. */
 import type {
-  AccountType,
   AdminBusinessSummary,
   AiRecommendation,
   AnalyticsRange,
   AnalyticsSummary,
-  AuthResult,
   BusinessListing,
   CheckIn,
   CommunityPost,
@@ -21,27 +19,15 @@ import type {
   PageViewPayload,
   Photo,
   Prediction,
-  PublicUser,
   Recommendation,
   Review,
   VenueListing,
 } from "./types";
+import { getSupabaseToken } from "./supabase";
 
 const BASE =
   process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ??
   "http://localhost:3001";
-
-const TOKEN_KEY = "fanwatch_token";
-
-export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(TOKEN_KEY);
-}
-export function setToken(token: string | null): void {
-  if (typeof window === "undefined") return;
-  if (token) window.localStorage.setItem(TOKEN_KEY, token);
-  else window.localStorage.removeItem(TOKEN_KEY);
-}
 
 async function request<T>(
   method: string,
@@ -55,12 +41,13 @@ async function request<T>(
   for (const [k, v] of Object.entries(opts.params ?? {})) {
     if (v !== undefined && v !== "") url.searchParams.set(k, String(v));
   }
-  const token = getToken();
+  // Supabase anonymous JWT — proves the request comes from our app.
+  const anonToken = await getSupabaseToken();
   const res = await fetch(url.toString(), {
     method,
     headers: {
       ...(opts.body ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: "Bearer " + token } : {}),
+      ...(anonToken ? { "X-Supabase-Auth": anonToken } : {}),
     },
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
@@ -117,26 +104,6 @@ export const api = {
   /** Resolve a zip code / neighborhood / address to a point (PRD §6.1). */
   geocode: (q: string, city?: string) =>
     get<GeocodeResult>("/geocode", { q, city }),
-
-  // ---- auth + profile ----
-  register: (body: {
-    email: string;
-    displayName: string;
-    favoriteTeams?: string[];
-    homeCity?: string;
-    accountType?: AccountType;
-    businessName?: string;
-  }) => request<AuthResult>("POST", "/auth/register", { body }),
-  login: (email: string) =>
-    request<AuthResult>("POST", "/auth/login", { body: { email } }),
-  me: () => get<{ user: PublicUser }>("/me"),
-  updateProfile: (
-    body: Partial<
-      Pick<PublicUser, "displayName" | "favoriteTeams" | "homeCity" | "bio">
-    >,
-  ) => request<PublicUser>("PUT", "/me/profile", { body }),
-  userCheckIns: (userId: string) =>
-    get<{ count: number; checkins: CheckIn[] }>(`/users/${userId}/checkins`),
 
   // ---- reviews ----
   listReviews: (venueId: string) =>

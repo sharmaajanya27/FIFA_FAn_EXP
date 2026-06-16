@@ -22,7 +22,7 @@ const RANGES: { key: AnalyticsRange; label: string }[] = [
 type LoadState = "idle" | "loading" | "ready" | "denied" | "error";
 
 export default function AdminPage() {
-  const { user, loading: authLoading, login, logout } = useAuth();
+  const { loading: authLoading } = useAuth();
   const [range, setRange] = useState<AnalyticsRange>("7d");
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
   const [state, setState] = useState<LoadState>("idle");
@@ -43,72 +43,20 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) {
-      setState("idle");
-      return;
-    }
+    // User login is disabled in v1 — attempt to fetch anyway (the API will
+    // return 401/403 if the request lacks admin credentials).
     void fetchSummary(range);
-  }, [authLoading, user, range, fetchSummary]);
-
-  // --- login gate ---
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [loginErr, setLoginErr] = useState<string>();
-  const submitLogin = async () => {
-    setBusy(true);
-    setLoginErr(undefined);
-    try {
-      await login(email.trim());
-    } catch (e) {
-      setLoginErr(e instanceof Error ? e.message : "Login failed");
-    } finally {
-      setBusy(false);
-    }
-  };
+  }, [authLoading, range, fetchSummary]);
 
   if (authLoading) {
     return <div className={styles.empty} style={{ textAlign: "center", marginTop: "4rem" }}>Loading…</div>;
   }
 
-  if (!user) {
+  if (state === "denied" || state === "idle") {
     return (
       <div className={styles.gate}>
         <h1>FanWatch Admin</h1>
-        <p>Sign in with an admin account to view site traffic.</p>
-        <div className={styles.field}>
-          <label htmlFor="admin-email">Email</label>
-          <input
-            id="admin-email"
-            type="email"
-            value={email}
-            placeholder="you@example.com"
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && email && submitLogin()}
-          />
-        </div>
-        <button className={styles.btn} disabled={!email || busy} onClick={submitLogin}>
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-        {loginErr && <div className={styles.error}>{loginErr}</div>}
-        <p style={{ marginTop: "1rem", fontSize: "0.8rem" }}>
-          No account yet? Create one in the main app, then add your email to
-          ADMIN_EMAILS.
-        </p>
-      </div>
-    );
-  }
-
-  if (state === "denied") {
-    return (
-      <div className={styles.gate}>
-        <h1>Not authorized</h1>
-        <p>
-          {user.displayName}, your account isn&apos;t on the admin allowlist. Ask
-          an admin to add your email to ADMIN_EMAILS on the API.
-        </p>
-        <button className={styles.btn} onClick={logout}>
-          Log out
-        </button>
+        <p>Admin access is not available in this version.</p>
       </div>
     );
   }
@@ -124,7 +72,7 @@ export default function AdminPage() {
         <div>
           <h1 className={styles.title}>Traffic</h1>
           <div className={styles.sub}>
-            Signed in as {user.displayName}
+            FanWatch Admin
             {summary
               ? ` · updated ${new Date(summary.generatedAt).toLocaleTimeString()}`
               : ""}

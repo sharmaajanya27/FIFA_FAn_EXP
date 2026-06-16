@@ -80,8 +80,16 @@ yet.
 ### Phase 2 — engagement (user-generated, write APIs)
 
 Writes go through a pluggable JSON store (`src/store`, swap for Postgres/
-DynamoDB) and require a bearer token from register/login (dev-stub auth in
-`src/auth`). Reviews overlay onto venue ratings, so they feed the §6.5 ranking.
+DynamoDB). Reviews overlay onto venue ratings, so they feed the §6.5 ranking.
+
+**Request-level auth:** All requests (except `/health`) must carry a valid
+`X-Supabase-Auth` JWT header — an anonymous session token issued by Supabase
+Auth (ES256, verified via JWKS). Set `SUPABASE_URL` in `.env` to enable.
+
+**User-level auth (dev stub):** Engagement writes use a `Bearer fmtok_<userId>`
+token via `Authorization` header. This identifies which user is posting a review
+or checking in. Will be replaced by Supabase Auth user sessions when user
+accounts launch.
 
 | Method   | Path                                                    | Auth    | Purpose                    |
 | -------- | ------------------------------------------------------- | ------- | -------------------------- |

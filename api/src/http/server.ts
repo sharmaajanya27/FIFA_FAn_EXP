@@ -54,6 +54,7 @@ import { listMetros } from "../handlers/metros.js";
 import { listLiveEvents } from "../handlers/liveEvents.js";
 import { analyticsSummary, recordPageView } from "../handlers/analytics.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
+import { initJwtVerification, isJwtVerificationEnabled, verifySupabaseJwt } from "../auth/jwtVerify.js";
 import { log } from "../util/logger.js";
 
 interface Route {
@@ -179,6 +180,9 @@ async function main(): Promise<void> {
   }
   const env = loadApiEnv();
 
+  // Initialize request-level JWT verification (Supabase JWKS).
+  initJwtVerification(env.supabaseUrl);
+
   // Storage swap (ARCHITECTURE §2): DATABASE_URL → Postgres, else local files.
   let repo: Repository;
   let store: Store;
@@ -214,7 +218,7 @@ async function main(): Promise<void> {
       res.writeHead(status, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": corsOrigin(origin),
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Supabase-Auth",
         "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
         "X-Content-Type-Options": "nosniff",
       });
@@ -222,6 +226,17 @@ async function main(): Promise<void> {
     };
 
     if (method === "OPTIONS") return send(204, undefined);
+
+    // Request-level auth: verify the Supabase anonymous JWT.
+    // Skip for /health (load-balancer probes). When the JWKS is configured,
+    // requests without a valid token are rejected.
+    if (isJwtVerificationEnabled() && segments[0] !== "health") {
+      const supaToken = (req.headers["x-supabase-auth"] as string) ?? undefined;
+      const jwtPayload = await verifySupabaseJwt(supaToken);
+      if (!jwtPayload) {
+        return send(401, { error: "Invalid or missing request token" });
+      }
+    }
 
     try {
       const body =

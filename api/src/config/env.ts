@@ -22,6 +22,8 @@ export interface ApiEnv {
   allowedOrigins: string[];
   /** true when NODE_ENV=production. */
   isProduction: boolean;
+  /** Supabase project URL for JWKS-based request auth. Unset → verification disabled (dev). */
+  supabaseUrl?: string;
 }
 
 export function loadApiEnv(): ApiEnv {
@@ -44,5 +46,6 @@ export function loadApiEnv(): ApiEnv {
       .map((o) => o.trim())
       .filter(Boolean),
     isProduction: process.env.NODE_ENV === "production",
+    supabaseUrl: process.env.SUPABASE_URL || undefined,
   };
 }

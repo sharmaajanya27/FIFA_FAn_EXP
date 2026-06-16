@@ -99,19 +99,22 @@ depend on the interface, never a concrete backend.
   collection's rows and filter in JS — identical semantics to the file store.
   `insert` upserts (`on conflict do update`). Services and handlers are untouched.
 
-### 2.3 Auth seam — `AuthService.resolveUser`
+### 2.3 Auth seam — request-level + user-level
 
-[`AuthService`](./api/src/auth/auth.ts) is a **dev stub**: token is
-`fmtok_<userId>`, no password/signature/expiry. The rest of the API depends
-only on:
+Request-level auth uses **Supabase Anonymous Auth**. Every browser visitor
+automatically gets a signed JWT (ES256, asymmetric key) without any login.
+The backend verifies this JWT via Supabase's public JWKS endpoint
+(`/.well-known/jwks.json`) using the `jose` library. This proves every API
+request originates from the app — scrapers and unauthorized clients are blocked.
 
-```ts
-resolveUser(authHeader?: string): Promise<User | undefined>
-```
+- **`X-Supabase-Auth` header** — attached to every frontend request.
+- **Backend:** [`jwtVerify.ts`](./api/src/auth/jwtVerify.ts) fetches the public
+  key from `SUPABASE_URL/auth/v1/.well-known/jwks.json` and verifies the token.
+- **Local dev:** `SUPABASE_URL` unset → verification disabled, all requests pass.
 
-- **Local:** parse the prefixed user id.
-- **Production:** verify a real JWT against the IdP's JWKS and map the token
-  `sub` to a local `users` row. `requireUser` and every handler stay the same.
+User-level auth (`Authorization: Bearer fmtok_...`) remains a dev stub for
+engagement features (reviews, check-ins). This layer is independent and will
+be replaced with Supabase Auth user sessions when user accounts are needed.
 
 ### 2.4 Transport seam — HTTP server
 
@@ -133,6 +136,7 @@ zero-config local defaults. Hosting = setting env vars, not editing code:
 | `PORT`                 | 3001                        | platform-assigned         |
 | `DATA_DIR`             | `../ingestion/data`         | unused when DB is set     |
 | `DATABASE_URL`         | _(unset → local files)_     | managed Postgres/Supabase |
+| `SUPABASE_URL`         | _(unset → no JWT check)_   | `https://<ref>.supabase.co` |
 | `ANTHROPIC_API_KEY`    | absent → heuristic fallback | secret store              |
 | `NEXT_PUBLIC_API_BASE` | `http://localhost:3001`     | API public URL            |
 
@@ -189,8 +193,8 @@ No database, no cloud account, no secrets required.
 flowchart LR
     U[Browser] --> CDN[Vercel / CloudFront]
     CDN --> FE[Next.js]
-    FE -->|JWT Bearer| API[API: Node service or Lambda]
-    FE -.login.-> IDP[Clerk / Cognito]
+    FE -->|X-Supabase-Auth JWT| API[API: Node service or Lambda]
+    FE -.anon session.-> IDP[Supabase Auth]
     IDP -.JWKS.-> API
     API --> PG[(Postgres + PostGIS)]
     API --> OBJ[(R2 / S3 — photos)]
@@ -203,8 +207,8 @@ Changes vs. local: ingestion dual-writes to **Postgres/Supabase** (the
 `SupabasePublisher`, JSONL still emitted as source of truth + rollback); the API
 reads venues/events from Postgres when `DATABASE_URL` is set. Geo-radius runs in
 JS today (plain Postgres, no PostGIS) — moving it into SQL with PostGIS
-`ST_DWithin` is a later optimization. Still ahead: JWT auth from a managed IdP
-and presigned object-storage photo uploads.
+`ST_DWithin` is a later optimization. Request-level auth (Supabase anonymous JWT
+via JWKS) is implemented; user-level auth for engagement writes is a dev stub.
 
 ---
 
@@ -217,7 +221,7 @@ and presigned object-storage photo uploads.
 | Frontend  | **Vercel**                       | Next.js native; free Hobby tier      |
 | API       | **Render** / **Railway**         | Runs the current Node server as-is   |
 | Database  | **Neon** / **Supabase** Postgres | Serverless, scale-to-zero, free tier |
-| Auth      | **Clerk** / **Supabase Auth**    | Free to ~10k MAU                     |
+| Auth      | **Supabase Auth** (anonymous + user) | Free to ~50k MAU               |
 | Ingestion | **GitHub Actions** cron          | No server; commits or writes to DB   |
 | Photos    | **Cloudflare R2**                | No egress fees                       |
 
@@ -254,53 +258,63 @@ concurrent/multi-instance writes.
 
 ## 7. Security & auth flow
 
-### 7.1 Known gaps (must fix before launch)
+### 7.1 Implemented
 
-1. **Forgeable tokens** — `fmtok_<userId>` allows trivial impersonation. _Critical._
-2. **No password / MFA** — passwordless-by-trust.
-3. **Input validation at API boundary** — reuse `zod` (already used in ingestion);
-   note `Collection.update()` spreads arbitrary `patch` (mass-assignment risk).
-4. **CORS** — lock to the frontend origin.
-5. **Rate limiting** — none; add at edge/gateway.
-6. **Secrets** — platform secret store only, never in repo.
-7. **Photo uploads** — replace 12 MB base64-through-API with presigned uploads.
+1. **Request-level auth** — Supabase Anonymous Auth. Every visitor gets a signed
+   ES256 JWT (no login required). Backend verifies via JWKS endpoint. Scrapers
+   and direct API callers without a valid token get `401`.
+2. **Security headers** — CSP, HSTS, X-Frame-Options, X-Content-Type-Options,
+   Referrer-Policy, Permissions-Policy (frontend `next.config.mjs`).
+3. **CORS** — locked to `ALLOWED_ORIGINS` in production.
+4. **Rate limiting** — nginx (`30r/s` + burst) at edge; client-side per-action
+   throttle for engagement writes.
+5. **Input validation** — client-side length limits + clamping; backend body
+   size cap (12 MB).
+6. **Token expiry** — app-level tokens expire after 24h (client-side); Supabase
+   JWTs expire after 1h (auto-refreshed by SDK).
+7. **Photo upload** — 2 MB client-side limit + image MIME type check.
 
-### 7.2 Login flow (target)
+### 7.2 Remaining gaps
+
+1. **User-level auth** — `fmtok_<userId>` is still a dev stub for engagement.
+   Replace with Supabase Auth user sessions when user accounts launch.
+2. **Server-side input validation** — add Zod schemas at handler boundaries.
+3. **Photo uploads** — replace base64-through-API with presigned S3/R2 uploads.
+
+### 7.3 Auth flow (current)
 
 ```mermaid
 sequenceDiagram
     participant U as User
     participant FE as Next.js
-    participant IdP as Clerk / Cognito
+    participant SB as Supabase Auth
     participant API as API
 
-    U->>FE: Log in
-    FE->>IdP: OIDC / hosted widget
-    U->>IdP: email+password / social / magic link
-    IdP-->>FE: JWT (short-lived) + refresh token
-    FE->>API: Authorization: Bearer <JWT>
-    API->>IdP: Verify signature via cached JWKS
-    API->>API: resolveUser(): map JWT sub -> users row (create on first login)
+    U->>FE: Visit page
+    FE->>SB: signInAnonymously()
+    SB-->>FE: JWT (ES256, 1h expiry, auto-refresh)
+    FE->>API: X-Supabase-Auth: <JWT>
+    API->>SB: Fetch JWKS (cached)
+    API->>API: jwtVerify(token, JWKS)
     API-->>FE: Authorized response
-    FE->>IdP: Silent refresh on expiry
+    FE->>SB: Auto-refresh on expiry
 ```
 
-Implementation: `register`/`login` endpoints are removed (IdP owns them);
-`resolveUser` becomes JWT verification + local profile lookup keyed by `sub`;
-the frontend drops the `localStorage` token in
-[`api.ts`](./frontend/src/lib/api.ts) for the IdP SDK (httpOnly session).
+No user interaction required. The Supabase SDK handles session persistence
+and token refresh in the background.
 
 ---
 
 ## 8. Suggested sequencing
 
 1. ~~**Postgres** — implement `PgRepository` + `PgStore` behind the existing
-   interfaces; dual-write ingestion to the DB.~~ ✅ Shipped (plain Postgres /
-   Supabase; PostGIS radius search still deferred — see §6).
-2. **Real auth** — JWT verification in `resolveUser` (Clerk/Cognito).
-3. **Hardening** — zod validation at boundaries, CORS lockdown, rate limiting.
-4. **Deploy** — Vercel + Render + Neon + GitHub Actions cron.
-5. **Photos** — presigned R2/S3 uploads.
+   interfaces; dual-write ingestion to the DB.~~ ✅ Shipped.
+2. ~~**Real auth** — JWT verification via JWKS (Supabase).~~ ✅ Shipped
+   (request-level via anonymous auth + JWKS verification).
+3. ~~**Hardening** — CSP, CORS lockdown, rate limiting, input validation.~~ ✅ Shipped.
+4. ~~**Deploy** — EC2 + Amplify + Supabase.~~ ✅ Shipped.
+5. **Photos** — presigned R2/S3 uploads (still base64 through API today).
+6. **User accounts** — Supabase Auth user sessions for engagement writes.
 
 Each step is isolated by a seam in §2, so it ships independently without
 destabilizing the rest of the app.

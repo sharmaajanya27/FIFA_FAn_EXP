@@ -12,7 +12,6 @@ import type { AiRecommendation, FanEvent, RankedVenue } from "@/lib/types";
 import { VenueList } from "@/components/VenueList";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
 import { EventsPanel } from "@/components/EventsPanel";
-import { AuthBar } from "@/components/AuthBar";
 import { VenueDetail } from "@/components/VenueDetail";
 import { CreateEventForm } from "@/components/CreateEventForm";
 import { LiveEventsPanel } from "@/components/LiveEventsPanel";
@@ -249,7 +248,6 @@ export default function Home() {
               </p>
             </div>
           </div>
-          {FEATURES.auth && <AuthBar />}
         </div>
         {season?.show && (
           <div className="season-banner" role="note">

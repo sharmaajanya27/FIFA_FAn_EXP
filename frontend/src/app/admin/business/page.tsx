@@ -16,7 +16,7 @@ import styles from "../admin.module.css";
 type LoadState = "idle" | "loading" | "ready" | "denied" | "error";
 
 export default function AdminBusinessPage() {
-  const { user, loading: authLoading, login, logout } = useAuth();
+  const { loading: authLoading } = useAuth();
   const [data, setData] = useState<AdminBusinessSummary | null>(null);
   const [state, setState] = useState<LoadState>("idle");
   const [errorMsg, setErrorMsg] = useState<string>();
@@ -36,65 +36,18 @@ export default function AdminBusinessPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) {
-      setState("idle");
-      return;
-    }
     void fetchData();
-  }, [authLoading, user, fetchData]);
-
-  const [email, setEmail] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [loginErr, setLoginErr] = useState<string>();
-  const submitLogin = async () => {
-    setBusy(true);
-    setLoginErr(undefined);
-    try {
-      await login(email.trim());
-    } catch (e) {
-      setLoginErr(e instanceof Error ? e.message : "Login failed");
-    } finally {
-      setBusy(false);
-    }
-  };
+  }, [authLoading, fetchData]);
 
   if (authLoading) {
     return <div className={styles.empty} style={{ textAlign: "center", marginTop: "4rem" }}>Loading…</div>;
   }
 
-  if (!user) {
+  if (state === "denied" || state === "idle") {
     return (
       <div className={styles.gate}>
         <h1>FanWatch Admin</h1>
-        <p>Sign in with an admin account to review business listings.</p>
-        <div className={styles.field}>
-          <label htmlFor="admin-email">Email</label>
-          <input
-            id="admin-email"
-            type="email"
-            value={email}
-            placeholder="you@example.com"
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && email && submitLogin()}
-          />
-        </div>
-        <button className={styles.btn} disabled={!email || busy} onClick={submitLogin}>
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-        {loginErr && <div className={styles.error}>{loginErr}</div>}
-      </div>
-    );
-  }
-
-  if (state === "denied") {
-    return (
-      <div className={styles.gate}>
-        <h1>Not authorized</h1>
-        <p>
-          {user.displayName}, your account isn&apos;t on the admin allowlist. Add
-          your email to ADMIN_EMAILS on the API.
-        </p>
-        <button className={styles.btn} onClick={logout}>Log out</button>
+        <p>Admin access is not available in this version.</p>
       </div>
     );
   }
@@ -105,7 +58,7 @@ export default function AdminBusinessPage() {
         <div>
           <h1 className={styles.title}>Business activity</h1>
           <div className={styles.sub}>
-            Signed in as {user.displayName}
+            FanWatch Admin
             {data ? ` · ${data.counts.listings} listings · ${data.counts.events} events` : ""}
           </div>
         </div>

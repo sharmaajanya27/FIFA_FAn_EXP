@@ -6,14 +6,19 @@ import { api } from "@/lib/api";
 import type { PageContext, PageViewPayload } from "@/lib/types";
 
 const SESSION_KEY = "fanwatch_sid";
+const SESSION_TS_KEY = "fanwatch_sid_ts";
+/** Rotate the anonymous session ID every 30 minutes. */
+const SESSION_MAX_AGE_MS = 30 * 60 * 1000;
 
-/** Stable per-browser id (not tied to a logged-in user). */
+/** Per-browser session id that rotates periodically for privacy. */
 function sessionId(): string {
   try {
+    const ts = Number(window.localStorage.getItem(SESSION_TS_KEY) || "0");
     let id = window.localStorage.getItem(SESSION_KEY);
-    if (!id) {
+    if (!id || Date.now() - ts > SESSION_MAX_AGE_MS) {
       id = window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
       window.localStorage.setItem(SESSION_KEY, id);
+      window.localStorage.setItem(SESSION_TS_KEY, String(Date.now()));
     }
     return id;
   } catch {

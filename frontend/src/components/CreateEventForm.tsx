@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "./AuthProvider";
 import { TEAMS } from "@/lib/teams";
+import { LIMITS, clamp, isRateLimited } from "@/lib/security";
 
 interface Props {
   city: string;
@@ -34,12 +35,14 @@ export function CreateEventForm({ city, origin, onCreated }: Props) {
   const submit = async () => {
     if (!user) return setError("Log in to create an event.");
     if (!title.trim() || !startTime) return setError("Title and start time are required.");
+    if (title.trim().length > LIMITS.eventTitle) return setError(`Title must be under ${LIMITS.eventTitle} characters.`);
+    if (isRateLimited("create_event", 3, 60_000)) return setError("Too many events — please wait a moment.");
     setBusy(true);
     setError(undefined);
     try {
       await api.createEvent({
         city,
-        title: title.trim(),
+        title: clamp(title.trim(), LIMITS.eventTitle),
         lat: origin.lat,
         lon: origin.lon,
         startTime: new Date(startTime).toISOString(),

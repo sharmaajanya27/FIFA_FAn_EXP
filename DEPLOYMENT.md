@@ -11,7 +11,7 @@
 ```
 ┌─────────────┐      ┌──────────────────────────┐      ┌───────────────────┐
 │   Browser   │─────▶│  AWS Amplify (CDN + SSR)  │─────▶│  EC2 t2.micro     │
-│             │      │  Next.js 14 frontend      │      │  Node.js API      │
+│             │      │  Next.js 16 frontend      │      │  Node.js API      │
 └─────────────┘      └──────────────────────────┘      │  nginx + PM2      │
                                                         └─────────┬─────────┘
                                                                   │
@@ -217,6 +217,8 @@ sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx
    ```
    NEXT_PUBLIC_API_BASE = http://<YOUR_EC2_IP>
    NEXT_PUBLIC_SITE_URL = https://main.<id>.amplifyapp.com
+   NEXT_PUBLIC_SUPABASE_URL = https://<ref>.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY = <your-supabase-anon-key>
    ```
 7. Deploy → wait 3-5 minutes
 
@@ -234,8 +236,8 @@ sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx
 
 **API (manual):**
 ```bash
-ssh -i fanwatch-key.pem ec2-user@<YOUR_EC2_IP>
-cd FIFA_FAn_EXP && git pull
+ssh -i fanwatch-key.pem ec2-user@98.91.107.103
+cd FIFA_FAn_EXP && git pull origin main
 cd api && npm install && pm2 restart fanwatch-api
 ```
 
@@ -246,8 +248,183 @@ Push to `main` branch → Amplify auto-deploys via GitHub webhook.
 ```bash
 # From local machine
 cd ingestion
-DATABASE_URL="..." npm run migrate
+DATABASE_URL="postgresql://postgres.lzhgbodmdsflasvashkp:[PASSWORD]@aws-1-us-east-1.pooler.supabase.com:6543/postgres" npm run migrate
 ```
+
+---
+
+## Actual Deployment Record (June 2026)
+
+### What We Deployed
+
+| Component | Details |
+|-----------|---------|
+| **EC2 Instance** | t2.micro, Amazon Linux 2023, us-east-1 |
+| **Elastic IP** | `98.91.107.103` |
+| **Instance Public IP** | `13.221.134.50` (replaced by Elastic IP) |
+| **Supabase Project** | `fanwatch-prod` (ref: `lzhgbodmdsflasvashkp`) |
+| **Supabase Pooler** | `aws-1-us-east-1.pooler.supabase.com:6543` |
+| **GitHub Repo** | `sharmaajanya27/FIFA_FAn_EXP` (branch: `main`) |
+| **SSH Key** | `fanwatch-key.pem` (stored at `~/Documents/Fanwatch-aws/`) |
+
+### SSH Access
+
+```bash
+ssh -i ~/Documents/Fanwatch-aws/fanwatch-key.pem ec2-user@98.91.107.103
+```
+
+### EC2 Setup Commands (What We Actually Ran)
+
+```bash
+# 1. Install Node.js 20, nginx, git, PM2
+curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+sudo yum install -y nodejs git nginx
+sudo npm install -g pm2
+
+# 2. Clone repo
+git clone https://github.com/sharmaajanya27/FIFA_FAn_EXP.git
+cd FIFA_FAn_EXP/api
+
+# 3. Install dependencies
+npm install
+
+# 4. Create production .env
+cat > .env << 'EOF'
+DATABASE_URL=postgresql://postgres.lzhgbodmdsflasvashkp:[PASSWORD]@aws-1-us-east-1.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://lzhgbodmdsflasvashkp.supabase.co
+PORT=3001
+NODE_ENV=production
+ADMIN_EMAILS=
+ALLOWED_ORIGINS=
+EOF
+
+# 5. Start API with PM2
+pm2 start npm --name "fanwatch-api" -- start
+pm2 save
+pm2 startup  # then run the command it outputs with sudo
+```
+
+### Nginx Configuration (What Actually Works)
+
+The default nginx.conf had a conflicting server block on port 80. We had to replace the entire nginx.conf:
+
+```bash
+# Replace nginx.conf entirely (removes default server block conflict)
+sudo tee /etc/nginx/nginx.conf << 'EOF'
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+    include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
+# Create the proxy config
+sudo tee /etc/nginx/conf.d/fanwatch.conf << 'EOF'
+limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
+
+server {
+    listen 80;
+    server_name _;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    location / {
+        limit_req zone=api burst=50 nodelay;
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 12M;
+    }
+}
+EOF
+
+# Test and start nginx
+sudo nginx -t && sudo systemctl enable nginx && sudo systemctl restart nginx
+```
+
+### PM2 Auto-Start on Reboot
+
+```bash
+pm2 startup  # prints a sudo command — run it
+pm2 save     # saves current process list
+```
+
+### Data Ingestion (Run From Local Machine)
+
+```bash
+cd ingestion
+
+# Create .env with DATABASE_URL
+cat > .env << 'EOF'
+DATABASE_URL=postgresql://postgres.lzhgbodmdsflasvashkp:[PASSWORD]@aws-1-us-east-1.pooler.supabase.com:6543/postgres
+EOF
+
+# Run migrations (creates tables)
+npm run migrate
+
+# Ingest all cities (scrapes venues, geocodes, scores, publishes to Supabase)
+npm run ingest
+```
+
+**Result:** 29 cities ingested, ~45,000+ venues, 12 matches, events loaded.  
+**Failed:** Phoenix (Overpass API rate-limited 406) — retry later with `npm run ingest -- phoenix`.
+
+### Deploy Code Updates to EC2
+
+```bash
+# From local machine: commit, push
+git add -A && git commit -m "feat: description" && git push origin main
+
+# Then update EC2
+ssh -i ~/Documents/Fanwatch-aws/fanwatch-key.pem ec2-user@98.91.107.103 \
+  "cd FIFA_FAn_EXP && git pull origin main && cd api && npm install && pm2 restart fanwatch-api"
+```
+
+### Verify Deployment
+
+```bash
+curl http://98.91.107.103/health          # → {"ok":true}
+curl http://98.91.107.103/cities           # → 29 cities
+curl http://98.91.107.103/venues/miami     # → venues in Miami
+```
+
+### Issues We Hit & Fixes
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| nginx 80 conflict | Default nginx.conf has its own server block | Replace entire `nginx.conf` with minimal config |
+| `ECONNRESET` on /cities | Stale DB pool after Elastic IP reassignment | `pm2 restart fanwatch-api` |
+| SSH host key mismatch | Elastic IP changed from original IP | `ssh-keygen -R 98.91.107.103` then reconnect |
+| Phoenix ingestion 406 | Overpass API rate limit | Retry later; 29/30 cities loaded fine |
+| ingestion .env not found | `loadDotenv()` reads from CWD | Created `.env` in `ingestion/` directory |
+
+### Remaining TODO
+
+- [ ] Deploy frontend to AWS Amplify (connect GitHub repo)
+- [ ] Set `ALLOWED_ORIGINS` on EC2 after getting Amplify URL
+- [ ] Set `NEXT_PUBLIC_API_BASE=http://98.91.107.103` in Amplify env vars
+- [ ] Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Amplify env vars
+- [ ] Enable Anonymous Sign-Ins in Supabase dashboard (Authentication → Providers → Anonymous)
+- [ ] Rotate SSH key (was exposed during deployment session)
+- [ ] Retry Phoenix city ingestion
+- [ ] Add HTTPS via Let's Encrypt + certbot (before sharing publicly)
+- [ ] Configure `ADMIN_EMAILS` for admin dashboard access
 
 ---
 
@@ -271,5 +448,5 @@ DATABASE_URL="..." npm run migrate
 | HTTPS for API | Before sharing publicly | Free (Let's Encrypt via certbot) |
 | Custom domain | When you have a brand name | ~$12/yr (Route 53) |
 | Auto-deploy API | When manual SSH gets tedious | Free (GitHub Actions + CodeDeploy) |
-| Real auth | Before real users sign up | Free (Supabase Auth) |
+| User accounts | Before real users sign up | Free (Supabase Auth user sessions) |
 | Scale API | >100 concurrent users | Upgrade to t3.small ($15/mo) |

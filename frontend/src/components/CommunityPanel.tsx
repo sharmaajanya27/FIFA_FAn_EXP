@@ -6,6 +6,7 @@ import { useAuth } from "./AuthProvider";
 import { TEAMS, teamLabel } from "@/lib/teams";
 import type { CommunityPost } from "@/lib/types";
 import { formatKickoff } from "@/lib/format";
+import { LIMITS, clamp, isRateLimited } from "@/lib/security";
 
 export function CommunityPanel() {
   const { user } = useAuth();
@@ -26,8 +27,10 @@ export function CommunityPanel() {
   const submit = async () => {
     if (!user) return setError("Log in to post.");
     if (!text.trim()) return;
+    if (text.trim().length > LIMITS.communityPost) return setError(`Post must be under ${LIMITS.communityPost} characters.`);
+    if (isRateLimited("community_post", 5, 60_000)) return setError("Too many posts — please wait a moment.");
     try {
-      await api.post(team, text.trim());
+      await api.post(team, clamp(text.trim(), LIMITS.communityPost));
       setText("");
       await reload();
     } catch (e) {

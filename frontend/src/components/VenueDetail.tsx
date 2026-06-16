@@ -16,6 +16,7 @@ import type {
 import { formatDistance } from "@/lib/format";
 import { teamLabel } from "@/lib/teams";
 import { FEATURES } from "@/lib/features";
+import { MAX_PHOTO_SIZE_BYTES, LIMITS, clamp, isRateLimited } from "@/lib/security";
 
 const CROWD_LEVELS: CrowdLevel[] = ["empty", "quiet", "lively", "packed"];
 const CROWD_EMOJI: Record<CrowdLevel, string> = {
@@ -88,10 +89,18 @@ export function VenueDetail({
   };
 
   const submitReview = guard(async () => {
-    await api.addReview(venue.id, rating, comment || undefined);
+    if (isRateLimited("review", 3, 60_000)) {
+      setError("Too many reviews — please wait a moment.");
+      return;
+    }
+    await api.addReview(venue.id, rating, clamp(comment, LIMITS.reviewComment) || undefined);
     setComment("");
   });
   const checkIn = guard(async () => {
+    if (isRateLimited("checkin", 5, 60_000)) {
+      setError("Too many check-ins — please wait a moment.");
+      return;
+    }
     await api.checkIn(venue.id);
   });
   const reportCrowd = (level: CrowdLevel) =>
@@ -102,6 +111,18 @@ export function VenueDetail({
   const onPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_PHOTO_SIZE_BYTES) {
+      setError("Photo must be under 2 MB.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setError("Only image files are allowed.");
+      return;
+    }
+    if (isRateLimited("photo", 3, 60_000)) {
+      setError("Too many uploads — please wait a moment.");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       void guard(async () => {
