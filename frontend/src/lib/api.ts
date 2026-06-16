@@ -25,9 +25,16 @@ import type {
 } from "./types";
 import { getSupabaseToken } from "./supabase";
 
-const BASE =
-  process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "") ??
-  "http://localhost:3001";
+// Server-side (build/SSR): use BACKEND_URL directly (full URL needed for new URL())
+// Client-side (browser): use "/_api" prefix (rewrite proxy, avoids mixed content)
+function getBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    // Browser: always go through the proxy
+    return "/_api";
+  }
+  // Server: need a full URL for fetch during SSG/SSR
+  return process.env.BACKEND_URL || "http://localhost:3001";
+}
 
 async function request<T>(
   method: string,
@@ -37,9 +44,11 @@ async function request<T>(
     body?: unknown;
   } = {},
 ): Promise<T> {
-  // Support both absolute URLs (local dev) and relative paths (production proxy)
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const url = new URL(BASE + path, BASE.startsWith("http") ? undefined : origin);
+  const base = getBaseUrl();
+  const fullPath = base + path;
+  const url = base.startsWith("http")
+    ? new URL(fullPath)
+    : new URL(fullPath, window.location.origin);
   for (const [k, v] of Object.entries(opts.params ?? {})) {
     if (v !== undefined && v !== "") url.searchParams.set(k, String(v));
   }

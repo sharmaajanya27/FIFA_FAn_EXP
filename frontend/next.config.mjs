@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Expose BACKEND_URL to server-side code (SSG/SSR) so api.ts can reach the
+  // backend during build. NEXT_PUBLIC_* is only for client bundles.
+  env: {
+    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001",
+  },
   // Proxy API requests to the backend server (avoids mixed-content HTTPS→HTTP
   // and eliminates CORS entirely). In production the browser only talks to the
   // same HTTPS origin; Next.js forwards requests server-side.
