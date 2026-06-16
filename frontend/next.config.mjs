@@ -1,6 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Proxy API requests to the backend server (avoids mixed-content HTTPS→HTTP
+  // and eliminates CORS entirely). In production the browser only talks to the
+  // same HTTPS origin; Next.js forwards requests server-side.
+  async rewrites() {
+    const backend = process.env.BACKEND_URL || "http://localhost:3001";
+    return [
+      {
+        source: "/_api/:path*",
+        destination: `${backend}/:path*`,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -38,7 +50,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https://*.tile.openstreetmap.org https://*.openstreetmap.org",
-              "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001") + " " + (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"),
+              "connect-src 'self' " + (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"),
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

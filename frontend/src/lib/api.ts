@@ -37,7 +37,9 @@ async function request<T>(
     body?: unknown;
   } = {},
 ): Promise<T> {
-  const url = new URL(BASE + path);
+  // Support both absolute URLs (local dev) and relative paths (production proxy)
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const url = new URL(BASE + path, BASE.startsWith("http") ? undefined : origin);
   for (const [k, v] of Object.entries(opts.params ?? {})) {
     if (v !== undefined && v !== "") url.searchParams.set(k, String(v));
   }
