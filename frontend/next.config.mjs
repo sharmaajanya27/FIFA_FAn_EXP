@@ -38,7 +38,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https://*.tile.openstreetmap.org https://*.openstreetmap.org",
-              "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001"),
+              "connect-src 'self' " + (process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001") + " " + (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"),
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
