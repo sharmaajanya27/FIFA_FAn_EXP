@@ -36,7 +36,16 @@ function getClient(): SupabaseClient | null {
  * If a session already exists (persisted in localStorage by Supabase),
  * this is a no-op. Otherwise, creates a new anonymous session.
  */
-export async function ensureAnonSession(): Promise<string | null> {
+let _sessionReady: Promise<string | null> | null = null;
+
+export function ensureAnonSession(): Promise<string | null> {
+  if (!_sessionReady) {
+    _sessionReady = _initSession();
+  }
+  return _sessionReady;
+}
+
+async function _initSession(): Promise<string | null> {
   const client = getClient();
   if (!client) return null;
 
@@ -54,6 +63,8 @@ export async function ensureAnonSession(): Promise<string | null> {
 
 /** Get the current access token (refreshed automatically by Supabase). */
 export async function getSupabaseToken(): Promise<string | null> {
+  // Wait for the initial session to be established before reading token.
+  await ensureAnonSession();
   const client = getClient();
   if (!client) return null;
   const { data: { session } } = await client.auth.getSession();
