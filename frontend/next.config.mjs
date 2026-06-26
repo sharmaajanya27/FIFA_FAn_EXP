@@ -4,7 +4,10 @@ const nextConfig = {
   // Expose server-only env vars to SSG/SSR code. NEXT_PUBLIC_* vars are only
   // for client bundles; these need explicit forwarding.
   env: {
-    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001",
+    BACKEND_URL:
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_BASE ||
+      "http://localhost:3001",
     SERVER_AUTH_SECRET: process.env.SERVER_AUTH_SECRET || "",
   },
   // Proxy API requests to the backend server (avoids mixed-content HTTPS→HTTP
@@ -55,8 +58,10 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https://*.tile.openstreetmap.org https://*.openstreetmap.org",
-              "connect-src 'self' " + (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"),
+              "img-src 'self' data: https://*.tile.openstreetmap.org https://*.openstreetmap.org https://a.espncdn.com",
+              "connect-src 'self' " +
+                (process.env.NEXT_PUBLIC_SUPABASE_URL ||
+                  "https://*.supabase.co"),
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

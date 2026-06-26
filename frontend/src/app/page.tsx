@@ -2,17 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { CITIES, cityBySlug, nearestCity } from "@/lib/cities";
 import { cityTheme, scatterBalls } from "@/lib/cityThemes";
 import { worldCupStatus, type SeasonStatus } from "@/lib/worldCup";
 import { TEAMS } from "@/lib/teams";
 import { FEATURES } from "@/lib/features";
-import type { AiRecommendation, FanEvent, RankedVenue } from "@/lib/types";
+import type { FanEvent, RankedVenue } from "@/lib/types";
 import { VenueList } from "@/components/VenueList";
-import { RecommendationPanel } from "@/components/RecommendationPanel";
 import { EventsPanel } from "@/components/EventsPanel";
-import { VenueDetail } from "@/components/VenueDetail";
 import { CreateEventForm } from "@/components/CreateEventForm";
 import { LiveEventsPanel } from "@/components/LiveEventsPanel";
 import { CommunityPanel } from "@/components/CommunityPanel";
@@ -20,36 +19,26 @@ import { CommunityPanel } from "@/components/CommunityPanel";
 // Leaflet touches window — load the map only on the client.
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
-const KINDS = ["", "bar", "pub", "restaurant", "cafe", "fan_zone"];
-
 export default function Home() {
+  const router = useRouter();
   const [city, setCity] = useState("jersey-city");
   const [team, setTeam] = useState("");
-  const [kind, setKind] = useState("");
-  const [radius, setRadius] = useState(3000);
+  // Fixed search defaults — the filter surface stays minimal (city + location
+  // + team). Venue type is unrestricted and the radius is a sensible 5 km.
+  const kind = "";
+  const radius = 5000;
   const [origin, setOrigin] = useState(() => cityBySlug("jersey-city")!.center);
-  // Which anchor the search is centered on. Downtown is the default; stadium is
-  // an alternative origin; custom = the user's shared geolocation.
-  const [originMode, setOriginMode] = useState<
-    "downtown" | "stadium" | "custom"
-  >("downtown");
 
   const [venues, setVenues] = useState<RankedVenue[]>([]);
   const [events, setEvents] = useState<FanEvent[]>([]);
-  const [rec, setRec] = useState<AiRecommendation | null>(null);
-  const [recMode, setRecMode] = useState<"smart" | "ai">("smart");
   const [activeId, setActiveId] = useState<string | undefined>();
   const [view, setView] = useState<"map" | "list">("map");
-  const [tab, setTab] = useState<"recs" | "events">("recs");
+  const [tab, setTab] = useState<"bars" | "events">("events");
   const [nav, setNav] = useState<"discover" | "live" | "community">("discover");
-  const [selected, setSelected] = useState<RankedVenue | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
-
-  // Zip / neighborhood search (PRD §6.1): resolve free text to a search origin.
-  const [placeQuery, setPlaceQuery] = useState("");
+  // Label of the current search origin (set when the user shares their location).
   const [placeLabel, setPlaceLabel] = useState<string | undefined>();
-  const [geoBusy, setGeoBusy] = useState(false);
 
   // Seasonal World Cup banner status. Computed on the client (after mount) so
   // the date-based message stays accurate without causing a hydration
@@ -62,43 +51,9 @@ export default function Home() {
   // When the city changes, reset the origin to that city's center (downtown).
   const onCityChange = (slug: string) => {
     setCity(slug);
-    setOriginMode("downtown");
     setPlaceLabel(undefined);
     const c = cityBySlug(slug);
     if (c) setOrigin(c.center);
-  };
-
-  // Switch the search origin between downtown and the stadium.
-  const onOriginModeChange = (mode: "downtown" | "stadium") => {
-    setOriginMode(mode);
-    setPlaceLabel(undefined);
-    const c = cityBySlug(city);
-    if (!c) return;
-    if (mode === "stadium" && c.stadium) setOrigin(c.stadium.center);
-    else setOrigin(c.center);
-  };
-
-  // Resolve a zip code / neighborhood / address to a search origin.
-  const searchPlace = async () => {
-    const q = placeQuery.trim();
-    if (!q) return;
-    setGeoBusy(true);
-    setError(undefined);
-    try {
-      const r = await api.geocode(q, city);
-      setOriginMode("custom");
-      setOrigin({ lat: r.lat, lon: r.lon });
-      setPlaceLabel(r.label);
-    } catch (e) {
-      setPlaceLabel(undefined);
-      setError(
-        e instanceof Error
-          ? `Couldn't find "${q}" — try a zip code or neighborhood name.`
-          : "Place lookup failed.",
-      );
-    } finally {
-      setGeoBusy(false);
-    }
   };
 
   const useMyLocation = () => {
@@ -114,7 +69,6 @@ export default function Home() {
         // here returns nothing within the radius.
         const near = nearestCity(here);
         if (near.slug !== city) setCity(near.slug);
-        setOriginMode("custom");
         setPlaceLabel(`Your location · ${near.name}`);
         setOrigin(here);
       },
@@ -159,18 +113,6 @@ export default function Home() {
       ]);
       setVenues(v.venues);
       setEvents(e.events);
-      setRec(
-        team
-          ? await api.aiRecommendations({
-              city,
-              lat: origin.lat,
-              lon: origin.lon,
-              team,
-              radius,
-              mode: recMode,
-            })
-          : null,
-      );
     } catch (err) {
       setError(
         err instanceof Error
@@ -179,23 +121,29 @@ export default function Home() {
       );
       setVenues([]);
       setEvents([]);
-      setRec(null);
     } finally {
       setLoading(false);
     }
-  }, [city, origin.lat, origin.lon, radius, team, kind, recMode]);
+  }, [city, origin.lat, origin.lon, radius, team, kind]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const headline = useMemo(() => {
-    const c = cityBySlug(city)?.name ?? city;
-    return `${venues.length} watch spots near ${c}`;
-  }, [venues.length, city]);
+  // Sports-bar shortlist for the right panel: the top-ranked bars & pubs — the
+  // venues most likely to be showing the match with a crowd.
+  const sportsBars = useMemo(
+    () =>
+      venues.filter((v) => v.kind === "bar" || v.kind === "pub").slice(0, 15),
+    [venues],
+  );
 
   const theme = useMemo(() => cityTheme(city), [city]);
   const balls = useMemo(() => scatterBalls(city), [city]);
+
+  // Clicking a watch spot opens its dedicated page (mirrors fan events).
+  const openVenue = (venue: RankedVenue) =>
+    router.push(`/venue/${city}/${encodeURIComponent(venue.id)}`);
 
   return (
     <main className="container">
@@ -281,47 +229,24 @@ export default function Home() {
 
       {nav === "live" && <LiveEventsPanel />}
       {FEATURES.community && nav === "community" && <CommunityPanel />}
-      {selected && (
-        <VenueDetail
-          venue={selected}
-          city={city}
-          onClose={() => setSelected(null)}
-        />
-      )}
 
       {nav === "discover" && (
         <>
-          <div className="controls">
+          <div className="controls controls-min">
             <div className="field">
               <label>City</label>
               <select
                 value={city}
                 onChange={(e) => onCityChange(e.target.value)}
               >
-                {CITIES.map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.country} {c.name}
-                  </option>
-                ))}
+                {[...CITIES]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((c) => (
+                    <option key={c.slug} value={c.slug}>
+                      {c.country} {c.name}
+                    </option>
+                  ))}
               </select>
-            </div>
-            <div className="field">
-              <label>Zip or neighborhood</label>
-              <div className="row" style={{ gap: 6 }}>
-                <input
-                  value={placeQuery}
-                  onChange={(e) => setPlaceQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && searchPlace()}
-                  placeholder="e.g. 07302 or Downtown"
-                  style={{ flex: 1, minWidth: 0 }}
-                />
-                <button
-                  onClick={searchPlace}
-                  disabled={geoBusy || !placeQuery.trim()}
-                >
-                  {geoBusy ? "…" : "Go"}
-                </button>
-              </div>
             </div>
             <div className="field">
               <label>Favorite team</label>
@@ -335,43 +260,6 @@ export default function Home() {
               </select>
             </div>
             <div className="field">
-              <label>Venue type</label>
-              <select value={kind} onChange={(e) => setKind(e.target.value)}>
-                {KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {k === "" ? "Any" : k.replace(/_/g, " ")}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <label>Radius — {(radius / 1000).toFixed(1)} km</label>
-              <input
-                type="range"
-                min={500}
-                max={10000}
-                step={500}
-                value={radius}
-                onChange={(e) => setRadius(Number(e.target.value))}
-              />
-            </div>
-            <div className="field">
-              <label>Search around</label>
-              <select
-                value={originMode === "custom" ? "downtown" : originMode}
-                onChange={(e) =>
-                  onOriginModeChange(e.target.value as "downtown" | "stadium")
-                }
-              >
-                <option value="downtown">Downtown</option>
-                {cityBySlug(city)?.stadium && (
-                  <option value="stadium">
-                    🏟️ {cityBySlug(city)!.stadium!.name}
-                  </option>
-                )}
-              </select>
-            </div>
-            <div className="field">
               <label>Location</label>
               <button onClick={useMyLocation}>📍 Use my location</button>
             </div>
@@ -379,9 +267,9 @@ export default function Home() {
 
           <div className="header" style={{ justifyContent: "space-between" }}>
             <div>
-              <h2 style={{ fontSize: 18, margin: 0 }}>
-                {loading ? "Searching…" : headline}
-              </h2>
+              {loading ? (
+                <h2 style={{ fontSize: 18, margin: 0 }}>Searching…</h2>
+              ) : null}
               {placeLabel && (
                 <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
                   📍 Centered on {placeLabel}
@@ -429,8 +317,9 @@ export default function Home() {
                 <VenueList
                   venues={venues}
                   activeId={activeId}
+                  team={team || undefined}
                   onHover={setActiveId}
-                  onSelect={setSelected}
+                  onSelect={openVenue}
                 />
               )}
             </div>
@@ -438,27 +327,21 @@ export default function Home() {
             <div className="panel">
               <h2 style={{ display: "flex", gap: 12 }}>
                 <button
-                  className={`toggle ${tab === "recs" ? "active" : ""}`}
-                  style={{ padding: "4px 10px", fontSize: 11 }}
-                  onClick={() => setTab("recs")}
-                >
-                  Recommendations
-                </button>
-                <button
                   className={`toggle ${tab === "events" ? "active" : ""}`}
                   style={{ padding: "4px 10px", fontSize: 11 }}
                   onClick={() => setTab("events")}
                 >
                   Fan events ({events.length})
                 </button>
+                <button
+                  className={`toggle ${tab === "bars" ? "active" : ""}`}
+                  style={{ padding: "4px 10px", fontSize: 11 }}
+                  onClick={() => setTab("bars")}
+                >
+                  Watch spots ({sportsBars.length})
+                </button>
               </h2>
-              {tab === "recs" ? (
-                <RecommendationPanel
-                  rec={rec}
-                  mode={recMode}
-                  onMode={setRecMode}
-                />
-              ) : (
+              {tab === "events" ? (
                 <>
                   {FEATURES.business && (
                     <CreateEventForm
@@ -469,17 +352,14 @@ export default function Home() {
                   )}
                   <EventsPanel events={events} />
                 </>
-              )}
-              {view === "map" && (
-                <>
-                  <h2>Ranked list</h2>
-                  <VenueList
-                    venues={venues.slice(0, 20)}
-                    activeId={activeId}
-                    onHover={setActiveId}
-                    onSelect={setSelected}
-                  />
-                </>
+              ) : (
+                <VenueList
+                  venues={sportsBars}
+                  activeId={activeId}
+                  team={team || undefined}
+                  onHover={setActiveId}
+                  onSelect={openVenue}
+                />
               )}
             </div>
           </div>

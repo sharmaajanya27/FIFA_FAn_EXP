@@ -19,6 +19,36 @@
       "startTime": "2026-06-18T21:30:00Z",
       "matchId": "wc2026-008",
       "estAttendance": 280
+    },
+    {
+      "externalId": "tor-evt-003",
+      "title": "Canada Opener Watch Party — Yonge-Dundas Square",
+      "kind": "fan_zone",
+      "lat": 43.656,
+      "lon": -79.38,
+      "startTime": "2026-06-12T20:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 800
+    },
+    {
+      "externalId": "tor-evt-004",
+      "title": "Brazil vs Portugal Community Watch — Kensington",
+      "kind": "community_watch",
+      "lat": 43.654,
+      "lon": -79.4,
+      "startTime": "2026-06-14T20:30:00Z",
+      "matchId": "wc2026-004",
+      "estAttendance": 240
+    },
+    {
+      "externalId": "tor-evt-005",
+      "title": "World Cup Final Watch Party — BMO Field Plaza",
+      "kind": "fan_zone",
+      "lat": 43.633,
+      "lon": -79.418,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1100
     }
   ]
 }

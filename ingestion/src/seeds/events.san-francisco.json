@@ -19,6 +19,36 @@
       "startTime": "2026-06-16T19:30:00Z",
       "matchId": "wc2026-006",
       "estAttendance": 240
+    },
+    {
+      "externalId": "sf-evt-003",
+      "title": "Brazil vs Portugal Watch Party — North Beach",
+      "kind": "viewing_party",
+      "lat": 37.8,
+      "lon": -122.41,
+      "startTime": "2026-06-14T20:30:00Z",
+      "matchId": "wc2026-004",
+      "estAttendance": 380
+    },
+    {
+      "externalId": "sf-evt-004",
+      "title": "Mexico vs England Fan Zone — Mission",
+      "kind": "fan_zone",
+      "lat": 37.76,
+      "lon": -122.414,
+      "startTime": "2026-06-17T18:30:00Z",
+      "matchId": "wc2026-007",
+      "estAttendance": 520
+    },
+    {
+      "externalId": "sf-evt-005",
+      "title": "World Cup Final Watch Party — Embarcadero",
+      "kind": "fan_zone",
+      "lat": 37.795,
+      "lon": -122.394,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 950
     }
   ]
 }

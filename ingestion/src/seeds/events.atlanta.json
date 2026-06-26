@@ -19,6 +19,36 @@
       "startTime": "2026-06-13T18:30:00Z",
       "matchId": "wc2026-003",
       "estAttendance": 220
+    },
+    {
+      "externalId": "atl-evt-003",
+      "title": "France vs Germany Community Watch — Old Fourth Ward",
+      "kind": "community_watch",
+      "lat": 33.766,
+      "lon": -84.371,
+      "startTime": "2026-06-15T17:30:00Z",
+      "matchId": "wc2026-005",
+      "estAttendance": 200
+    },
+    {
+      "externalId": "atl-evt-004",
+      "title": "USA Round of 16 Watch Party — The Battery",
+      "kind": "viewing_party",
+      "lat": 33.89,
+      "lon": -84.468,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 700
+    },
+    {
+      "externalId": "atl-evt-005",
+      "title": "World Cup Final Watch Party — Centennial Park",
+      "kind": "fan_zone",
+      "lat": 33.76,
+      "lon": -84.393,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 900
     }
   ]
 }

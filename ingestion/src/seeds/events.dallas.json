@@ -19,6 +19,36 @@
       "startTime": "2026-06-14T20:30:00Z",
       "matchId": "wc2026-004",
       "estAttendance": 260
+    },
+    {
+      "externalId": "dal-evt-003",
+      "title": "Mexico vs England Watch Party — Bishop Arts",
+      "kind": "viewing_party",
+      "lat": 32.748,
+      "lon": -96.829,
+      "startTime": "2026-06-17T18:30:00Z",
+      "matchId": "wc2026-007",
+      "estAttendance": 500
+    },
+    {
+      "externalId": "dal-evt-004",
+      "title": "Argentina vs Japan Community Watch — Lower Greenville",
+      "kind": "community_watch",
+      "lat": 32.81,
+      "lon": -96.77,
+      "startTime": "2026-06-19T17:30:00Z",
+      "matchId": "wc2026-009",
+      "estAttendance": 180
+    },
+    {
+      "externalId": "dal-evt-005",
+      "title": "World Cup Final Watch Party — AT&T Stadium Plaza",
+      "kind": "fan_zone",
+      "lat": 32.747,
+      "lon": -97.093,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1200
     }
   ]
 }

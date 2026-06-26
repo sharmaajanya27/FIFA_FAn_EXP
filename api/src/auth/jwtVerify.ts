@@ -14,12 +14,19 @@ import { log } from "../util/logger.js";
 let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
 let supabaseUrl: string | undefined;
 
+function normalizeSupabaseUrl(url: string | undefined): string | undefined {
+  const trimmed = url?.trim().replace(/\/+$/, "");
+  return trimmed || undefined;
+}
+
 export function initJwtVerification(url: string | undefined): void {
-  supabaseUrl = url;
+  supabaseUrl = normalizeSupabaseUrl(url);
   if (supabaseUrl) {
     const jwksUrl = new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`);
     jwks = createRemoteJWKSet(jwksUrl);
-    log.info("api: supabase JWT verification enabled (JWKS)", { jwksUrl: jwksUrl.toString() });
+    log.info("api: supabase JWT verification enabled (JWKS)", {
+      jwksUrl: jwksUrl.toString(),
+    });
   } else {
     log.info("api: supabase JWT verification disabled (no SUPABASE_URL)");
   }
@@ -53,4 +60,3 @@ export async function verifySupabaseJwt(
     return null;
   }
 }
-

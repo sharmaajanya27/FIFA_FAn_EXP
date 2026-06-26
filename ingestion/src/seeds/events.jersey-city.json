@@ -1,8 +1,64 @@
 {
   "events": [
-    { "externalId": "jc-evt-001", "title": "USA vs Mexico Watch Party @ Zeppelin Hall", "kind": "viewing_party", "lat": 40.7178, "lon": -74.0431, "startTime": "2026-06-11T19:30:00Z", "matchId": "wc2026-001", "estAttendance": 400 },
-    { "externalId": "jc-evt-002", "title": "Argentina Supporters Fan Zone — Newark Ave", "kind": "fan_zone", "lat": 40.7215, "lon": -74.0476, "startTime": "2026-06-12T17:30:00Z", "matchId": "wc2026-002", "estAttendance": 250 },
-    { "externalId": "jc-evt-003", "title": "England Community Watch — The Hutton", "kind": "community_watch", "lat": 40.7268, "lon": -74.0668, "startTime": "2026-06-13T18:30:00Z", "matchId": "wc2026-003", "estAttendance": 120 },
-    { "externalId": "jc-evt-004", "title": "Brazil vs Portugal Viewing Party — Exchange Place", "kind": "viewing_party", "lat": 40.7163, "lon": -74.0329, "startTime": "2026-06-14T20:30:00Z", "matchId": "wc2026-004", "estAttendance": 300 }
+    {
+      "externalId": "jc-evt-001",
+      "title": "USA vs Mexico Watch Party @ Zeppelin Hall",
+      "kind": "viewing_party",
+      "lat": 40.7178,
+      "lon": -74.0431,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 400
+    },
+    {
+      "externalId": "jc-evt-002",
+      "title": "Argentina Supporters Fan Zone — Newark Ave",
+      "kind": "fan_zone",
+      "lat": 40.7215,
+      "lon": -74.0476,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 250
+    },
+    {
+      "externalId": "jc-evt-003",
+      "title": "England Community Watch — The Hutton",
+      "kind": "community_watch",
+      "lat": 40.7268,
+      "lon": -74.0668,
+      "startTime": "2026-06-13T18:30:00Z",
+      "matchId": "wc2026-003",
+      "estAttendance": 120
+    },
+    {
+      "externalId": "jc-evt-004",
+      "title": "Brazil vs Portugal Viewing Party — Exchange Place",
+      "kind": "viewing_party",
+      "lat": 40.7163,
+      "lon": -74.0329,
+      "startTime": "2026-06-14T20:30:00Z",
+      "matchId": "wc2026-004",
+      "estAttendance": 300
+    },
+    {
+      "externalId": "jc-evt-005",
+      "title": "USA Round of 16 Watch Party — Newport",
+      "kind": "viewing_party",
+      "lat": 40.7267,
+      "lon": -74.0345,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 500
+    },
+    {
+      "externalId": "jc-evt-006",
+      "title": "World Cup Final Watch Party — Liberty State Park",
+      "kind": "fan_zone",
+      "lat": 40.7053,
+      "lon": -74.0552,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1000
+    }
   ]
 }

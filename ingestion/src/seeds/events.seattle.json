@@ -19,6 +19,36 @@
       "startTime": "2026-06-15T17:30:00Z",
       "matchId": "wc2026-005",
       "estAttendance": 170
+    },
+    {
+      "externalId": "sea-evt-003",
+      "title": "Spain vs Netherlands Fan Zone — Ballard",
+      "kind": "fan_zone",
+      "lat": 47.668,
+      "lon": -122.384,
+      "startTime": "2026-06-16T19:30:00Z",
+      "matchId": "wc2026-006",
+      "estAttendance": 230
+    },
+    {
+      "externalId": "sea-evt-004",
+      "title": "USA Round of 16 Watch Party — Capitol Hill",
+      "kind": "viewing_party",
+      "lat": 47.62,
+      "lon": -122.32,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 560
+    },
+    {
+      "externalId": "sea-evt-005",
+      "title": "World Cup Final Watch Party — Lumen Field Plaza",
+      "kind": "fan_zone",
+      "lat": 47.595,
+      "lon": -122.331,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1000
     }
   ]
 }

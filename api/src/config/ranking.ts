@@ -11,7 +11,11 @@
  * query-time signals — `teamFanMatch` and `distance` — which depend on the
  * requesting user (their chosen team and location).
  *
- *   Venue Score = 50% content  + 20% static
+ * `buzz` is the live signal: fans currently "here" + recent vibe posts, so a
+ * spot that's actively buzzing right now gets a (decaying) lift. Anonymous fan
+ * reviews feed `static` (see VenueEngagementService.applyOverlay).
+ *
+ *   Venue Score = 50% content  + 20% static    + 10% buzz
  *               + 15% team-fan-match + 10% distance   (renormalized per query)
  */
 export interface RankingWeights {
@@ -21,6 +25,8 @@ export interface RankingWeights {
   static: number;
   teamFanMatch: number;
   distance: number;
+  /** Live buzz: fans currently here + recent vibe posts (0..1). */
+  buzz: number;
 }
 
 export const RANKING_WEIGHTS: RankingWeights = {
@@ -28,6 +34,7 @@ export const RANKING_WEIGHTS: RankingWeights = {
   static: 0.2,
   teamFanMatch: 0.15,
   distance: 0.1,
+  buzz: 0.1,
 };
 
 /**

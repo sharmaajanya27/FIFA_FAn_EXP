@@ -50,10 +50,14 @@ export function rankVenue(
   const staticScore = venue.score ?? 0;
   const distScore = distanceScore(distanceMeters, params.radiusMeters);
   const content = contentScore(venue);
+  const buzz = clamp01(venue.buzz ?? 0);
 
   let weighted =
-    w.content * content + w.static * staticScore + w.distance * distScore;
-  let totalWeight = w.content + w.static + w.distance;
+    w.content * content +
+    w.static * staticScore +
+    w.distance * distScore +
+    w.buzz * buzz;
+  let totalWeight = w.content + w.static + w.distance + w.buzz;
 
   if (params.team) {
     const teamMatch = venue.supportsTeams.includes(params.team) ? 1 : 0;

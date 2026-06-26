@@ -19,6 +19,36 @@
       "startTime": "2026-06-14T20:30:00Z",
       "matchId": "wc2026-004",
       "estAttendance": 400
+    },
+    {
+      "externalId": "mia-evt-003",
+      "title": "Mexico vs England Watch Party — Little Havana",
+      "kind": "viewing_party",
+      "lat": 25.765,
+      "lon": -80.219,
+      "startTime": "2026-06-17T18:30:00Z",
+      "matchId": "wc2026-007",
+      "estAttendance": 620
+    },
+    {
+      "externalId": "mia-evt-004",
+      "title": "Italy vs Uruguay Fan Zone — South Beach",
+      "kind": "fan_zone",
+      "lat": 25.79,
+      "lon": -80.13,
+      "startTime": "2026-06-18T21:30:00Z",
+      "matchId": "wc2026-008",
+      "estAttendance": 340
+    },
+    {
+      "externalId": "mia-evt-005",
+      "title": "World Cup Final Watch Party — Hard Rock Stadium Plaza",
+      "kind": "fan_zone",
+      "lat": 25.958,
+      "lon": -80.239,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1300
     }
   ]
 }

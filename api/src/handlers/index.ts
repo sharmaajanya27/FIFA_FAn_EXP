@@ -16,11 +16,9 @@ const str = (req: ApiRequest, key: string): string | undefined =>
   req.query[key]?.trim() || undefined;
 
 /** GET /cities — list ingested cities. */
-export const listCities =
-  (c: Container) =>
-  async (): Promise<ApiResponse> => {
-    return ok({ cities: await c.repo.listCities() });
-  };
+export const listCities = (c: Container) => async (): Promise<ApiResponse> => {
+  return ok({ cities: await c.repo.listCities() });
+};
 
 /**
  * GET /venues/nearby?city&lat&lon&radius&team&kind&limit
@@ -83,7 +81,21 @@ export const nearbyEvents =
       radiusMeters: radius,
       team: str(req, "team"),
     });
-    return ok({ count: list.length, events: list });
+    // Annotate with anonymous engagement (going, vibes, energy, team) for list.
+    const aggs = await c.eventEngagement.aggregates();
+    const events = list.map((e) => {
+      const a = aggs.get(e.id);
+      return a
+        ? {
+            ...e,
+            goingCount: a.going,
+            vibeCount: a.vibes,
+            ...(a.energy ? { energy: a.energy } : {}),
+            ...(a.dominantTeam ? { dominantTeam: a.dominantTeam } : {}),
+          }
+        : e;
+    });
+    return ok({ count: events.length, events });
   };
 
 /**

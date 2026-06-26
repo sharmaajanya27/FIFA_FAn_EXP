@@ -1,0 +1,64 @@
+{
+  "events": [
+    {
+      "externalId": "mex-evt-001",
+      "title": "USA vs Mexico Watch Party — Zócalo",
+      "kind": "fan_zone",
+      "lat": 19.4326,
+      "lon": -99.1332,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 2000
+    },
+    {
+      "externalId": "mex-evt-002",
+      "title": "Mexico vs England Fan Zone — Ángel de la Independencia",
+      "kind": "fan_zone",
+      "lat": 19.427,
+      "lon": -99.1677,
+      "startTime": "2026-06-17T18:30:00Z",
+      "matchId": "wc2026-007",
+      "estAttendance": 2500
+    },
+    {
+      "externalId": "mex-evt-003",
+      "title": "Argentina vs Croatia Viewing Party — Roma Norte",
+      "kind": "viewing_party",
+      "lat": 19.4147,
+      "lon": -99.162,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 700
+    },
+    {
+      "externalId": "mex-evt-004",
+      "title": "Brazil vs Portugal Community Watch — Condesa",
+      "kind": "community_watch",
+      "lat": 19.411,
+      "lon": -99.171,
+      "startTime": "2026-06-14T20:30:00Z",
+      "matchId": "wc2026-004",
+      "estAttendance": 420
+    },
+    {
+      "externalId": "mex-evt-005",
+      "title": "Mexico Round of 16 Watch Party — Estadio Azteca Plaza",
+      "kind": "viewing_party",
+      "lat": 19.3029,
+      "lon": -99.1505,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 3000
+    },
+    {
+      "externalId": "mex-evt-006",
+      "title": "World Cup Final Watch Party — Monumento a la Revolución",
+      "kind": "fan_zone",
+      "lat": 19.4361,
+      "lon": -99.1543,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 3500
+    }
+  ]
+}

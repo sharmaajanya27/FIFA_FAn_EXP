@@ -12,14 +12,14 @@ title: FanWatch AI Agent Guide
 
 ## Quick Facts
 
-| Property | Value |
-|----------|-------|
-| **Tech Stack** | TypeScript (Node.js 20+), Next.js 16, React 19, Postgres/Supabase |
-| **Module Format** | ESM (`import` / `export`) across all packages |
-| **TypeScript** | Strict mode enabled; `noUncheckedIndexedAccess: true` |
-| **Packages** | 3 monorepo packages: `ingestion/`, `api/`, `frontend/` |
-| **Storage** | Pluggable via interfaces (local JSONL in dev, Postgres in production) |
-| **Development** | No tests; validation via Zod (ingestion) and runtime helpers (api) |
+| Property          | Value                                                                 |
+| ----------------- | --------------------------------------------------------------------- |
+| **Tech Stack**    | TypeScript (Node.js 20+), Next.js 16, React 19, Postgres/Supabase     |
+| **Module Format** | ESM (`import` / `export`) across all packages                         |
+| **TypeScript**    | Strict mode enabled; `noUncheckedIndexedAccess: true`                 |
+| **Packages**      | 3 monorepo packages: `ingestion/`, `api/`, `frontend/`                |
+| **Storage**       | Pluggable via interfaces (local JSONL in dev, Postgres in production) |
+| **Development**   | No tests; validation via Zod (ingestion) and runtime helpers (api)    |
 
 ---
 
@@ -29,15 +29,16 @@ title: FanWatch AI Agent Guide
 
 **Role:** Scrape, normalize, geocode, dedup, enrich, and score venues/matches/events into a clean dataset.
 
-| Item | Details |
-|------|---------|
-| **Entry** | `src/cli/run.ts` (orchestrator) |
-| **Runtime** | Node.js CLI |
-| **Dev command** | `cd ingestion && npm run ingest` |
-| **Build command** | `cd ingestion && npm run build` |
-| **Type check** | `cd ingestion && npm run typecheck` |
+| Item              | Details                             |
+| ----------------- | ----------------------------------- |
+| **Entry**         | `src/cli/run.ts` (orchestrator)     |
+| **Runtime**       | Node.js CLI                         |
+| **Dev command**   | `cd ingestion && npm run ingest`    |
+| **Build command** | `cd ingestion && npm run build`     |
+| **Type check**    | `cd ingestion && npm run typecheck` |
 
 **Key files:**
+
 - `src/models/canonical.ts` — Zod schemas (Venue, Match, Event, GeoPoint) define the canonical data model
 - `src/config/env.ts` — Environment configuration (DATA_DIR, DATABASE_URL, etc.)
 - `src/pipeline/` — Processing stages: collect → normalize → geocode → dedup → merge → enrich → score → publish
@@ -50,45 +51,55 @@ title: FanWatch AI Agent Guide
 
 **Role:** Serve the discovery API (search, rank, recommend venues), handle engagement writes (reviews, checkins, predictions), provide admin analytics.
 
-| Item | Details |
-|------|---------|
-| **Entry** | `src/http/server.ts` (Node HTTP server) |
-| **Runtime** | Node.js HTTP server (dev: `tsx watch`, prod: replaceable with Lambda) |
-| **Dev command** | `cd api && npm run dev` |
-| **Start command** | `cd api && npm start` |
-| **Build command** | `cd api && npm run build` |
-| **Type check** | `cd api && npm run typecheck` |
+| Item              | Details                                                               |
+| ----------------- | --------------------------------------------------------------------- |
+| **Entry**         | `src/http/server.ts` (Node HTTP server)                               |
+| **Runtime**       | Node.js HTTP server (dev: `tsx watch`, prod: replaceable with Lambda) |
+| **Dev command**   | `cd api && npm run dev`                                               |
+| **Start command** | `cd api && npm start`                                                 |
+| **Build command** | `cd api && npm run build`                                             |
+| **Type check**    | `cd api && npm run typecheck`                                         |
 
 **Key files:**
+
 - `src/container.ts` — Dependency injection: wires Repository, Store, Services, and Handlers
 - `src/http/types.ts` — Transport-agnostic request/response types
 - `src/http/server.ts` — HTTP routing and request binding
 - `src/data/repository.ts` — Read interface (venues, matches, events)
 - `src/store/jsonStore.ts` — Write interface (Store, Collection CRUD)
 - `src/domain/models.ts` — Read models (Venue, Match, Event, RankedVenue)
-- `src/domain/engagement.ts` — Engagement models (User, Review, CheckIn, Prediction, etc.)
+- `src/domain/engagement.ts` — Engagement models (User, Review, CheckIn, Prediction, plus the v1 anonymous Event/Venue Rsvp/Presence/Vibe/Review + vibe intensity helpers)
+- `src/services/eventEngagement.ts`, `src/services/venueEngagement.ts` — **v1 anonymous engagement** (RSVP/presence, 0–10 vibe slider, reviews); the venue one is also a discovery overlay feeding ranking
 - `src/handlers/` — Handler functions (one per endpoint or feature)
 - `src/services/` — Business logic (DiscoveryService, RankingService, etc.)
 - `src/config/env.ts` — Environment variables with sensible defaults
 
 **Storage Seams:**
+
 - `DATABASE_URL` unset → `FileRepository` (reads JSONL from `../ingestion/data/<city>/`) + `JsonStore` (writes to `data/engagement/<name>.json`)
 - `DATABASE_URL` set → `PgRepository` (queries Postgres) + `PgStore` (upserts to Postgres)
 - Services depend on interfaces, never concrete backends → **storage is fully swappable**
 
 **Auth:**
+
+- **v1 is account-free.** The live engagement (RSVP/presence, vibe slider,
+  reviews) is keyed to a **device-scoped anonymous id** (`anonId`, stored in the
+  browser's localStorage — see `frontend/src/lib/anon.ts`), not a user account.
+  The account-gated features below are built but dormant behind the frontend
+  `features.ts` flags.
 - **Request-level:** Supabase Anonymous Auth. Every browser visitor gets a
   signed ES256 JWT (no login). Frontend sends as `X-Supabase-Auth` header.
   Backend verifies via JWKS (`jose` library). `SUPABASE_URL` unset → disabled.
-- **User-level (dev stub):** `fmtok_<userId>` token for engagement writes.
+- **User-level (dev stub):** `fmtok_<userId>` token for account-gated writes.
   `AuthService.resolveUser()` parses token, looks up user.
 
 **Handler Pattern:**
+
 ```ts
 // Transport-agnostic
 const myHandler = (c: Container) => async (req: ApiRequest) => {
   const userId = requireUser(req); // throws ApiError if missing
-  const radius = requireFloat(req, 'radius', 5000);
+  const radius = requireFloat(req, "radius", 5000);
   const results = await c.services.discovery.search({ userId, radius });
   return { status: 200, body: results };
 };
@@ -100,17 +111,18 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 
 **Role:** Discovery map/list UI, ranking/recommendation views, programmatic SEO landing pages, admin analytics dashboard.
 
-| Item | Details |
-|------|---------|
-| **Entry** | `src/app/page.tsx` (Next.js App Router) |
-| **Runtime** | Next.js 16 (React 19) with Leaflet for maps |
-| **Dev command** | `cd frontend && npm run dev` |
-| **Build command** | `cd frontend && npm run build` |
-| **Start command** | `cd frontend && npm start` |
-| **Type check** | `cd frontend && npm run typecheck` |
-| **Lint** | `cd frontend && npm lint` |
+| Item              | Details                                     |
+| ----------------- | ------------------------------------------- |
+| **Entry**         | `src/app/page.tsx` (Next.js App Router)     |
+| **Runtime**       | Next.js 16 (React 19) with Leaflet for maps |
+| **Dev command**   | `cd frontend && npm run dev`                |
+| **Build command** | `cd frontend && npm run build`              |
+| **Start command** | `cd frontend && npm start`                  |
+| **Type check**    | `cd frontend && npm run typecheck`          |
+| **Lint**          | `cd frontend && npm lint`                   |
 
 **Key files:**
+
 - `src/app/` — Next.js App Router pages (layout, discovery, `/watch/[city]`, `/venue/[city]/[id]`)
 - `src/components/` — React components (MapView, VenueList, EventsPanel, etc.)
 - `src/lib/api.ts` — Client-side API fetching (calls `api/`)
@@ -118,6 +130,7 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 - `public/cities/` — City-specific static assets (flags, themes, etc.)
 
 **SEO & Programmatic Landing Pages:**
+
 - `/watch` → all cities
 - `/watch/[city]` → city-specific discovery
 - `/watch/[city]/[team]` → team-filtered discovery
@@ -125,6 +138,7 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 - Server-rendered with JSON-LD, sitemap, robots.txt
 
 **Admin Routes:**
+
 - `/admin` — traffic analytics dashboard (admin-gated by `ADMIN_EMAILS` in `api/`)
 
 ---
@@ -153,16 +167,16 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 
 ### Common Tasks
 
-| Task | Where |
-|------|-------|
-| Add an API endpoint | Create handler in `api/src/handlers/`, wire in `container.ts`, add route in `http/server.ts` |
-| Add engagement data type | Add model to `api/src/domain/engagement.ts`, create service + handlers, wire into container |
-| Add business logic | Create service in `api/src/services/`, inject dependencies (Repository, Store, other services) |
-| Add frontend page | Create `.tsx` in `api/src/app/`, add client components in `src/components/` |
-| Transform ingestion data | Add/modify stage in `ingestion/src/pipeline/`, update `canonical.ts` Zod schema if needed |
-| Add configuration | Add to `src/config/env.ts` with sensible defaults; load from `process.env` |
-| Auth-gate an endpoint | Use `requireUser()` or `requireAdmin()` helper in handler. Request-level auth (Supabase JWT) is automatic for all routes except `/health` |
-| Swap storage backends | Implement `Repository` or `Store` interface; services unchanged |
+| Task                     | Where                                                                                                                                     |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Add an API endpoint      | Create handler in `api/src/handlers/`, wire in `container.ts`, add route in `http/server.ts`                                              |
+| Add engagement data type | Add model to `api/src/domain/engagement.ts`, create service + handlers, wire into container                                               |
+| Add business logic       | Create service in `api/src/services/`, inject dependencies (Repository, Store, other services)                                            |
+| Add frontend page        | Create `.tsx` in `api/src/app/`, add client components in `src/components/`                                                               |
+| Transform ingestion data | Add/modify stage in `ingestion/src/pipeline/`, update `canonical.ts` Zod schema if needed                                                 |
+| Add configuration        | Add to `src/config/env.ts` with sensible defaults; load from `process.env`                                                                |
+| Auth-gate an endpoint    | Use `requireUser()` or `requireAdmin()` helper in handler. Request-level auth (Supabase JWT) is automatic for all routes except `/health` |
+| Swap storage backends    | Implement `Repository` or `Store` interface; services unchanged                                                                           |
 
 ---
 
@@ -215,8 +229,10 @@ Handlers use tiny helpers to extract and validate request fields. Helpers throw 
 
 ```ts
 const userId = requireUser(req); // throws if missing
-const radius = requireFloat(req, 'radius', 5000); // throws if invalid, defaults to 5000
-const filters = bodyField<Filters>(req, 'filters', { /* defaults */ });
+const radius = requireFloat(req, "radius", 5000); // throws if invalid, defaults to 5000
+const filters = bodyField<Filters>(req, "filters", {
+  /* defaults */
+});
 ```
 
 **Why:** Consistent error handling; explicit validation; no middleware chain.
@@ -242,25 +258,27 @@ const rankedVenues = await c.services.ranking.rank(venues, venueOverlay);
 
 ## TypeScript Conventions
 
-| Setting | Value | Notes |
-|---------|-------|-------|
-| **Target** | ES2022 | Modern async/await, nullish coalescing |
-| **Module** | NodeNext | Explicit ESM with proper Node resolution |
-| **Strict** | true | Enforces strict null checks, no implicit any |
-| **noUncheckedIndexedAccess** | true | Indexing maps returns `T \| undefined` |
-| **lib** | ES2022, dom (frontend) | Standard types + DOM for frontend |
+| Setting                      | Value                  | Notes                                        |
+| ---------------------------- | ---------------------- | -------------------------------------------- |
+| **Target**                   | ES2022                 | Modern async/await, nullish coalescing       |
+| **Module**                   | NodeNext               | Explicit ESM with proper Node resolution     |
+| **Strict**                   | true                   | Enforces strict null checks, no implicit any |
+| **noUncheckedIndexedAccess** | true                   | Indexing maps returns `T \| undefined`       |
+| **lib**                      | ES2022, dom (frontend) | Standard types + DOM for frontend            |
 
 **Import Style:**
+
 ```ts
 // ✅ Do this (ESM)
-import { Repository } from '../data/repository.ts';
-import type { Venue } from '../domain/models.ts';
+import { Repository } from "../data/repository.ts";
+import type { Venue } from "../domain/models.ts";
 
 // ❌ Not this (CommonJS)
-const { Repository } = require('../data/repository');
+const { Repository } = require("../data/repository");
 ```
 
 **Nullable Types:**
+
 ```ts
 // ✅ Be explicit
 interface Result {
@@ -273,6 +291,7 @@ const user = getUserById(123); // must have explicit return type
 ```
 
 **Interfaces for Contracts:**
+
 ```ts
 // ✅ Storage backends implement interfaces
 interface Store {
@@ -292,6 +311,7 @@ class EngagementService {
 **Prerequisites:** Node.js 20+, npm/yarn
 
 **Setup:**
+
 ```bash
 # Install dependencies in each package
 cd api && npm install
@@ -306,6 +326,7 @@ export SUPABASE_URL=https://<ref>.supabase.co
 ```
 
 **Development:**
+
 ```bash
 # Terminal 1: Ingestion (optional—if you want fresh data)
 cd ingestion && npm run ingest
@@ -318,6 +339,7 @@ cd frontend && npm run dev
 ```
 
 **Open browser:**
+
 - Frontend: http://localhost:3000
 - API docs: See `api/README.md` for endpoints
 - Admin dashboard: http://localhost:3000/admin (gated by `ADMIN_EMAILS`)
@@ -380,4 +402,3 @@ cd ingestion && npm run typecheck   # Type-check
 - [frontend/README.md](./frontend/README.md) — Frontend architecture and components
 - [ingestion/README.md](./ingestion/README.md) — Data pipeline documentation
 - [ingestion/sources.md](./ingestion/sources.md) — Data sources and scraping details
-

@@ -25,17 +25,20 @@ HTTP / API Gateway → Handler → Service → Repository → Phase 0 JSONL
 
 ### Ranking (PRD §6.5)
 
-The full venue score is split across phases:
+The full venue score blends static (precomputed) and query-time signals:
 
 ```
-Venue Score = 30% ratings + 25% attendance + 20% engagement   ← static, precomputed in Phase 0
-            + 15% team-fan-match + 10% distance                ← query-time, computed here
+Venue Score = 50% content      ← venue-type prior + showsMatches ("is this a watch spot?")
+            + 20% static       ← precomputed venue.score (ratings/attendance/engagement)
+            + 15% team-fan-match + 10% distance   ← query-time (user team + location)
+            + 10% buzz          ← live: fans "here" now + recent vibe energy (0–10 slider)
 ```
 
-The static 0.75 portion is read from `venue.score`; this service adds the
-user-relative signals and renormalizes (team-fan-match only counts when the
-user picked a team). Weights live in `src/config/ranking.ts`, mirroring the
-ingestion `scoring.json`.
+Weights live in `src/config/ranking.ts` and are renormalized per query
+(team-fan-match only counts when the user picked a team). Anonymous **reviews**
+blend community consensus into the `static` score and **vibes/presence** drive
+the `buzz` term — both via the `VenueEngagementService` discovery overlay, so
+user engagement genuinely moves ranking.
 
 ## Endpoints
 
@@ -50,16 +53,35 @@ ingestion `scoring.json`.
 | GET    | `/events/nearby`      | `city,lat,lon[,radius,team]`            | Fan events near a point                                     |
 | GET    | `/recommendations`    | `city,lat,lon,team[,radius,limit]`      | Personalized venue recs                                     |
 | GET    | `/ai/recommendations` | `city,lat,lon,team[,radius,limit,mode]` | Matchday pitch (Phase 3)                                    |
-| GET    | `/live/events`        | —                                       | Live + upcoming scores across leagues (ESPN-backed)         |
+| GET    | `/live/events`        | —                                       | Live + upcoming FIFA World Cup 2026 scores (ESPN-backed)    |
+
+### Anonymous fan engagement (v1 — no login)
+
+The live engagement path is account-free: each request carries a device-scoped
+`anonId` (random id in the browser's localStorage), not a user account. Covers
+three interactions on both **fan events** and **watch spots** (venues):
+
+| Method   | Path                                     | Body / query                            | Purpose                              |
+| -------- | ---------------------------------------- | --------------------------------------- | ------------------------------------ |
+| GET      | `/events/:id`                            | `[anonId]`                              | Event detail + RSVP/review summaries |
+| POST/GET | `/events/:id/rsvp` · `/events/:id/rsvps` | `anonId[,going,favoriteTeam]`           | "I'm going" + who's going            |
+| POST/GET | `/events/:id/vibes`                      | `anonId,intensity(0–10)[,favoriteTeam]` | Live energy pulse + feed             |
+| POST/GET | `/events/:id/reviews`                    | `anonId,rating(1–5)[,comment,team]`     | Anonymous review                     |
+| POST/GET | `/venues/:id/presence`                   | `anonId[,here,favoriteTeam]`            | "I'm here" + who's here              |
+| POST/GET | `/venues/:id/vibes`                      | `anonId,intensity(0–10)[,favoriteTeam]` | Live energy pulse + feed             |
+| POST/GET | `/venues/:id/fan-reviews`                | `anonId,rating(1–5)[,comment,team]`     | Anonymous review                     |
+
+All persist via the same `Store` seam (local JSON in dev, Supabase `engagement`
+table in prod). Reviews feed the `static` ranking score; presence + vibe energy
+feed the `buzz` term.
 
 ### Live sporting events (`/live/events`)
 
 A public, read-only ticker. [`LiveEventsService`](./src/services/liveEvents.ts)
-aggregates ESPN's public scoreboard JSON across several leagues (soccer,
-basketball, baseball, hockey), normalizes each game to a stable `LiveEvent`
-shape, and sorts live games first. The fetch is server-side (no browser CORS,
-upstream shape hidden behind our contract); a failing league is skipped, never
-fatal.
+fetches ESPN's public scoreboard JSON for the **FIFA World Cup** only,
+normalizes each game to a stable `LiveEvent` shape, and sorts live games first.
+The fetch is server-side (no browser CORS, upstream shape hidden behind our
+contract); a failing fetch is skipped, never fatal.
 
 > **⚠️ Production:** ESPN's endpoint is **unofficial, undocumented, and
 > rate-limited** — great for local/demo, not SLA-grade. Before launch, swap to a
@@ -77,10 +99,11 @@ as a placeholder — the Claude path (`claude-opus-4-8` via the Anthropic SDK,
 `ANTHROPIC_API_KEY` / `AI_MODEL`) is scaffolded but intentionally not wired in
 yet.
 
-### Phase 2 — engagement (user-generated, write APIs)
+### Phase 2 — account-gated engagement (dormant in v1)
 
-Writes go through a pluggable JSON store (`src/store`, swap for Postgres/
-DynamoDB). Reviews overlay onto venue ratings, so they feed the §6.5 ranking.
+> The v1 live path is the **anonymous** engagement above. These account-gated
+> write APIs are built but hidden behind the frontend `features.ts` flags. Writes
+> go through a pluggable JSON store (`src/store`, swap for Postgres/DynamoDB).
 
 **Request-level auth:** All requests (except `/health`) must carry a valid
 `X-Supabase-Auth` JWT header — an anonymous session token issued by Supabase

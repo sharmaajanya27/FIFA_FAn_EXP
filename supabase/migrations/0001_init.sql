@@ -44,7 +44,8 @@ create index if not exists events_city_slug_idx on events (city_slug);
 -- ── Engagement (generic store preserving the Store.collection<T>() surface) ──
 -- One row per record; `collection` is the logical table name used by the code
 -- (users, reviews, checkins, posts, crowd_reports, user_events, photos,
--- predictions, venue_claims, venue_features).
+-- predictions, venue_claims, venue_features, event_rsvps, event_vibes,
+-- event_reviews).
 
 create table if not exists engagement (
   collection text not null,

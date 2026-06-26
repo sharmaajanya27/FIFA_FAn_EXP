@@ -9,7 +9,15 @@
  * geolocation.
  */
 import { cityBySlug } from "../cities";
-import type { Match, RankedVenue, ReviewsResponse, VenueDetail } from "../types";
+import type {
+  EventDetailResponse,
+  Match,
+  PresenceSummary,
+  RankedVenue,
+  ReviewsResponse,
+  VenueDetail,
+  VenueReviewSummary,
+} from "../types";
 
 // Server-only: always use BACKEND_URL (full http:// URL). Exposed via
 // next.config.mjs `env` field to ensure it's available during build.
@@ -17,6 +25,7 @@ const BASE = (process.env.BACKEND_URL || "http://localhost:3001").replace(
   /\/+$/,
   "",
 );
+const SERVER_AUTH_SECRET = process.env.SERVER_AUTH_SECRET || "";
 const REVALIDATE_SECONDS = 3600;
 /** Wide enough to cover a metro from its center (e.g. SF Bay Area). */
 const METRO_RADIUS_M = 25000;
@@ -32,12 +41,14 @@ async function apiGet<T>(
   try {
     const res = await fetch(url.toString(), {
       next: { revalidate: REVALIDATE_SECONDS },
-      headers: {
-        // Server-side calls bypass the browser Supabase session. The backend
-        // skips JWT verification when SUPABASE_URL is unset; in production we
-        // send a service-level bypass header so the JWT gate lets SSG through.
-        "X-Server-Auth": process.env.SERVER_AUTH_SECRET || "",
-      },
+      headers: SERVER_AUTH_SECRET
+        ? {
+            // Server-side calls bypass the browser Supabase session. The backend
+            // skips JWT verification when SUPABASE_URL is unset; in production we
+            // send a service-level bypass header so the JWT gate lets SSG through.
+            "X-Server-Auth": SERVER_AUTH_SECRET,
+          }
+        : undefined,
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
@@ -73,18 +84,54 @@ export async function getVenueWithReviews(
     city: citySlug,
   });
   if (!venue?.id) return null;
-  const reviews =
-    (await apiGet<ReviewsResponse>(`/venues/${encodeURIComponent(id)}/reviews`)) ?? {
+  const reviews = (await apiGet<ReviewsResponse>(
+    `/venues/${encodeURIComponent(id)}/reviews`,
+  )) ?? {
+    venueId: id,
+    count: 0,
+    averageRating: null,
+    reviews: [],
+  };
+  return { venue, reviews };
+}
+
+/** Single fan event + its RSVP/review summaries (event detail page). */
+export async function getEventDetail(
+  id: string,
+): Promise<EventDetailResponse | null> {
+  const data = await apiGet<EventDetailResponse>(
+    `/events/${encodeURIComponent(id)}`,
+  );
+  return data?.event ? data : null;
+}
+
+/** A venue's anonymous engagement summaries (presence + reviews) for SSR. */
+export async function getVenueEngagement(
+  id: string,
+): Promise<{ presence: PresenceSummary; reviews: VenueReviewSummary }> {
+  const [presence, reviews] = await Promise.all([
+    apiGet<PresenceSummary>(`/venues/${encodeURIComponent(id)}/presence`),
+    apiGet<VenueReviewSummary>(`/venues/${encodeURIComponent(id)}/fan-reviews`),
+  ]);
+  return {
+    presence: presence ?? { venueId: id, count: 0, teams: {}, here: false },
+    reviews: reviews ?? {
       venueId: id,
       count: 0,
       averageRating: null,
       reviews: [],
-    };
-  return { venue, reviews };
+    },
+  };
 }
 
 /** Upcoming fixtures for a city, optionally filtered by team code. */
-export async function getCityMatches(slug: string, team?: string): Promise<Match[]> {
-  const data = await apiGet<{ matches: Match[] }>("/matches", { city: slug, team });
+export async function getCityMatches(
+  slug: string,
+  team?: string,
+): Promise<Match[]> {
+  const data = await apiGet<{ matches: Match[] }>("/matches", {
+    city: slug,
+    team,
+  });
   return data?.matches ?? [];
 }

@@ -491,17 +491,43 @@ button.toggle.active {
 .badge.kind {
   text-transform: capitalize;
 }
-.score-bar {
-  height: 4px;
-  border-radius: 4px;
-  background: var(--panel-2);
-  margin-top: 8px;
-  overflow: hidden;
+
+/* Clickable cards (venue + event): clear affordance with cursor, lift, arrow. */
+.venue.clickable,
+.event.clickable {
+  cursor: pointer;
 }
-.score-bar > span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), #e0a44e);
+.venue.clickable:hover,
+.event.clickable:hover {
+  background: var(--panel-2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.venue.clickable:focus-visible,
+.event.clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.venue.clickable .name {
+  color: var(--accent-deep);
+}
+
+/* Live crowd metrics row (stars / fans here / vibes). */
+.metrics {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.metric {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.metric.hot {
+  color: var(--accent-deep);
 }
 
 .map {
@@ -538,6 +564,14 @@ button.toggle.active {
 .event .when {
   color: var(--muted);
   font-size: 12px;
+}
+.event .event-title {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+.event .event-title:hover {
+  text-decoration: underline;
 }
 .row {
   display: flex;

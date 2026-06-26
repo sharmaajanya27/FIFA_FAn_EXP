@@ -22,6 +22,17 @@ export interface RankedVenue {
   finalScore: number;
   featured?: boolean;
   claimed?: boolean;
+  /** Anonymous fan rating (avg 1..5) + count, from venue engagement. */
+  fanRating?: number;
+  fanRatingCount?: number;
+  /** Distinct devices currently "here" (live presence). */
+  hereCount?: number;
+  /** Number of live vibe pulses. */
+  vibeCount?: number;
+  /** Average crowd-energy intensity (0..10) from recent vibe pulses. */
+  energy?: number;
+  /** Dominant repped team among fans here. */
+  dominantTeam?: string;
 }
 
 export interface Match {
@@ -43,6 +54,14 @@ export interface FanEvent {
   teams: string[];
   estAttendance?: number;
   distanceMeters: number;
+  /** Distinct devices currently RSVP'd "going" (anonymous). */
+  goingCount?: number;
+  /** Number of live vibe pulses. */
+  vibeCount?: number;
+  /** Average crowd-energy intensity (0..10) from recent vibe pulses. */
+  energy?: number;
+  /** Dominant repped team among attendees. */
+  dominantTeam?: string;
 }
 
 export interface NearbyVenuesResponse {
@@ -53,6 +72,113 @@ export interface NearbyVenuesResponse {
 export interface EventsResponse {
   count: number;
   events: FanEvent[];
+}
+
+// ---- fan-event engagement (v1, anonymous) ----
+/** Full fan-event record (event detail page; no per-query distance). */
+export interface EventDetail {
+  id: string;
+  title: string;
+  kind: string;
+  geo: GeoPoint;
+  startTime: string;
+  city?: string;
+  country?: string;
+  venueId?: string;
+  matchId?: string;
+  teams: string[];
+  estAttendance?: number;
+}
+
+export interface RsvpSummary {
+  eventId: string;
+  /** Distinct devices currently going. */
+  count: number;
+  /** Going-count by repped team code. */
+  teams: Record<string, number>;
+  /** Whether this device is currently going. */
+  going: boolean;
+  /** This device's repped team, if any. */
+  favoriteTeam?: string;
+}
+
+export interface EventVibe {
+  id: string;
+  eventId: string;
+  anonId: string;
+  intensity: number;
+  favoriteTeam?: string;
+  createdAt: string;
+}
+
+export interface EventReview {
+  id: string;
+  eventId: string;
+  anonId: string;
+  rating: number;
+  comment?: string;
+  favoriteTeam?: string;
+  createdAt: string;
+}
+
+export interface EventReviewSummary {
+  eventId: string;
+  count: number;
+  averageRating: number | null;
+  reviews: EventReview[];
+}
+
+export interface EventDetailResponse {
+  event: EventDetail;
+  rsvps: RsvpSummary;
+  reviews: EventReviewSummary;
+}
+
+export interface EventVibesResponse {
+  count: number;
+  vibes: EventVibe[];
+}
+
+// ---- watch-spot (venue) engagement (v1, anonymous) ----
+export interface PresenceSummary {
+  venueId: string;
+  /** Distinct devices currently here. */
+  count: number;
+  teams: Record<string, number>;
+  /** Whether this device is currently here. */
+  here: boolean;
+  favoriteTeam?: string;
+}
+
+export interface VenueVibe {
+  id: string;
+  venueId: string;
+  anonId: string;
+  intensity: number;
+  favoriteTeam?: string;
+  createdAt: string;
+}
+
+export interface VenueFanReview {
+  id: string;
+  venueId: string;
+  anonId: string;
+  rating: number;
+  comment?: string;
+  favoriteTeam?: string;
+  createdAt: string;
+}
+
+export interface VenueReviewSummary {
+  venueId: string;
+  count: number;
+  averageRating: number | null;
+  reviews: VenueFanReview[];
+}
+
+export interface VenueVibesResponse {
+  count: number;
+  vibes: VenueVibe[];
 }
 
 export type LiveEventState = "pre" | "in" | "post";

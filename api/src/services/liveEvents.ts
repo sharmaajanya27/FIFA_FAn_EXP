@@ -1,22 +1,21 @@
 /**
- * Live sporting events (read-only). Aggregates ESPN's public, keyless
- * scoreboard JSON across a handful of leagues/sports and normalizes it to a
- * stable `LiveEvent` shape the frontend renders. This is a pure proxy: no
- * persistence, no auth — it keeps the third-party fetch server-side (avoids
- * browser CORS and shields the response shape behind our own contract).
+ * Live sporting events (read-only). Fetches ESPN's public, keyless scoreboard
+ * JSON for the FIFA World Cup and normalizes it to a stable `LiveEvent` shape
+ * the frontend renders. This is a pure proxy: no persistence, no auth — it
+ * keeps the third-party fetch server-side (avoids browser CORS and shields the
+ * response shape behind our own contract).
  *
  * Source: https://site.api.espn.com/apis/site/v2/sports/<sport>/<league>/scoreboard
  */
 import { log } from "../util/logger.js";
 
-/** Leagues polled for the live ticker. Order is the display fallback order. */
+/**
+ * Leagues polled for the live ticker. Scoped to the FIFA World Cup only — the
+ * product shows World Cup 2026 scores exclusively. `fifa.world` resolves to the
+ * active men's World Cup edition (2026 during the tournament window).
+ */
 const LEAGUES: { sport: string; league: string; sportLabel: string }[] = [
   { sport: "soccer", league: "fifa.world", sportLabel: "Soccer" },
-  { sport: "soccer", league: "uefa.champions", sportLabel: "Soccer" },
-  { sport: "basketball", league: "nba", sportLabel: "Basketball" },
-  { sport: "basketball", league: "wnba", sportLabel: "Basketball" },
-  { sport: "baseball", league: "mlb", sportLabel: "Baseball" },
-  { sport: "hockey", league: "nhl", sportLabel: "Hockey" },
 ];
 
 export type LiveEventState = "pre" | "in" | "post";
