@@ -19,6 +19,36 @@
       "startTime": "2026-06-11T19:30:00Z",
       "matchId": "wc2026-001",
       "estAttendance": 500
+    },
+    {
+      "externalId": "gdl-evt-003",
+      "title": "Argentina vs Croatia Fan Zone — Zapopan",
+      "kind": "fan_zone",
+      "lat": 20.72,
+      "lon": -103.39,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 420
+    },
+    {
+      "externalId": "gdl-evt-004",
+      "title": "Mexico Round of 16 Watch Party — Chapultepec",
+      "kind": "viewing_party",
+      "lat": 20.67,
+      "lon": -103.37,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 950
+    },
+    {
+      "externalId": "gdl-evt-005",
+      "title": "World Cup Final Watch Party — Estadio Akron Plaza",
+      "kind": "fan_zone",
+      "lat": 20.681,
+      "lon": -103.463,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1200
     }
   ]
 }

@@ -46,51 +46,6 @@ export const METROS: Metro[] = [
     },
   },
   {
-    slug: "london",
-    name: "London",
-    country: "GB",
-    locale: "en-GB",
-    currency: "GBP",
-    center: { lat: 51.515, lon: -0.115 },
-    stadium: { name: "Wembley Stadium", center: { lat: 51.556, lon: -0.2796 } },
-  },
-  {
-    slug: "buenos-aires",
-    name: "Buenos Aires",
-    country: "AR",
-    locale: "es-AR",
-    currency: "ARS",
-    center: { lat: -34.6, lon: -58.4 },
-    stadium: {
-      name: "Estadio Monumental",
-      center: { lat: -34.5453, lon: -58.4498 },
-    },
-  },
-  {
-    slug: "sao-paulo",
-    name: "São Paulo",
-    country: "BR",
-    locale: "pt-BR",
-    currency: "BRL",
-    center: { lat: -23.55, lon: -46.64 },
-    stadium: {
-      name: "Estádio do Morumbi",
-      center: { lat: -23.6, lon: -46.7211 },
-    },
-  },
-  {
-    slug: "madrid",
-    name: "Madrid",
-    country: "ES",
-    locale: "es-ES",
-    currency: "EUR",
-    center: { lat: 40.42, lon: -3.7 },
-    stadium: {
-      name: "Santiago Bernabéu",
-      center: { lat: 40.4531, lon: -3.6883 },
-    },
-  },
-  {
     slug: "mexico-city",
     name: "Mexico City",
     country: "MX",
@@ -98,18 +53,6 @@ export const METROS: Metro[] = [
     currency: "MXN",
     center: { lat: 19.43, lon: -99.13 },
     stadium: { name: "Estadio Azteca", center: { lat: 19.303, lon: -99.1505 } },
-  },
-  {
-    slug: "tokyo",
-    name: "Tokyo",
-    country: "JP",
-    locale: "ja-JP",
-    currency: "JPY",
-    center: { lat: 35.68, lon: 139.74 },
-    stadium: {
-      name: "Japan National Stadium",
-      center: { lat: 35.6779, lon: 139.7147 },
-    },
   },
   // FIFA World Cup 2026 host cities.
   {

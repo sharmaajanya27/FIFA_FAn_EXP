@@ -7,12 +7,15 @@
  * sitemap resolve correctly.
  */
 import type { Metadata } from "next";
-import type { VenueDetail } from "./types";
+import type { EventDetail, VenueDetail } from "./types";
 
 const DEFAULT_SITE_URL = "https://fanwatch.app";
 
 export function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(/\/+$/, "");
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(
+    /\/+$/,
+    "",
+  );
 }
 
 export function absoluteUrl(path = "/"): string {
@@ -24,8 +27,11 @@ export const paths = {
   home: () => "/",
   watchIndex: () => "/watch",
   city: (slug: string) => `/watch/${slug}`,
-  cityTeam: (slug: string, teamCode: string) => `/watch/${slug}/${teamCode.toLowerCase()}`,
-  venue: (citySlug: string, id: string) => `/venue/${citySlug}/${encodeURIComponent(id)}`,
+  cityTeam: (slug: string, teamCode: string) =>
+    `/watch/${slug}/${teamCode.toLowerCase()}`,
+  venue: (citySlug: string, id: string) =>
+    `/venue/${citySlug}/${encodeURIComponent(id)}`,
+  event: (id: string) => `/event/${encodeURIComponent(id)}`,
 };
 
 interface MetaInput {
@@ -36,7 +42,12 @@ interface MetaInput {
   noindex?: boolean;
 }
 
-export function buildMetadata({ title, description, path, noindex }: MetaInput): Metadata {
+export function buildMetadata({
+  title,
+  description,
+  path,
+  noindex,
+}: MetaInput): Metadata {
   const url = absoluteUrl(path);
   return {
     title,
@@ -143,6 +154,53 @@ export function venueLd(
   if (venue.hours) ld.openingHours = venue.hours;
   if (venue.website) ld.sameAs = [venue.website];
   // Google requires a count alongside the value, else it flags the rating.
+  if (rating && rating.count > 0) {
+    ld.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: Number(rating.value.toFixed(1)),
+      reviewCount: rating.count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+  return ld;
+}
+
+/** schema.org Event for a fan watch party / fan zone. */
+export function eventLd(
+  event: EventDetail,
+  path: string,
+  rating?: { value: number; count: number },
+): Ld {
+  const ld: Ld = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    startDate: event.startTime,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    url: absoluteUrl(path),
+  };
+  if (event.geo) {
+    ld.location = {
+      "@type": "Place",
+      ...(event.city ? { name: event.city } : {}),
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: event.geo.lat,
+        longitude: event.geo.lon,
+      },
+      ...(event.city
+        ? {
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: event.city,
+              ...(event.country ? { addressCountry: event.country } : {}),
+            },
+          }
+        : {}),
+    };
+  }
   if (rating && rating.count > 0) {
     ld.aggregateRating = {
       "@type": "AggregateRating",

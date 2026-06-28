@@ -19,6 +19,36 @@
       "startTime": "2026-06-11T19:30:00Z",
       "matchId": "wc2026-001",
       "estAttendance": 480
+    },
+    {
+      "externalId": "mty-evt-003",
+      "title": "Argentina vs Croatia Community Watch — San Pedro",
+      "kind": "community_watch",
+      "lat": 25.658,
+      "lon": -100.402,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 300
+    },
+    {
+      "externalId": "mty-evt-004",
+      "title": "Mexico Round of 16 Watch Party — Macroplaza",
+      "kind": "viewing_party",
+      "lat": 25.672,
+      "lon": -100.31,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 900
+    },
+    {
+      "externalId": "mty-evt-005",
+      "title": "World Cup Final Watch Party — Estadio BBVA Plaza",
+      "kind": "fan_zone",
+      "lat": 25.669,
+      "lon": -100.244,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1100
     }
   ]
 }

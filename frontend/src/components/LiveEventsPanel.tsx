@@ -61,7 +61,7 @@ export function LiveEventsPanel() {
       <div className="header" style={{ justifyContent: "space-between" }}>
         <div>
           <h2 style={{ margin: 0 }}>
-            Live sporting events
+            World Cup 2026 scores
             {liveCount > 0 && (
               <span className="live-pill" style={{ marginLeft: 10 }}>
                 <span className="season-live" aria-hidden /> {liveCount} live
@@ -69,7 +69,7 @@ export function LiveEventsPanel() {
             )}
           </h2>
           <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
-            Scores across soccer, basketball, baseball &amp; hockey
+            Live &amp; upcoming FIFA World Cup 2026 matches
             {updatedAt
               ? ` · updated ${updatedAt.toLocaleTimeString(undefined, {
                   hour: "numeric",

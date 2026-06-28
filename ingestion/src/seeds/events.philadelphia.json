@@ -19,6 +19,36 @@
       "startTime": "2026-06-18T21:30:00Z",
       "matchId": "wc2026-008",
       "estAttendance": 160
+    },
+    {
+      "externalId": "phl-evt-003",
+      "title": "USA vs Mexico Watch Party — Northern Liberties",
+      "kind": "viewing_party",
+      "lat": 39.965,
+      "lon": -75.141,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 420
+    },
+    {
+      "externalId": "phl-evt-004",
+      "title": "Spain vs Netherlands Fan Zone — Rittenhouse",
+      "kind": "fan_zone",
+      "lat": 39.949,
+      "lon": -75.172,
+      "startTime": "2026-06-16T19:30:00Z",
+      "matchId": "wc2026-006",
+      "estAttendance": 260
+    },
+    {
+      "externalId": "phl-evt-005",
+      "title": "World Cup Final Watch Party — LOVE Park",
+      "kind": "fan_zone",
+      "lat": 39.954,
+      "lon": -75.165,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 800
     }
   ]
 }

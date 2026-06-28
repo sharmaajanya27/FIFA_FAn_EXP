@@ -40,6 +40,23 @@ import { listPhotos, uploadPhoto } from "../handlers/photos.js";
 import { aiRecommendations } from "../handlers/ai.js";
 import { createEvent, listEvents } from "../handlers/events.js";
 import {
+  getEvent,
+  listEventReviews,
+  listRsvps,
+  listVibes,
+  postVibe,
+  reviewEvent,
+  rsvpEvent,
+} from "../handlers/eventEngagement.js";
+import {
+  getVenuePresence,
+  listVenueFanReviews,
+  listVenueVibes,
+  postVenueVibe,
+  reviewVenue,
+  setVenuePresence,
+} from "../handlers/venueEngagement.js";
+import {
   claimVenue,
   featureVenue,
   getListing,
@@ -54,7 +71,11 @@ import { listMetros } from "../handlers/metros.js";
 import { listLiveEvents } from "../handlers/liveEvents.js";
 import { analyticsSummary, recordPageView } from "../handlers/analytics.js";
 import { ApiError, type ApiRequest, type Handler } from "./types.js";
-import { initJwtVerification, isJwtVerificationEnabled, verifySupabaseJwt } from "../auth/jwtVerify.js";
+import {
+  initJwtVerification,
+  isJwtVerificationEnabled,
+  verifySupabaseJwt,
+} from "../auth/jwtVerify.js";
 import { log } from "../util/logger.js";
 
 interface Route {
@@ -122,6 +143,21 @@ function buildRoutes(c: Container): Route[] {
     // Event creation (Phase 3)
     route("POST", "/events", createEvent(c)),
     route("GET", "/events", listEvents(c)),
+    // Anonymous fan-event engagement (v1): detail, RSVP, vibes, reviews
+    route("GET", "/events/:id", getEvent(c)),
+    route("POST", "/events/:id/rsvp", rsvpEvent(c)),
+    route("GET", "/events/:id/rsvps", listRsvps(c)),
+    route("POST", "/events/:id/vibes", postVibe(c)),
+    route("GET", "/events/:id/vibes", listVibes(c)),
+    route("POST", "/events/:id/reviews", reviewEvent(c)),
+    route("GET", "/events/:id/reviews", listEventReviews(c)),
+    // Anonymous watch-spot (venue) engagement (v1): presence, vibes, reviews
+    route("POST", "/venues/:id/presence", setVenuePresence(c)),
+    route("GET", "/venues/:id/presence", getVenuePresence(c)),
+    route("POST", "/venues/:id/vibes", postVenueVibe(c)),
+    route("GET", "/venues/:id/vibes", listVenueVibes(c)),
+    route("POST", "/venues/:id/fan-reviews", reviewVenue(c)),
+    route("GET", "/venues/:id/fan-reviews", listVenueFanReviews(c)),
     route("GET", "/recommendations", recommendations(c)),
     // AI recommendations (Phase 3)
     route("GET", "/ai/recommendations", aiRecommendations(c)),
@@ -218,7 +254,8 @@ async function main(): Promise<void> {
       res.writeHead(status, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": corsOrigin(origin),
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Supabase-Auth",
+        "Access-Control-Allow-Headers":
+          "Content-Type, Authorization, X-Supabase-Auth",
         "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
         "X-Content-Type-Options": "nosniff",
       });
@@ -237,7 +274,8 @@ async function main(): Promise<void> {
       const isServerCall = serverSecret && serverAuth === serverSecret;
 
       if (!isServerCall) {
-        const supaToken = (req.headers["x-supabase-auth"] as string) ?? undefined;
+        const supaToken =
+          (req.headers["x-supabase-auth"] as string) ?? undefined;
         const jwtPayload = await verifySupabaseJwt(supaToken);
         if (!jwtPayload) {
           return send(401, { error: "Invalid or missing request token" });
@@ -272,7 +310,10 @@ async function main(): Promise<void> {
   });
 
   server.listen(env.port, () => {
-    log.info("api: listening", { port: env.port, env: env.isProduction ? "production" : "development" });
+    log.info("api: listening", {
+      port: env.port,
+      env: env.isProduction ? "production" : "development",
+    });
   });
 
   // Graceful shutdown (PM2 sends SIGINT on restart).

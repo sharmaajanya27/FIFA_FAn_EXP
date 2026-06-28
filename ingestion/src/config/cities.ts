@@ -61,50 +61,6 @@ export const CITIES: Record<string, City> = {
       bbox: [40.79, -74.1, 40.84, -74.05],
     },
   },
-  london: {
-    slug: "london",
-    name: "London",
-    country: "GB",
-    bbox: [51.48, -0.18, 51.55, -0.05],
-    stadium: {
-      name: "Wembley Stadium",
-      center: { lat: 51.556, lon: -0.2796 },
-      bbox: [51.54, -0.3, 51.57, -0.26],
-    },
-  },
-  // International expansion (Phase 3) — adding a metro is config-only.
-  "buenos-aires": {
-    slug: "buenos-aires",
-    name: "Buenos Aires",
-    country: "AR",
-    bbox: [-34.64, -58.45, -34.56, -58.36],
-    stadium: {
-      name: "Estadio Monumental",
-      center: { lat: -34.5453, lon: -58.4498 },
-      bbox: [-34.56, -58.47, -34.53, -58.43],
-    },
-  },
-  "sao-paulo": {
-    slug: "sao-paulo",
-    name: "São Paulo",
-    country: "BR",
-    bbox: [-23.59, -46.69, -23.52, -46.6],
-    stadium: {
-      name: "Estádio do Morumbi",
-      center: { lat: -23.6, lon: -46.7211 },
-      bbox: [-23.62, -46.74, -23.58, -46.7],
-    },
-  },
-  madrid: {
-    slug: "madrid",
-    name: "Madrid",
-    country: "ES",
-    bbox: [40.38, -3.74, 40.46, -3.65],
-    stadium: {
-      name: "Santiago Bernabéu",
-      center: { lat: 40.4531, lon: -3.6883 },
-    },
-  },
   "mexico-city": {
     slug: "mexico-city",
     name: "Mexico City",
@@ -114,16 +70,6 @@ export const CITIES: Record<string, City> = {
       name: "Estadio Azteca",
       center: { lat: 19.303, lon: -99.1505 },
       bbox: [19.28, -99.17, 19.32, -99.13],
-    },
-  },
-  tokyo: {
-    slug: "tokyo",
-    name: "Tokyo",
-    country: "JP",
-    bbox: [35.65, 139.69, 35.72, 139.78],
-    stadium: {
-      name: "Japan National Stadium",
-      center: { lat: 35.6779, lon: 139.7147 },
     },
   },
   // FIFA World Cup 2026 host cities. New York/New Jersey is covered by the
@@ -266,74 +212,6 @@ export const CITIES: Record<string, City> = {
       name: "Estadio BBVA",
       center: { lat: 25.6692, lon: -100.2444 },
       bbox: [25.65, -100.26, 25.69, -100.22],
-    },
-  },
-  // Additional major US metros (non-host) — broader fan-experience coverage.
-  // Anchor is the city's primary stadium, used as a UI search origin.
-  chicago: {
-    slug: "chicago",
-    name: "Chicago",
-    country: "US",
-    bbox: [41.85, -87.68, 41.93, -87.58],
-    stadium: { name: "Soldier Field", center: { lat: 41.8623, lon: -87.6167 } },
-  },
-  "washington-dc": {
-    slug: "washington-dc",
-    name: "Washington, D.C.",
-    country: "US",
-    bbox: [38.86, -77.06, 38.93, -76.97],
-    stadium: { name: "Audi Field", center: { lat: 38.8688, lon: -77.0125 } },
-  },
-  phoenix: {
-    slug: "phoenix",
-    name: "Phoenix",
-    country: "US",
-    bbox: [33.42, -112.1, 33.49, -112.03],
-    stadium: { name: "Chase Field", center: { lat: 33.4455, lon: -112.0667 } },
-  },
-  detroit: {
-    slug: "detroit",
-    name: "Detroit",
-    country: "US",
-    bbox: [42.31, -83.08, 42.37, -83.01],
-    stadium: { name: "Ford Field", center: { lat: 42.34, lon: -83.0456 } },
-  },
-  minneapolis: {
-    slug: "minneapolis",
-    name: "Minneapolis",
-    country: "US",
-    bbox: [44.96, -93.3, 45.01, -93.23],
-    stadium: {
-      name: "U.S. Bank Stadium",
-      center: { lat: 44.9737, lon: -93.2575 },
-    },
-  },
-  "san-diego": {
-    slug: "san-diego",
-    name: "San Diego",
-    country: "US",
-    bbox: [32.69, -117.18, 32.75, -117.11],
-    stadium: { name: "Petco Park", center: { lat: 32.7073, lon: -117.1566 } },
-  },
-  denver: {
-    slug: "denver",
-    name: "Denver",
-    country: "US",
-    bbox: [39.71, -105.03, 39.78, -104.95],
-    stadium: {
-      name: "Empower Field at Mile High",
-      center: { lat: 39.7439, lon: -105.0201 },
-    },
-  },
-  tampa: {
-    slug: "tampa",
-    name: "Tampa",
-    country: "US",
-    bbox: [27.93, -82.47, 27.97, -82.43],
-    stadium: {
-      name: "Raymond James Stadium",
-      center: { lat: 27.9759, lon: -82.5033 },
-      bbox: [27.96, -82.52, 28.0, -82.48],
     },
   },
 };

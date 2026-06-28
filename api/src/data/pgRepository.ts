@@ -36,4 +36,10 @@ export class PgRepository implements Repository {
       select data from events where city_slug = ${citySlug}`;
     return rows.map((r) => r.data);
   }
+
+  async eventById(id: string): Promise<Event | undefined> {
+    const rows = await this.sql<{ data: Event }[]>`
+      select data from events where id = ${id} limit 1`;
+    return rows[0]?.data;
+  }
 }

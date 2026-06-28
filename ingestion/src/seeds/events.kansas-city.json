@@ -19,6 +19,36 @@
       "startTime": "2026-06-13T18:30:00Z",
       "matchId": "wc2026-003",
       "estAttendance": 150
+    },
+    {
+      "externalId": "kc-evt-003",
+      "title": "France vs Germany Fan Zone — Crossroads",
+      "kind": "fan_zone",
+      "lat": 39.092,
+      "lon": -94.583,
+      "startTime": "2026-06-15T17:30:00Z",
+      "matchId": "wc2026-005",
+      "estAttendance": 240
+    },
+    {
+      "externalId": "kc-evt-004",
+      "title": "USA Round of 16 Watch Party — Power & Light",
+      "kind": "viewing_party",
+      "lat": 39.099,
+      "lon": -94.583,
+      "startTime": "2026-06-25T22:30:00Z",
+      "matchId": "wc2026-011",
+      "estAttendance": 600
+    },
+    {
+      "externalId": "kc-evt-005",
+      "title": "World Cup Final Watch Party — Arrowhead Plaza",
+      "kind": "fan_zone",
+      "lat": 39.049,
+      "lon": -94.484,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1000
     }
   ]
 }

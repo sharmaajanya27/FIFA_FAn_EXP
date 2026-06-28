@@ -28,12 +28,13 @@ Three TypeScript packages (see [`ARCHITECTURE.md`](./ARCHITECTURE.md)):
 - **`api/`** — discovery API (location/team search, ranking, recommendations), Phase 2 engagement writes (accounts, reviews, check-ins, crowd, predictions, communities), Phase 3 (AI rec scaffold, crowd estimation, user events, sponsorship), and **first-party traffic analytics** (`/analytics/*`, admin-gated by `ADMIN_EMAILS`).
 - **`frontend/`** — the interactive map/list discovery app, plus **programmatic SEO landing pages** (`/watch`, `/watch/[city]`, `/watch/[city]/[team]`, `/venue/[city]/[id]` — server-rendered with metadata, JSON-LD, sitemap/robots) and a **`/admin` traffic dashboard**.
 
-> **Data coverage:** all 30 metros have been ingested and carry venue data
-> (hundreds to thousands each — e.g. Tokyo ~10k, London/New York ~7k). City pages
-> become indexable once they clear a small venue threshold, which every ingested
-> metro does. **Fan events** are still sparse — only a handful of cities have seed
-> events — so event discovery is thin outside those metros even though venue
-> discovery is rich everywhere.
+> **Data coverage:** scoped to the **16 FIFA World Cup 2026 host cities** (17
+> metro slugs — NY/NJ spans `new-york` + `jersey-city`). Each host metro carries
+> rich venue data (hundreds to thousands each) in both local JSONL and Postgres;
+> non-host cities and non-WC teams were removed (`npm run cleanup:host-cities`).
+> **Fan events** are curated seeds (~89 across the host metros). The v1 live
+> experience is account-free — fans RSVP, post a 0–10 **vibe** energy reading,
+> and review, all via an anonymous device id.
 
 ## Status
 

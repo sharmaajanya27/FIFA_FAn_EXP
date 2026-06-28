@@ -11,6 +11,8 @@ import type { Store } from "./store/jsonStore.js";
 import { DiscoveryService } from "./services/discovery.js";
 import { RecommendationService } from "./services/recommendations.js";
 import { ReviewService } from "./services/reviews.js";
+import { EventEngagementService } from "./services/eventEngagement.js";
+import { VenueEngagementService } from "./services/venueEngagement.js";
 import { AiRecommendationService } from "./services/aiRecommendations.js";
 import { CrowdEstimationService } from "./services/crowdEstimation.js";
 import { EventService } from "./services/events.js";
@@ -35,6 +37,10 @@ export interface Container {
   aiRecommendations: AiRecommendationService;
   crowdEstimation: CrowdEstimationService;
   events: EventService;
+  /** Anonymous fan-event RSVP / vibe / review engagement (v1). */
+  eventEngagement: EventEngagementService;
+  /** Anonymous watch-spot presence / vibe / review engagement (v1). */
+  venueEngagement: VenueEngagementService;
   sponsorship: SponsorshipService;
   /** Business-submitted venue listings (PRD §8). */
   business: BusinessService;
@@ -53,10 +59,16 @@ export function buildContainer(
   const auth = new AuthService(store.collection<User>("users"));
   const reviews = new ReviewService(store);
   const events = new EventService(store);
+  const venueEngagement = new VenueEngagementService(store);
   const sponsorship = new SponsorshipService(store);
   const business = new BusinessService(store);
-  // Reviews set the rating-based score; sponsorship then boosts featured venues.
-  const venueOverlay = new CompositeVenueOverlay([reviews, sponsorship]);
+  // Reviews set the rating-based score; venue engagement adds live crowd
+  // metrics (stars/here/vibes); sponsorship then boosts featured venues.
+  const venueOverlay = new CompositeVenueOverlay([
+    reviews,
+    venueEngagement,
+    sponsorship,
+  ]);
   // Business listings are merged into discovery alongside Phase 0 venues.
   const recommendations = new RecommendationService(
     repo,
@@ -75,6 +87,8 @@ export function buildContainer(
     aiRecommendations: new AiRecommendationService(recommendations, env),
     crowdEstimation: new CrowdEstimationService(repo, store),
     events,
+    eventEngagement: new EventEngagementService(store),
+    venueEngagement,
     sponsorship,
     business,
     geocode: new GeocodeService(),

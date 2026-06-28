@@ -19,6 +19,36 @@
       "startTime": "2026-06-19T17:30:00Z",
       "matchId": "wc2026-009",
       "estAttendance": 210
+    },
+    {
+      "externalId": "hou-evt-003",
+      "title": "USA vs Mexico Watch Party — Montrose",
+      "kind": "viewing_party",
+      "lat": 29.742,
+      "lon": -95.39,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 460
+    },
+    {
+      "externalId": "hou-evt-004",
+      "title": "Brazil vs Portugal Fan Zone — Heights",
+      "kind": "fan_zone",
+      "lat": 29.79,
+      "lon": -95.398,
+      "startTime": "2026-06-14T20:30:00Z",
+      "matchId": "wc2026-004",
+      "estAttendance": 300
+    },
+    {
+      "externalId": "hou-evt-005",
+      "title": "World Cup Final Watch Party — Discovery Green",
+      "kind": "fan_zone",
+      "lat": 29.753,
+      "lon": -95.359,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 850
     }
   ]
 }

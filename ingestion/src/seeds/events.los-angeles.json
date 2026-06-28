@@ -19,6 +19,36 @@
       "startTime": "2026-06-20T20:30:00Z",
       "matchId": "wc2026-010",
       "estAttendance": 320
+    },
+    {
+      "externalId": "la-evt-003",
+      "title": "USA vs Mexico Watch Party — Echo Park",
+      "kind": "viewing_party",
+      "lat": 34.078,
+      "lon": -118.26,
+      "startTime": "2026-06-11T19:30:00Z",
+      "matchId": "wc2026-001",
+      "estAttendance": 800
+    },
+    {
+      "externalId": "la-evt-004",
+      "title": "Argentina vs Croatia Fan Zone — Silver Lake",
+      "kind": "fan_zone",
+      "lat": 34.083,
+      "lon": -118.27,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 360
+    },
+    {
+      "externalId": "la-evt-005",
+      "title": "World Cup Final Watch Party — SoFi Stadium Plaza",
+      "kind": "fan_zone",
+      "lat": 33.953,
+      "lon": -118.339,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 1500
     }
   ]
 }

@@ -10,17 +10,48 @@
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")
+  .trim()
+  .replace(/\/+$/, "");
+const SUPABASE_ANON_KEY = (
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ""
+).trim();
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+let _configWarningShown = false;
+
+function getSupabaseConfig(): { url: string; anonKey: string } | null {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    return { url: SUPABASE_URL, anonKey: SUPABASE_ANON_KEY };
+  }
+
+  const missing: string[] = [];
+  if (!SUPABASE_URL) missing.push("NEXT_PUBLIC_SUPABASE_URL");
+  if (!SUPABASE_ANON_KEY) missing.push("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  const message = `[supabase] missing required config: ${missing.join(", ")}`;
+
+  if (IS_PRODUCTION) {
+    throw new Error(message);
+  }
+
+  if (!_configWarningShown) {
+    _configWarningShown = true;
+    console.warn(
+      `${message}; request-level auth is disabled for browser API calls`,
+    );
+  }
+  return null;
+}
 
 /** Lazy singleton — only created in the browser when credentials are present. */
 let _client: SupabaseClient | null = null;
 
 function getClient(): SupabaseClient | null {
   if (typeof window === "undefined") return null;
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+  const config = getSupabaseConfig();
+  if (!config) return null;
   if (!_client) {
-    _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    _client = createClient(config.url, config.anonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
@@ -49,7 +80,9 @@ async function _initSession(): Promise<string | null> {
   const client = getClient();
   if (!client) return null;
 
-  const { data: { session } } = await client.auth.getSession();
+  const {
+    data: { session },
+  } = await client.auth.getSession();
   if (session?.access_token) return session.access_token;
 
   // No existing session — create an anonymous one.
@@ -67,6 +100,8 @@ export async function getSupabaseToken(): Promise<string | null> {
   await ensureAnonSession();
   const client = getClient();
   if (!client) return null;
-  const { data: { session } } = await client.auth.getSession();
+  const {
+    data: { session },
+  } = await client.auth.getSession();
   return session?.access_token ?? null;
 }

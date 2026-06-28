@@ -31,6 +31,8 @@ export interface VenueOverlay {
 /** Optional source of additional (user-created) events to merge into discovery. */
 export interface EventOverlay {
   forCity(city: string): Promise<Event[]>;
+  /** Resolve a single user-created event by id (event detail). */
+  byId?(id: string): Promise<Event | undefined>;
 }
 
 /** Optional source of additional (business-submitted) venues to merge in. */
@@ -72,6 +74,14 @@ export class DiscoveryService {
     return venues.find((v) => v.id === id);
   }
 
+  /** A single fan event by id — seed events first, then user-created. */
+  async eventById(id: string): Promise<Event | undefined> {
+    const seed = await this.repo.eventById(id);
+    if (seed) return seed;
+    if (this.eventOverlay?.byId) return this.eventOverlay.byId(id);
+    return undefined;
+  }
+
   /** Fixtures, optionally filtered by team code, sorted by kickoff. */
   async matches(city: string, team?: string): Promise<Match[]> {
     const matches = await this.repo.matches(city);
@@ -81,7 +91,7 @@ export class DiscoveryService {
     return [...filtered].sort((a, b) => a.kickoff.localeCompare(b.kickoff));
   }
 
-  /** Fan events near a point, sorted by start time. */
+  /** Fan events near a point. Team (if any) boosts matching events to the top. */
   async nearbyEvents(q: {
     city: string;
     origin: GeoPoint;
@@ -89,15 +99,24 @@ export class DiscoveryService {
     team?: string;
   }): Promise<(Event & { distanceMeters: number })[]> {
     const seed = await this.repo.events(q.city);
-    const userEvents = this.eventOverlay ? await this.eventOverlay.forCity(q.city) : [];
+    const userEvents = this.eventOverlay
+      ? await this.eventOverlay.forCity(q.city)
+      : [];
     const events = [...seed, ...userEvents];
     return events
-      .filter((e) => !q.team || e.teams.includes(q.team))
       .map((e) => ({
         ...e,
         distanceMeters: Math.round(haversineMeters(q.origin, e.geo)),
       }))
       .filter((e) => e.distanceMeters <= q.radiusMeters)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      .sort((a, b) => {
+        // Events featuring the user's team surface first; then soonest kickoff.
+        if (q.team) {
+          const am = a.teams.includes(q.team) ? 0 : 1;
+          const bm = b.teams.includes(q.team) ? 0 : 1;
+          if (am !== bm) return am - bm;
+        }
+        return a.startTime.localeCompare(b.startTime);
+      });
   }
 }

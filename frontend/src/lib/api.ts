@@ -10,7 +10,12 @@ import type {
   CrowdEstimate,
   CrowdLevel,
   CrowdStatus,
+  EventDetailResponse,
+  EventReview,
+  EventReviewSummary,
   EventsResponse,
+  EventVibe,
+  EventVibesResponse,
   FanEvent,
   GeocodeResult,
   LeaderboardEntry,
@@ -21,6 +26,12 @@ import type {
   Prediction,
   Recommendation,
   Review,
+  RsvpSummary,
+  PresenceSummary,
+  VenueFanReview,
+  VenueReviewSummary,
+  VenueVibe,
+  VenueVibesResponse,
   VenueListing,
 } from "./types";
 import { getSupabaseToken } from "./supabase";
@@ -99,6 +110,75 @@ export const api = {
     radius: number;
     team?: string;
   }) => get<EventsResponse>("/events/nearby", { ...a }),
+
+  // ---- fan-event engagement (v1, anonymous) ----
+  /** Event detail + RSVP/review summaries. Pass anonId to learn "am I going". */
+  getEvent: (id: string, anonId?: string) =>
+    get<EventDetailResponse>(`/events/${id}`, { anonId }),
+  rsvpEvent: (
+    id: string,
+    anonId: string,
+    opts: { going?: boolean; favoriteTeam?: string } = {},
+  ) =>
+    request<RsvpSummary>("POST", `/events/${id}/rsvp`, {
+      body: { anonId, ...opts },
+    }),
+  listEventVibes: (id: string) =>
+    get<EventVibesResponse>(`/events/${id}/vibes`),
+  postEventVibe: (
+    id: string,
+    anonId: string,
+    intensity: number,
+    favoriteTeam?: string,
+  ) =>
+    request<EventVibe>("POST", `/events/${id}/vibes`, {
+      body: { anonId, intensity, favoriteTeam },
+    }),
+  listEventReviews: (id: string) =>
+    get<EventReviewSummary>(`/events/${id}/reviews`),
+  reviewEvent: (
+    id: string,
+    anonId: string,
+    rating: number,
+    opts: { comment?: string; favoriteTeam?: string } = {},
+  ) =>
+    request<EventReview>("POST", `/events/${id}/reviews`, {
+      body: { anonId, rating, ...opts },
+    }),
+
+  // ---- watch-spot (venue) engagement (v1, anonymous) ----
+  getVenuePresence: (venueId: string, anonId?: string) =>
+    get<PresenceSummary>(`/venues/${venueId}/presence`, { anonId }),
+  setVenuePresence: (
+    venueId: string,
+    anonId: string,
+    opts: { here?: boolean; favoriteTeam?: string } = {},
+  ) =>
+    request<PresenceSummary>("POST", `/venues/${venueId}/presence`, {
+      body: { anonId, ...opts },
+    }),
+  listVenueVibes: (venueId: string) =>
+    get<VenueVibesResponse>(`/venues/${venueId}/vibes`),
+  postVenueVibe: (
+    venueId: string,
+    anonId: string,
+    intensity: number,
+    favoriteTeam?: string,
+  ) =>
+    request<VenueVibe>("POST", `/venues/${venueId}/vibes`, {
+      body: { anonId, intensity, favoriteTeam },
+    }),
+  listVenueFanReviews: (venueId: string) =>
+    get<VenueReviewSummary>(`/venues/${venueId}/fan-reviews`),
+  reviewVenue: (
+    venueId: string,
+    anonId: string,
+    rating: number,
+    opts: { comment?: string; favoriteTeam?: string } = {},
+  ) =>
+    request<VenueFanReview>("POST", `/venues/${venueId}/fan-reviews`, {
+      body: { anonId, rating, ...opts },
+    }),
   recommendations: (a: {
     city: string;
     lat: number;

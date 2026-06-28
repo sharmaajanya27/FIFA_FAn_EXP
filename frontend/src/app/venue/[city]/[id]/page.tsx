@@ -3,13 +3,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CITIES, cityBySlug } from "@/lib/cities";
 import { teamByCode } from "@/lib/teams";
-import { getCityVenues, getVenueWithReviews } from "@/lib/server/fetchers";
+import {
+  getCityVenues,
+  getVenueEngagement,
+  getVenueWithReviews,
+} from "@/lib/server/fetchers";
 import type { VenueDetail } from "@/lib/types";
 import { breadcrumbLd, buildMetadata, paths, venueLd } from "@/lib/seo";
 import { isSafeUrl } from "@/lib/security";
 import { SeoShell } from "@/components/seo/SeoShell";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
+import { VenueEngagement } from "@/components/venue/VenueEngagement";
 import styles from "@/components/seo/seo.module.css";
 
 export const revalidate = 3600;
@@ -25,7 +30,9 @@ const KIND_LABEL: Record<string, string> = {
 
 /** A venue is worth indexing only when it carries real, useful detail. */
 const isIndexable = (v: VenueDetail): boolean =>
-  Boolean(v.name && v.address && (typeof v.ratingAvg === "number" || v.website));
+  Boolean(
+    v.name && v.address && (typeof v.ratingAvg === "number" || v.website),
+  );
 
 // Pre-render the top few venues per city; the long tail renders on demand (ISR).
 export async function generateStaticParams() {
@@ -40,17 +47,18 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: { city: string; id: string };
+  params: Promise<{ city: string; id: string }>;
 }): Promise<Metadata> {
-  const city = cityBySlug(params.city);
-  const data = await getVenueWithReviews(params.city, params.id);
+  const { city: citySlug, id } = await params;
+  const city = cityBySlug(citySlug);
+  const data = await getVenueWithReviews(citySlug, id);
   if (!city || !data) return {};
   const { venue } = data;
   const kind = KIND_LABEL[venue.kind] ?? "venue";
   return buildMetadata({
     title: `${venue.name} — Watch the World Cup in ${city.name} | FanWatch`,
     description: `${venue.name} is a ${kind.toLowerCase()} in ${city.name} for watching FIFA World Cup 2026 matches.${venue.address ? ` ${venue.address}.` : ""} See hours, location, ratings, and live crowd levels.`,
-    path: paths.venue(params.city, venue.id),
+    path: paths.venue(citySlug, venue.id),
     noindex: !isIndexable(venue),
   });
 }
@@ -58,17 +66,22 @@ export async function generateMetadata({
 export default async function VenuePage({
   params,
 }: {
-  params: { city: string; id: string };
+  params: Promise<{ city: string; id: string }>;
 }) {
-  const city = cityBySlug(params.city);
+  const { city: citySlug, id } = await params;
+  const city = cityBySlug(citySlug);
   if (!city) notFound();
-  const data = await getVenueWithReviews(params.city, params.id);
+  const data = await getVenueWithReviews(citySlug, id);
   if (!data) notFound();
-  const { venue, reviews } = data;
+  const { venue } = data;
+  const engagement = await getVenueEngagement(venue.id);
 
   const rating =
-    reviews.averageRating != null
-      ? { value: reviews.averageRating, count: reviews.count }
+    engagement.reviews.averageRating != null
+      ? {
+          value: engagement.reviews.averageRating,
+          count: engagement.reviews.count,
+        }
       : undefined;
   const teams = venue.supportsTeams
     .map((c) => teamByCode(c))
@@ -77,12 +90,12 @@ export default async function VenuePage({
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "Where to watch", path: paths.watchIndex() },
-    { name: city.name, path: paths.city(params.city) },
-    { name: venue.name, path: paths.venue(params.city, venue.id) },
+    { name: city.name, path: paths.city(citySlug) },
+    { name: venue.name, path: paths.venue(citySlug, venue.id) },
   ];
   const ld = [
     breadcrumbLd(crumbs),
-    venueLd(venue, paths.venue(params.city, venue.id), rating),
+    venueLd(venue, paths.venue(citySlug, venue.id), rating),
   ];
 
   return (
@@ -92,7 +105,7 @@ export default async function VenuePage({
         items={[
           { name: "Home", path: "/" },
           { name: "Where to watch", path: paths.watchIndex() },
-          { name: city.name, path: paths.city(params.city) },
+          { name: city.name, path: paths.city(citySlug) },
           { name: venue.name },
         ]}
       />
@@ -100,8 +113,8 @@ export default async function VenuePage({
       <section className={styles.hero}>
         <h1 className={styles.h1}>{venue.name}</h1>
         <p className={styles.lede}>
-          {KIND_LABEL[venue.kind] ?? "Venue"} in {city.name} for watching the FIFA
-          World Cup 2026.
+          {KIND_LABEL[venue.kind] ?? "Venue"} in {city.name} for watching the
+          FIFA World Cup 2026.
           {typeof venue.ratingAvg === "number"
             ? ` Rated ${venue.ratingAvg.toFixed(1)}★ by fans.`
             : ""}
@@ -130,7 +143,11 @@ export default async function VenuePage({
           {venue.website && isSafeUrl(venue.website) && (
             <p>
               <strong>Website:</strong>{" "}
-              <a href={venue.website} rel="nofollow noopener noreferrer" target="_blank">
+              <a
+                href={venue.website}
+                rel="nofollow noopener noreferrer"
+                target="_blank"
+              >
                 {venue.website}
               </a>
             </p>
@@ -145,7 +162,7 @@ export default async function VenuePage({
             {teams.map((t) => (
               <Link
                 key={t.code}
-                href={paths.cityTeam(params.city, t.code)}
+                href={paths.cityTeam(citySlug, t.code)}
                 className={styles.pill}
               >
                 <span>{t.flag}</span> {t.name}
@@ -155,23 +172,14 @@ export default async function VenuePage({
         </section>
       )}
 
-      {reviews.reviews.length > 0 && (
-        <section className={styles.section}>
-          <h2 className={styles.h2}>
-            Fan reviews{rating ? ` · ${rating.value.toFixed(1)}★ (${rating.count})` : ""}
-          </h2>
-          <div className={styles.faq}>
-            {reviews.reviews.slice(0, 8).map((r) => (
-              <div key={r.id} className={styles.faqItem}>
-                <p className={styles.faqQ}>
-                  {r.userName} · <span className={styles.star}>★ {r.rating}</span>
-                </p>
-                {r.comment && <p className={styles.faqA}>{r.comment}</p>}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className={styles.section}>
+        <h2 className={styles.h2}>Who&apos;s here, the vibe &amp; reviews</h2>
+        <VenueEngagement
+          venueId={venue.id}
+          initialPresence={engagement.presence}
+          initialReviews={engagement.reviews}
+        />
+      </section>
 
       <section className={styles.section}>
         <Link href={`/?city=${city.slug}`} className={styles.cta}>

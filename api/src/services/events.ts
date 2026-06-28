@@ -62,6 +62,11 @@ export class EventService {
     return this.events.find((e) => e.city === city || e.city === undefined);
   }
 
+  /** A single user-created event by id (event detail page). */
+  async byId(id: string): Promise<UserEvent | undefined> {
+    return this.events.findOne((e) => e.id === id);
+  }
+
   async listForCity(city: string): Promise<UserEvent[]> {
     return (await this.events.find((e) => e.city === city)).sort((a, b) =>
       a.startTime.localeCompare(b.startTime),

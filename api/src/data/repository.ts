@@ -15,6 +15,8 @@ export interface Repository {
   venues(citySlug: string): Promise<Venue[]>;
   matches(citySlug: string): Promise<Match[]>;
   events(citySlug: string): Promise<Event[]>;
+  /** Find a single seed event by id across all cities (event detail page). */
+  eventById(id: string): Promise<Event | undefined>;
 }
 
 function parseJsonl<T>(text: string): T[] {
@@ -64,5 +66,13 @@ export class FileRepository implements Repository {
   }
   events(citySlug: string): Promise<Event[]> {
     return this.load<Event>(citySlug, "events");
+  }
+
+  async eventById(id: string): Promise<Event | undefined> {
+    for (const city of await this.listCities()) {
+      const found = (await this.events(city)).find((e) => e.id === id);
+      if (found) return found;
+    }
+    return undefined;
   }
 }

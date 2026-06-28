@@ -19,6 +19,36 @@
       "startTime": "2026-06-20T20:30:00Z",
       "matchId": "wc2026-010",
       "estAttendance": 190
+    },
+    {
+      "externalId": "van-evt-003",
+      "title": "Argentina vs Croatia Fan Zone — Granville Island",
+      "kind": "fan_zone",
+      "lat": 49.271,
+      "lon": -123.134,
+      "startTime": "2026-06-12T17:30:00Z",
+      "matchId": "wc2026-002",
+      "estAttendance": 300
+    },
+    {
+      "externalId": "van-evt-004",
+      "title": "Spain vs Netherlands Community Watch — Mount Pleasant",
+      "kind": "community_watch",
+      "lat": 49.264,
+      "lon": -123.1,
+      "startTime": "2026-06-16T19:30:00Z",
+      "matchId": "wc2026-006",
+      "estAttendance": 200
+    },
+    {
+      "externalId": "van-evt-005",
+      "title": "World Cup Final Watch Party — BC Place Plaza",
+      "kind": "fan_zone",
+      "lat": 49.277,
+      "lon": -123.112,
+      "startTime": "2026-07-12T18:30:00Z",
+      "matchId": "wc2026-012",
+      "estAttendance": 950
     }
   ]
 }

@@ -35,6 +35,20 @@ export interface Venue {
   claimed?: boolean;
   /** True when this listing was submitted by a business owner (not Phase 0). */
   business?: boolean;
+  /** Anonymous fan rating (avg 1..5) from venue engagement, if any. */
+  fanRating?: number;
+  /** Number of anonymous fan reviews. */
+  fanRatingCount?: number;
+  /** Distinct devices currently "here" (live presence). */
+  hereCount?: number;
+  /** Number of live vibe pulses at this venue. */
+  vibeCount?: number;
+  /** Average crowd-energy intensity (0..10) from recent vibe pulses. */
+  energy?: number;
+  /** Dominant repped team among fans here (most common). */
+  dominantTeam?: string;
+  /** Live-buzz score (0..1): fans here + recent energy — feeds ranking. */
+  buzz?: number;
 }
 
 export interface Match {
@@ -59,6 +73,14 @@ export interface Event {
   matchId?: string;
   teams: string[];
   estAttendance?: number;
+  /** Distinct devices currently RSVP'd "going" (anonymous). */
+  goingCount?: number;
+  /** Number of live vibe pulses for this event. */
+  vibeCount?: number;
+  /** Average crowd-energy intensity (0..10) from recent vibe pulses. */
+  energy?: number;
+  /** Dominant repped team among attendees (most common). */
+  dominantTeam?: string;
 }
 
 /** A venue annotated with query-time results (distance + final score). */
