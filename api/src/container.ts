@@ -20,6 +20,7 @@ import {
 } from "./services/sponsorship.js";
 import { BusinessService } from "./services/business.js";
 import { GeocodeService } from "./services/geocode.js";
+import { LocalGazetteer } from "./services/localGazetteer.js";
 import { AnalyticsService } from "./services/analytics.js";
 import { LiveEventsService } from "./services/liveEvents.js";
 
@@ -77,7 +78,7 @@ export function buildContainer(
     events,
     sponsorship,
     business,
-    geocode: new GeocodeService(),
+    geocode: new GeocodeService(undefined, undefined, new LocalGazetteer(env.dataDir)),
     analytics: new AnalyticsService(env.dataDir),
     liveEvents: new LiveEventsService(),
   };

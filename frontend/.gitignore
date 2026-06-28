@@ -16,5 +16,8 @@ next-env.d.ts.bak
 # Logs
 *.log
 
+# Local map tiles (generate with pmtiles; see lib/mapConfig.ts)
+public/maps/*.pmtiles
+
 # OS
 .DS_Store

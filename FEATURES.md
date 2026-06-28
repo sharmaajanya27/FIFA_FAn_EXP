@@ -1,6 +1,8 @@
 # FanWatch — Feature Inventory
 
-Status of every feature, grouped by the type of user it serves. See
+FanWatch helps soccer fans find their people — their team crowd, their place, and
+their shared World Cup experience. This is the status of every feature that
+delivers that belonging, grouped by the type of user it serves. See
 [`PRD.md`](./PRD.md) for the product spec and [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 for how it's built.
 

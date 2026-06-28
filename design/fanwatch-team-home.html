@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>FanWatch — My Team Home</title>
+<style>
+  :root{
+    --green:#16c172; --green-deep:#0aa15a; --ink:#06231a;
+    --hot:#ff5da2; --gold:#ffd166; --sky:#4cc9f0;
+    --team:#16c172; --team-deep:#0aa15a; --team-ink:#06231a;
+    --bg:#eef7f1; --card:#ffffff; --muted:#5b7a6f;
+    --shadow:0 10px 30px rgba(6,35,26,.12); --shadow-lg:0 18px 44px rgba(6,35,26,.22);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;min-height:100%;position:relative;overflow:hidden}
+
+  /* ---------- TEAM PICKER (first run) ---------- */
+  .picker{position:absolute;inset:0;z-index:50;background:
+    radial-gradient(120% 80% at 50% -10%,#0f3d2c,#06231a 60%);color:#fff;
+    display:flex;flex-direction:column;padding:30px 22px;transition:opacity .45s,transform .45s}
+  .picker.hide{opacity:0;transform:scale(1.04);pointer-events:none}
+  .picker .ball{font-size:30px}
+  .picker h1{font-size:27px;margin:14px 0 6px;letter-spacing:-.02em;line-height:1.15}
+  .picker p{margin:0 0 22px;color:#bfe6d4;font-size:14.5px;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;overflow-y:auto}
+  .pick{border:0;cursor:pointer;font:inherit;color:#fff;background:rgba(255,255,255,.08);
+    border-radius:20px;padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;
+    box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12);transition:transform .14s,background .14s}
+  .pick:active{transform:scale(.95)}
+  .pick .flg{font-size:34px}
+  .pick .nm{font-size:12.5px;font-weight:800}
+  .pick .fans{font-size:10.5px;color:#a9dcc6;font-weight:700}
+  .picker .skip{margin-top:16px;text-align:center;color:#8fc9b1;font-size:13px;font-weight:700;
+    background:none;border:0;cursor:pointer}
+
+  /* ---------- HOME ---------- */
+  .home{min-height:100%;padding-bottom:30px;opacity:0;transition:opacity .5s .15s}
+  .home.show{opacity:1}
+  .hero{position:relative;color:#fff;padding:20px 18px 26px;overflow:hidden;
+    background:linear-gradient(160deg,var(--team) 0%,var(--team-deep) 78%)}
+  .hero::after{content:"";position:absolute;right:-40px;top:-50px;font-size:240px;opacity:.16;
+    content:var(--crest);line-height:1}
+  .hero .bartop{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px}
+  .hero .bartop .loc{margin-left:auto;font-size:12px;font-weight:700;background:rgba(255,255,255,.16);
+    padding:6px 11px;border-radius:999px;cursor:pointer}
+  .hero .crestbig{font-size:50px;margin:14px 0 6px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
+  .hero h1{margin:0;font-size:26px;letter-spacing:-.02em}
+  .hero .tag{margin:5px 0 0;font-size:14px;color:rgba(255,255,255,.92);font-weight:600}
+  .hero .switch{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.18);border:0;color:#fff;
+    font:inherit;font-weight:700;font-size:12px;padding:7px 12px;border-radius:999px;cursor:pointer}
+
+  /* next match countdown */
+  .match{margin:-18px 16px 0;position:relative;z-index:5;background:#fff;border-radius:20px;
+    box-shadow:var(--shadow-lg);padding:16px}
+  .match .lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .match .vs{display:flex;align-items:center;gap:10px;margin:10px 0 4px}
+  .match .vs .f{font-size:30px}
+  .match .vs .mid{flex:1;text-align:center;font-size:13px;font-weight:800;color:var(--muted)}
+  .match .vs b{font-size:16px}
+  .match .clock{display:flex;align-items:center;gap:8px;margin-top:12px;
+    background:var(--team-ink);color:#fff;border-radius:13px;padding:11px 14px}
+  .match .clock .t{font-variant-numeric:tabular-nums;font-weight:800;font-size:20px;margin-left:auto;
+    letter-spacing:.02em}
+  .match .clock .k{font-size:12px;font-weight:700;opacity:.85}
+
+  .sec{padding:22px 18px 0}
+  .sec h2{font-size:18px;margin:0 0 3px;letter-spacing:-.01em}
+  .sec .note{font-size:13px;color:var(--muted);font-weight:600;margin:0 0 13px}
+  .sec h2 .you{color:var(--team-deep)}
+
+  /* supporters strip */
+  .supp{display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,#fff, #f3faf6);
+    border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:6px}
+  .supp .faces{display:flex}
+  .supp .faces .f{width:34px;height:34px;border-radius:50%;border:2.5px solid #fff;margin-left:-12px;
+    display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800}
+  .supp .faces .f:first-child{margin-left:0}
+  .supp .txt b{font-size:17px;color:var(--team-deep)}
+  .supp .txt div{font-size:12.5px;color:var(--muted);font-weight:600}
+
+  /* crowd rows */
+  .row{display:flex;align-items:center;gap:13px;background:#fff;border-radius:18px;box-shadow:var(--shadow);
+    padding:13px 14px;margin-bottom:11px;cursor:pointer;transition:transform .12s}
+  .row:active{transform:scale(.99)}
+  .row .rank{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;
+    font-size:13px;font-weight:900;color:#fff;background:var(--team)}
+  .row .body{flex:1;min-width:0}
+  .row .body h3{margin:0;font-size:15.5px;letter-spacing:-.01em}
+  .row .body .meta{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px;
+    display:flex;gap:8px;align-items:center}
+  .row .live{color:var(--hot);font-weight:800;display:inline-flex;align-items:center;gap:5px}
+  .row .live .pulse{width:7px;height:7px;border-radius:50%;background:var(--hot);animation:halo 1.6s infinite}
+  .row .go{flex:0 0 auto;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:13px;color:#fff;
+    background:linear-gradient(135deg,var(--team),var(--team-deep));padding:10px 14px;border-radius:12px}
+  .row .go.done{background:var(--ink)}
+  .row .going{font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap;text-align:right}
+  .row .going b{color:var(--team-deep)}
+
+  /* official party */
+  .official{margin:4px 18px 0;background:linear-gradient(150deg,#fff,#fff8e6);border-radius:20px;
+    box-shadow:var(--shadow);padding:16px;display:flex;align-items:center;gap:14px}
+  .official .star{font-size:30px}
+  .official b{font-size:15px}
+  .official div{font-size:12.5px;color:var(--muted);font-weight:600}
+  .official .go{margin-left:auto;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:13px;
+    color:var(--ink);background:var(--gold);padding:11px 15px;border-radius:13px}
+
+  .toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,20px);z-index:60;
+    background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:999px;
+    box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast b{color:var(--gold)}
+
+  @keyframes halo{0%{box-shadow:0 0 0 0 rgba(255,93,162,.5)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .confetti{position:fixed;width:9px;height:14px;z-index:80;pointer-events:none;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TEAM PICKER -->
+  <section class="picker" id="picker">
+    <span class="ball">⚽</span>
+    <h1>Who do you<br>watch with?</h1>
+    <p>Pick your team. FanWatch becomes your home — your crowd, your colors, your people.</p>
+    <div class="grid" id="pickGrid"></div>
+    <button class="skip" id="skip">I'm neutral — show me everyone →</button>
+  </section>
+
+  <!-- HOME -->
+  <section class="home" id="home">
+    <header class="hero">
+      <button class="switch" id="switch">Switch team ⇄</button>
+      <div class="bartop"><span>⚽</span> FanWatch
+        <span class="loc">📍 Jersey City ▾</span></div>
+      <div class="crestbig" id="crestBig">🌍</div>
+      <h1 id="homeTitle">Your home tonight</h1>
+      <p class="tag" id="homeTag">Find your people. Feel at home.</p>
+    </header>
+
+    <div class="match" id="matchCard">
+      <div class="lbl">Next match</div>
+      <div class="vs">
+        <span class="f" id="vsA">🏟️</span><b id="vsAn">Your team</b>
+        <span class="mid">vs<br>Group C</span>
+        <b id="vsBn">Mexico</b><span class="f" id="vsB">🇲🇽</span>
+      </div>
+      <div class="clock"><span class="k">Kickoff 7:00 PM · Today</span>
+        <span class="t" id="count">2:14:08</span></div>
+    </div>
+
+    <div class="sec">
+      <div class="supp">
+        <div class="faces" id="suppFaces"></div>
+        <div class="txt"><b id="suppCount">—</b>
+          <div id="suppLine">supporters near you</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="you" id="teamWord">Your</span> people tonight</h2>
+      <p class="note">The biggest crowds backing your team within 5 miles, sorted by buzz.</p>
+      <div id="crowds"></div>
+    </div>
+
+    <div class="sec" style="padding-bottom:6px">
+      <h2>Official watch party</h2>
+      <p class="note">Where the whole community gathers.</p>
+    </div>
+    <div class="official" id="officialCard">
+      <span class="star">🎉</span>
+      <div><b id="offTitle">—</b><div id="offWhere">—</div></div>
+      <button class="go" id="offGo">RSVP</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TEAMS=[
+  {code:"ARG",flag:"🇦🇷",name:"Argentina",color:"#6CACE4",deep:"#3d84c6",ink:"#0b2c47",fans:"1,240",chant:"Vamos Argentina — tonight we're loud."},
+  {code:"BRA",flag:"🇧🇷",name:"Brazil",color:"#1eae53",deep:"#0c8a3c",ink:"#063d1c",fans:"980",chant:"Samba, screens, and a sea of green."},
+  {code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",name:"England",color:"#e23b4b",deep:"#c8102e",ink:"#4a0710",fans:"610",chant:"It's coming home — find your end."},
+  {code:"USA",flag:"🇺🇸",name:"USA",color:"#2b5fb3",deep:"#0a3161",ink:"#071a37",fans:"1,510",chant:"I believe — and so do 1,500 nearby."},
+  {code:"GER",flag:"🇩🇪",name:"Germany",color:"#2b2b2b",deep:"#111111",ink:"#000",fans:"720",chant:"Mannschaft mode. Steins up."},
+  {code:"MEX",flag:"🇲🇽",name:"Mexico",color:"#1f9d57",deep:"#006847",ink:"#03311f",fans:"1,330",chant:"Verde, blanco, y todos juntos."},
+  {code:"ITA",flag:"🇮🇹",name:"Italy",color:"#1f7fc2",deep:"#0066b3",ink:"#06314f",fans:"540",chant:"Forza Azzurri — andiamo."},
+];
+const TEAM=Object.fromEntries(TEAMS.map(t=>[t.code,t]));
+
+// crowds carry a team; we filter to the chosen team (mirrors API venue model).
+const CROWDS=[
+  {team:"ARG",name:"The Ashford",kind:"Pub",area:"The Heights",going:142,dist:"0.8 mi",live:true},
+  {team:"ARG",name:"Plaza Cafe",kind:"Cafe",area:"Journal Sq",going:88,dist:"1.2 mi",live:true},
+  {team:"ARG",name:"Hudson Social",kind:"Bar",area:"Newport",going:54,dist:"0.5 mi",live:false},
+  {team:"BRA",name:"Wonder Bar",kind:"Bar",area:"Journal Sq",going:176,dist:"1.1 mi",live:true},
+  {team:"BRA",name:"Newark Ave Plaza",kind:"Plaza",area:"Downtown",going:120,dist:"0.7 mi",live:true},
+  {team:"USA",name:"Hudson Tavern",kind:"Sports bar",area:"Hoboken",going:95,dist:"1.5 mi",live:false},
+  {team:"USA",name:"Zeppelin Hall",kind:"Beer hall",area:"Newport",going:160,dist:"0.4 mi",live:true},
+  {team:"ENG",name:"Barcade JC",kind:"Bar",area:"Grove St",going:68,dist:"0.9 mi",live:false},
+  {team:"GER",name:"Zeppelin Hall",kind:"Beer hall",area:"Newport",going:210,dist:"0.4 mi",live:true},
+  {team:"MEX",name:"Taqueria Downtown",kind:"Cantina",area:"Downtown",going:130,dist:"0.6 mi",live:true},
+  {team:"ITA",name:"Porta",kind:"Pub",area:"Hamilton Park",going:54,dist:"1.0 mi",live:false},
+];
+const PARTY={
+  ARG:{title:"Argentina vs Mexico — Big-Screen Watch Party",where:"Exchange Place · 7:00 PM · 320 going"},
+  BRA:{title:"Brazil Samba Watch",where:"Newark Ave Plaza · 8:00 PM · 230 going"},
+  ENG:{title:"England Supporters Takeover",where:"Barcade JC · 2:30 PM · 88 going"},
+  USA:{title:"USA Fan Fest",where:"Liberty State Park · 4:00 PM · 540 going"},
+  GER:{title:"Germany Beer-Hall Watch",where:"Zeppelin Hall · 3:00 PM · 210 going"},
+  MEX:{title:"Mexico vs Argentina — Plaza Watch",where:"Exchange Place · 7:00 PM · 320 going"},
+  ITA:{title:"Azzurri Watch Night",where:"Porta · 2:30 PM · 54 going"},
+};
+const OPP={ARG:"MEX",MEX:"ARG",BRA:"USA",USA:"BRA",ENG:"GER",GER:"ENG",ITA:"BRA"};
+
+const NAMES=["AM","JL","SK","RC","DV","NP","TO","BR"];
+const AV=["#ff5da2","#4cc9f0","#ffd166","#16c172","#9b5de5","#f15bb5"];
+
+// build picker
+const grid=document.getElementById("pickGrid");
+TEAMS.forEach(t=>{
+  const b=document.createElement("button");b.className="pick";
+  b.innerHTML=`<span class="flg">${t.flag}</span><span class="nm">${t.name}</span>
+    <span class="fans">${t.fans} near you</span>`;
+  b.onclick=()=>choose(t.code);grid.appendChild(b);
+});
+document.getElementById("skip").onclick=()=>choose("USA"); // demo: neutral falls back to local favorite
+
+document.getElementById("switch").onclick=()=>{
+  document.getElementById("picker").classList.remove("hide");
+  document.getElementById("home").classList.remove("show");
+};
+
+let countTimer;
+function choose(code){
+  const t=TEAM[code];const root=document.documentElement.style;
+  root.setProperty("--team",t.color);root.setProperty("--team-deep",t.deep);
+  root.setProperty("--team-ink",t.ink);root.setProperty("--crest",`"${t.flag}"`);
+
+  document.getElementById("crestBig").textContent=t.flag;
+  document.getElementById("homeTitle").textContent=`${t.name}, tonight in Jersey City`;
+  document.getElementById("homeTag").textContent=t.chant;
+  document.getElementById("teamWord").textContent="Your";
+
+  // next match
+  const opp=TEAM[OPP[code]||"MEX"];
+  document.getElementById("vsA").textContent=t.flag;
+  document.getElementById("vsAn").textContent=t.name;
+  document.getElementById("vsB").textContent=opp.flag;
+  document.getElementById("vsBn").textContent=opp.name;
+
+  // supporters strip
+  let f="";for(let i=0;i<5;i++)f+=`<div class="f" style="background:${AV[i%AV.length]}">${NAMES[i]}</div>`;
+  document.getElementById("suppFaces").innerHTML=f;
+  document.getElementById("suppCount").textContent=`${t.fans} ${t.name} fans`;
+  document.getElementById("suppLine").textContent="within 5 miles tonight — you're not watching alone.";
+
+  // crowds for this team
+  const mine=CROWDS.filter(c=>c.team===code).sort((a,b)=>b.going-a.going);
+  const wrap=document.getElementById("crowds");wrap.innerHTML="";
+  if(!mine.length){wrap.innerHTML=`<p class="note">No ${t.name} crowd near you yet — want to start one? Tap to host.</p>`;}
+  mine.forEach((c,i)=>{
+    const r=document.createElement("div");r.className="row";
+    r.innerHTML=`<div class="rank">${i+1}</div>
+      <div class="body"><h3>${c.name}</h3>
+        <div class="meta">${c.kind} · ${c.area} · ${c.dist}
+          ${c.live?`· <span class="live"><span class="pulse"></span>LIVE</span>`:""}</div></div>
+      <div style="text-align:right">
+        <button class="go">I'm in</button>
+        <div class="going" style="margin-top:6px"><b>${c.going}</b> going</div></div>`;
+    const btn=r.querySelector(".go");
+    btn.onclick=e=>{e.stopPropagation();if(btn.classList.contains("done"))return;
+      btn.classList.add("done");btn.textContent="Going ✓";
+      const g=r.querySelector(".going b");g.textContent=c.going+1;
+      burst(e.clientX,e.clientY);toast(`See you at <b>${c.name}</b> — your crowd's ready.`);};
+    wrap.appendChild(r);
+  });
+
+  // official party
+  const p=PARTY[code]||PARTY.USA;
+  document.getElementById("offTitle").textContent=p.title;
+  document.getElementById("offWhere").textContent=p.where;
+  document.getElementById("offGo").onclick=e=>{burst(e.clientX,e.clientY);
+    toast("RSVP'd — <b>added to your night.</b>");};
+
+  // reveal
+  document.getElementById("picker").classList.add("hide");
+  document.getElementById("home").classList.add("show");
+  startCount();
+}
+
+function startCount(){
+  clearInterval(countTimer);let s=2*3600+14*60+8;const el=document.getElementById("count");
+  countTimer=setInterval(()=>{s=Math.max(0,s-1);const h=(s/3600|0),m=(s%3600/60|0),x=s%60;
+    el.textContent=`${h}:${String(m).padStart(2,"0")}:${String(x).padStart(2,"0")}`;},1000);
+}
+
+const toastEl=document.getElementById("toast");let tT;
+function toast(html){toastEl.innerHTML=html;toastEl.classList.add("show");clearTimeout(tT);
+  tT=setTimeout(()=>toastEl.classList.remove("show"),2200);}
+function burst(x,y){const cols=["#16c172","#ff5da2","#ffd166","#4cc9f0","#9b5de5"];
+  x=x||innerWidth/2;y=y||innerHeight/2;
+  for(let i=0;i<24;i++){const c=document.createElement("div");c.className="confetti";
+    c.style.left=x+"px";c.style.top=y+"px";c.style.background=cols[i%cols.length];document.body.appendChild(c);
+    const ang=Math.random()*Math.PI*2,dist=70+Math.random()*120,dx=Math.cos(ang)*dist,dy=Math.sin(ang)*dist-50;
+    c.animate([{transform:"translate(0,0)",opacity:1},
+      {transform:`translate(${dx}px,${dy+220}px) rotate(${Math.random()*720}deg)`,opacity:0}],
+      {duration:1100+Math.random()*400,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>c.remove();}}
+</script>
+</body>
+</html>

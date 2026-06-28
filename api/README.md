@@ -1,8 +1,10 @@
 # FanWatch — API (Phase 1)
 
-The discovery backend. Serves venue discovery, location/team search, ranking,
-and recommendations over the dataset produced by Phase 0 ingestion (see
-[`../PRD.md`](../PRD.md) §6).
+The discovery backend behind FanWatch's promise of helping fans find their
+people. Serves venue discovery, location/team search, ranking, and
+recommendations over the dataset produced by Phase 0 ingestion (see
+[`../PRD.md`](../PRD.md) §6) — surfacing the team crowds, venues, and fan events
+where supporters belong.
 
 **Stack:** Node.js + TypeScript (ESM). Handlers are transport-agnostic, designed
 to run behind **API Gateway → AWS Lambda**; a local HTTP server drives them in

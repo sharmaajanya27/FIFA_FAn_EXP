@@ -1,7 +1,10 @@
 # FanWatch — Workflow & Architecture Diagrams
 
-Reference diagrams for the development team. All diagrams use
-[Mermaid](https://mermaid.js.org/) and render natively on GitHub.
+Reference diagrams for the development team. FanWatch helps soccer fans find their
+people — the team crowds, venues, and fan events that turn every World Cup match
+into a shared celebration; the flows below show how the product delivers that
+belonging. All diagrams use [Mermaid](https://mermaid.js.org/) and render natively
+on GitHub.
 
 ---
 

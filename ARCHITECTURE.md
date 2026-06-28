@@ -1,5 +1,9 @@
 # FanWatch — Architecture
 
+FanWatch helps soccer fans find their people — the team crowds, venues, and fan
+events that turn every World Cup match into a shared celebration. This document
+covers how that product is built and deployed.
+
 > **Status:** Living document
 > **Scope:** Current implementation, the seams that make it hostable, and the
 > target production architecture.

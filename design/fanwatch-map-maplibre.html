@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>FanWatch — Our Own Interactive Map (MapLibre + PMTiles)</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+<style>
+  :root{
+    --green:#16c172; --green-deep:#0aa15a; --ink:#06231a;
+    --hot:#ff5da2; --gold:#ffd166; --sky:#4cc9f0; --accent:#16c172;
+    --glass:rgba(255,255,255,.85); --shadow:0 10px 30px rgba(6,35,26,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
+  #map{position:fixed;inset:0}
+  .maplibregl-popup-content{border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);font-weight:600}
+  .maplibregl-popup-content b{font-size:15px}
+
+  /* top bar */
+  .topbar{position:fixed;z-index:5;top:14px;left:50%;transform:translateX(-50%);
+    width:min(980px,calc(100% - 24px));display:flex;align-items:center;gap:10px;
+    padding:10px 12px;background:var(--glass);backdrop-filter:blur(14px);border-radius:20px;box-shadow:var(--shadow)}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:-.02em}
+  .brand .ball{font-size:22px}.brand b{font-size:18px}
+  .brand small{display:block;font-size:10px;font-weight:600;color:#5b7a6f;margin-top:-2px}
+  .ctrl{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .btn{border:0;cursor:pointer;font:inherit;font-weight:700;color:#fff;
+    background:linear-gradient(135deg,var(--green),var(--green-deep));padding:9px 13px;border-radius:13px;
+    box-shadow:0 6px 16px rgba(22,193,114,.35);transition:transform .12s}
+  .btn:active{transform:scale(.97)}
+  .btn.ghost{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px #d6e7df}
+  .seg{display:flex;background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1.5px #d6e7df;overflow:hidden}
+  .seg button{border:0;background:transparent;font:inherit;font-weight:700;padding:8px 12px;cursor:pointer;color:#3f5d52}
+  .seg button.on{background:var(--accent);color:#fff}
+
+  /* team flags */
+  .teams{position:fixed;z-index:5;top:70px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;padding:8px 10px;background:var(--glass);backdrop-filter:blur(14px);
+    border-radius:18px;box-shadow:var(--shadow);max-width:calc(100% - 24px);overflow:auto}
+  .teams::-webkit-scrollbar{display:none}
+  .flag{border:0;cursor:pointer;background:#fff;font-size:22px;width:44px;height:44px;border-radius:14px;
+    display:grid;place-items:center;box-shadow:inset 0 0 0 2px #e7f1ec;transition:transform .12s;position:relative}
+  .flag.active{box-shadow:inset 0 0 0 3px var(--accent),0 8px 18px rgba(0,0,0,.15);transform:scale(1.06)}
+  .flag small{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:800;
+    color:#3f5d52;background:#fff;padding:1px 5px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+
+  /* proof badge */
+  .proof{position:fixed;z-index:5;left:14px;bottom:14px;max-width:340px;background:var(--ink);color:#fff;
+    border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);font-size:12.5px;line-height:1.5}
+  .proof b{color:var(--gold)}
+  .proof .pill{display:inline-block;background:rgba(255,255,255,.12);border-radius:999px;padding:2px 9px;margin:2px 4px 0 0;font-weight:700;font-size:11px}
+
+  /* map pins */
+  .pin{position:relative;width:46px;height:46px;display:grid;place-items:center;cursor:pointer;transition:transform .15s}
+  .pin .badge{width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:21px;
+    box-shadow:inset 0 0 0 3px var(--ring,#16c172),0 6px 14px rgba(6,35,26,.28)}
+  .pin .count{position:absolute;bottom:-6px;right:-6px;background:var(--ink);color:#fff;font-size:10px;font-weight:800;
+    padding:2px 6px;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+  .pin.live::before{content:"";position:absolute;inset:-6px;border-radius:50%;box-shadow:0 0 0 0 var(--ring,#16c172);animation:halo 1.8s infinite}
+  .pin.pop{transform:scale(1.18)}.pin.dim{opacity:.4;filter:grayscale(.4)}
+  .evpin{position:relative;width:40px;height:48px;cursor:pointer}
+  .evpin .pole{position:absolute;left:6px;top:0;width:3px;height:48px;background:var(--ink);border-radius:2px}
+  .evpin .pennant{position:absolute;left:9px;top:2px;background:var(--hot);color:#fff;font-size:14px;font-weight:900;
+    padding:4px 8px;border-radius:6px 12px 12px 6px;box-shadow:0 6px 14px rgba(255,93,162,.5)}
+  @keyframes halo{0%{box-shadow:0 0 0 0 var(--ring,#16c172)}70%{box-shadow:0 0 0 16px transparent}100%{box-shadow:0 0 0 0 transparent}}
+</style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div class="topbar">
+    <div class="brand"><span class="ball">⚽</span><div><b>FanWatch</b><small>our own vector map</small></div></div>
+    <div class="ctrl">
+      <div class="seg" id="themeSeg">
+        <button data-theme="day" class="on">☀︎ Day</button>
+        <button data-theme="night">☾ Night</button>
+      </div>
+      <select id="city" class="btn ghost" style="padding:9px"></select>
+    </div>
+  </div>
+
+  <div class="teams" id="teams"></div>
+
+  <div class="proof">
+    <b>This map is ours.</b> Vector tiles rendered in-browser by MapLibre GL from a self-hostable
+    <b>PMTiles</b> file — our own style, no vendor SDK.
+    <div>
+      <span class="pill">No API key</span>
+      <span class="pill">$0 per map load</span>
+      <span class="pill">Commercial-OK (OSM)</span>
+      <span class="pill">Served from S3+CloudFront</span>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script>
+/* ---------------------------------------------------------------------------
+   FanWatch "own maps" proof.
+   - Renderer: MapLibre GL JS (open-source, no token).
+   - Tiles: Protomaps PMTiles (single file, HTTP range requests) — here we point
+     at the public Protomaps demo archive; in production this is OUR file on
+     S3+CloudFront. Swap PMTILES_URL only.
+   - Style: hand-written FanWatch vector style (below) — proves we control the
+     cartography (Day/Night, brand colors), not a vendor preset.
+--------------------------------------------------------------------------- */
+const PMTILES_URL = "https://demo-bucket.protomaps.com/v4.pmtiles"; // → prod: https://maps.fanwatch.app/basemap.pmtiles
+const GLYPHS = "https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf"; // → prod: self-hosted
+
+// Register the pmtiles:// protocol so MapLibre can read the archive via range requests.
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol("pmtiles", protocol.tile);
+
+/* ---- our cartographic palettes (this is "owning the map") ---- */
+const PALETTES = {
+  day:   { bg:"#e9f6ef", earth:"#eef7f0", water:"#bfe3f2", green:"#d4eed7",
+           road:"#ffffff", roadCase:"#dfe7e3", building:"#dfeadf", text:"#0d3b2e", halo:"#ffffff" },
+  night: { bg:"#0b1f1a", earth:"#0d241d", water:"#13384a", green:"#123026",
+           road:"#21433a", roadCase:"#16302a", building:"#16302a", text:"#dff3ea", halo:"#06231a" },
+};
+
+function buildStyle(themeKey){
+  const p = PALETTES[themeKey];
+  return {
+    version: 8,
+    glyphs: GLYPHS,
+    sources: {
+      protomaps: { type:"vector", url:"pmtiles://"+PMTILES_URL, attribution:'© OpenStreetMap · Protomaps' }
+    },
+    layers: [
+      { id:"bg", type:"background", paint:{ "background-color":p.bg } },
+      { id:"earth", type:"fill", source:"protomaps", "source-layer":"earth", paint:{ "fill-color":p.earth } },
+      { id:"landuse-green", type:"fill", source:"protomaps", "source-layer":"landuse",
+        filter:["match",["get","kind"],["park","forest","wood","grass","pitch","recreation_ground","golf_course","meadow"],true,false],
+        paint:{ "fill-color":p.green, "fill-opacity":0.7 } },
+      { id:"water", type:"fill", source:"protomaps", "source-layer":"water", paint:{ "fill-color":p.water } },
+      { id:"buildings", type:"fill", source:"protomaps", "source-layer":"buildings",
+        minzoom:13, paint:{ "fill-color":p.building, "fill-opacity":0.6 } },
+      { id:"roads-case", type:"line", source:"protomaps", "source-layer":"roads",
+        minzoom:7, layout:{ "line-cap":"round","line-join":"round" },
+        paint:{ "line-color":p.roadCase,
+          "line-width":["interpolate",["linear"],["zoom"],8,0.5,14,5,18,18] } },
+      { id:"roads", type:"line", source:"protomaps", "source-layer":"roads",
+        minzoom:8, layout:{ "line-cap":"round","line-join":"round" },
+        paint:{ "line-color":p.road,
+          "line-width":["interpolate",["linear"],["zoom"],8,0.3,14,3.2,18,13] } },
+      { id:"boundaries", type:"line", source:"protomaps", "source-layer":"boundaries",
+        paint:{ "line-color":p.text, "line-opacity":0.18, "line-dasharray":[2,2] } },
+      { id:"places", type:"symbol", source:"protomaps", "source-layer":"places",
+        layout:{ "text-field":["get","name"], "text-font":["Noto Sans Regular"],
+          "text-size":["interpolate",["linear"],["zoom"],6,11,12,15],
+          "text-transform":"none", "text-letter-spacing":0.02 },
+        paint:{ "text-color":p.text, "text-halo-color":p.halo, "text-halo-width":1.6 } },
+    ],
+  };
+}
+
+/* ---- mock fan data (same shape the API already returns) ---- */
+const CITIES = {
+  "jersey-city":{ name:"Jersey City", center:[-74.045,40.728] },
+  "new-york":{ name:"New York", center:[-73.985,40.758] },
+  "london":{ name:"London", center:[-0.118,51.509] },
+};
+const TEAMS=[
+  {code:"ARG",flag:"🇦🇷",name:"Argentina",color:"#6CACE4"},
+  {code:"BRA",flag:"🇧🇷",name:"Brazil",color:"#009c3b"},
+  {code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",name:"England",color:"#c8102e"},
+  {code:"USA",flag:"🇺🇸",name:"USA",color:"#0a3161"},
+  {code:"MEX",flag:"🇲🇽",name:"Mexico",color:"#006847"},
+  {code:"GER",flag:"🇩🇪",name:"Germany",color:"#444"},
+];
+const TEAM=Object.fromEntries(TEAMS.map(t=>[t.code,t]));
+const VENUES={
+  "jersey-city":[
+    {id:"v1",name:"The Ashford",team:"ARG",lng:-74.041,lat:40.7205,going:142,live:true},
+    {id:"v2",name:"Zeppelin Hall",team:"GER",lng:-74.036,lat:40.7165,going:210,live:true},
+    {id:"v3",name:"Wonder Bar",team:"BRA",lng:-74.050,lat:40.7340,going:176,live:true},
+    {id:"v4",name:"Barcade JC",team:"ENG",lng:-74.047,lat:40.7215,going:68,live:false},
+    {id:"v5",name:"Hudson Tavern",team:"USA",lng:-74.029,lat:40.7380,going:95,live:false},
+  ],
+  "new-york":[
+    {id:"n1",name:"Banter NYC",team:"ARG",lng:-73.997,lat:40.737,going:188,live:true},
+    {id:"n2",name:"Football Factory",team:"ENG",lng:-73.986,lat:40.745,going:240,live:true},
+    {id:"n3",name:"Boca Juniors Bar",team:"BRA",lng:-73.991,lat:40.726,going:130,live:false},
+  ],
+  "london":[
+    {id:"l1",name:"The Globe",team:"ENG",lng:-0.090,lat:51.519,going:300,live:true},
+    {id:"l2",name:"Bar Estrella",team:"ARG",lng:-0.131,lat:51.512,going:120,live:false},
+  ],
+};
+const EVENTS={
+  "jersey-city":[{id:"e1",title:"Argentina vs Mexico Watch Party",teams:["ARG","MEX"],lng:-74.0335,lat:40.7165,going:320}],
+  "new-york":[{id:"e2",title:"USA Fan Fest",teams:["USA"],lng:-73.978,lat:40.731,going:540}],
+  "london":[{id:"e3",title:"England Supporters Takeover",teams:["ENG"],lng:-0.105,lat:51.515,going:410}],
+};
+
+let map, cityKey="jersey-city", theme="day", selectedTeam=null, markers=[];
+
+map = new maplibregl.Map({
+  container:"map", style:buildStyle(theme),
+  center:CITIES[cityKey].center, zoom:13.5, attributionControl:{compact:true},
+});
+map.addControl(new maplibregl.NavigationControl({showCompass:false}), "bottom-right");
+map.addControl(new maplibregl.GeolocateControl({positionOptions:{enableHighAccuracy:true}, trackUserLocation:true}), "bottom-right");
+map.on("load", renderMarkers);
+
+/* city select */
+const sel=document.getElementById("city");
+Object.entries(CITIES).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;sel.appendChild(o);});
+sel.value=cityKey;
+sel.onchange=()=>{cityKey=sel.value;map.flyTo({center:CITIES[cityKey].center,zoom:13.5});renderMarkers();};
+
+/* theme toggle — proves we own the cartography */
+document.querySelectorAll("#themeSeg button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#themeSeg button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); theme=b.dataset.theme;
+  map.setStyle(buildStyle(theme));            // markers (DOM overlays) persist across style swaps
+});
+
+/* team flags */
+const tr=document.getElementById("teams");
+TEAMS.forEach(t=>{const b=document.createElement("button");b.className="flag";b.innerHTML=`${t.flag}<small>${t.code}</small>`;
+  b.onclick=()=>{document.querySelectorAll(".flag").forEach(f=>f.classList.remove("active"));
+    if(selectedTeam===t.code){selectedTeam=null;} else {selectedTeam=t.code;b.classList.add("active");
+      document.documentElement.style.setProperty("--accent",t.color);}
+    if(!selectedTeam) document.documentElement.style.setProperty("--accent","#16c172");
+    renderMarkers();};
+  tr.appendChild(b);});
+
+function clearMarkers(){ markers.forEach(m=>m.remove()); markers=[]; }
+function renderMarkers(){
+  clearMarkers();
+  (VENUES[cityKey]||[]).forEach(v=>{
+    const t=TEAM[v.team];
+    const el=document.createElement("div");
+    el.className=`pin ${v.live?"live":""} ${selectedTeam?(selectedTeam===v.team?"pop":"dim"):""}`;
+    el.style.setProperty("--ring",t.color);
+    el.innerHTML=`<div class="badge">${t.flag}</div><div class="count">${v.going}</div>`;
+    const popup=new maplibregl.Popup({offset:24,closeButton:false})
+      .setHTML(`<b>${v.name}</b><br>${t.name} crowd · <b style="color:#0aa15a">${v.going} going</b><br>${v.live?"🔥 buzzing now":"filling up"}`);
+    const m=new maplibregl.Marker({element:el}).setLngLat([v.lng,v.lat]).setPopup(popup).addTo(map);
+    markers.push(m);
+  });
+  (EVENTS[cityKey]||[]).forEach(ev=>{
+    const el=document.createElement("div"); el.className="evpin";
+    el.innerHTML=`<div class="pole"></div><div class="pennant">🎉</div>`;
+    const flags=ev.teams.map(c=>TEAM[c]?.flag||"").join(" ");
+    const popup=new maplibregl.Popup({offset:24,closeButton:false})
+      .setHTML(`<b>${flags} ${ev.title}</b><br><b style="color:#ff5da2">${ev.going} going</b> · watch party`);
+    const m=new maplibregl.Marker({element:el,anchor:"bottom"}).setLngLat([ev.lng,ev.lat]).setPopup(popup).addTo(map);
+    markers.push(m);
+  });
+}
+</script>
+</body>
+</html>

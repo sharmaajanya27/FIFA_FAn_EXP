@@ -1,16 +1,23 @@
 # FanWatch
 
-A location-based web app that helps soccer fans discover the best places to
-watch matches — bars, pubs, fan zones, viewing parties, and community events —
-ranked by popularity, atmosphere, team support, and fan engagement.
+> *Find your fans. Feel at home.*
 
-Launches during the World Cup, built as a **year-round** platform that extends
-to the Premier League, UEFA Champions League, MLS, La Liga, and more.
+FanWatch helps soccer fans **find their people** — connecting fans with the team
+crowds, venues, and fan events that turn every World Cup match into a shared
+celebration. It's for supporters who want more than a bar: their team's crowd,
+their community, their place, and the match-day feeling of belonging. *You will
+never watch alone.*
 
-A **data aggregation layer (Phase 0)** scrapes and ingests cities, venues, bars,
-fan events, and match schedules — normalizing, geocoding, deduplicating, and
-enriching them into the dataset that powers discovery, rankings, and
-recommendations.
+**Vision:** to become the global home for fans to discover where to watch, who to
+cheer with, and how to celebrate the teams they love — launching for the World Cup
+across the **U.S., Canada, and Mexico**, and built as a **year-round** platform
+that extends to the Premier League, UEFA Champions League, MLS, La Liga, and more.
+
+Discovering the best venues and fan events is **how** FanWatch delivers that
+belonging. A **data aggregation layer (Phase 0)** scrapes and ingests cities,
+venues, bars, fan events, and match schedules — normalizing, geocoding,
+deduplicating, and enriching them into the dataset that powers discovery,
+rankings, and recommendations.
 
 ## Documentation
 

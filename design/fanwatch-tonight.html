@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>FanWatch — Tonight</title>
+<style>
+  :root{
+    --green:#16c172; --green-deep:#0aa15a; --ink:#06231a;
+    --hot:#ff5da2; --gold:#ffd166; --sky:#4cc9f0;
+    --bg:#0c1f18; --card:#12302410; --muted:#9fbcb0;
+    --shadow:0 10px 30px rgba(0,0,0,.3); --shadow-lg:0 18px 44px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:#eafaf2;background:radial-gradient(130% 60% at 50% -10%,#10402c,#081711 55%);
+    -webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;min-height:100%;position:relative;padding-bottom:96px}
+
+  .head{position:sticky;top:0;z-index:30;padding:16px 18px 12px;
+    background:linear-gradient(#0b1f17ee,#0b1f17b0 70%,transparent);backdrop-filter:blur(8px)}
+  .brandrow{display:flex;align-items:center;gap:9px}
+  .brandrow .ball{font-size:22px}
+  .brandrow b{font-size:18px;letter-spacing:-.02em}
+  .brandrow .loc{margin-left:auto;font-size:12.5px;font-weight:700;color:#cfeede;
+    background:rgba(255,255,255,.08);padding:7px 11px;border-radius:999px;cursor:pointer}
+  .date{margin:12px 2px 2px;display:flex;align-items:baseline;gap:9px}
+  .date h1{margin:0;font-size:23px;letter-spacing:-.02em}
+  .date span{font-size:13px;color:var(--muted);font-weight:700}
+  .daynav{display:flex;gap:7px;margin-top:11px}
+  .daynav button{flex:0 0 auto;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:12.5px;
+    color:#bfe6d4;background:rgba(255,255,255,.07);padding:8px 13px;border-radius:999px}
+  .daynav button.on{background:var(--green);color:#04130d;box-shadow:0 6px 14px rgba(22,193,114,.35)}
+
+  /* timeline */
+  .tl{position:relative;padding:8px 18px 0 56px}
+  .tl::before{content:"";position:absolute;left:30px;top:14px;bottom:10px;width:2px;
+    background:linear-gradient(#16c17255,#16c17211)}
+  .slot{position:relative;margin-bottom:16px}
+  .slot .time{position:absolute;left:-38px;top:16px;width:44px;text-align:right;
+    font-size:12px;font-weight:800;color:#bfe6d4;font-variant-numeric:tabular-nums}
+  .slot .dot{position:absolute;left:-26px;top:20px;width:14px;height:14px;border-radius:50%;
+    background:#0b1f17;box-shadow:0 0 0 3px var(--green);z-index:2}
+  .slot.live .dot{background:var(--hot);box-shadow:0 0 0 3px var(--hot);animation:halo 1.6s infinite}
+  .slot.past{opacity:.5}
+
+  .fixture{background:rgba(255,255,255,.06);border-radius:20px;overflow:hidden;
+    box-shadow:var(--shadow);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.06)}
+  .fx-head{display:flex;align-items:center;gap:10px;padding:15px 16px;cursor:pointer}
+  .fx-head .teams{display:flex;align-items:center;gap:9px;flex:1;min-width:0;overflow:hidden}
+  .fx-head .teams .f{font-size:24px;flex:0 0 auto}
+  .fx-head .teams .nm{font-size:16px;font-weight:800;letter-spacing:.01em;white-space:nowrap}
+  .fx-head .teams .v{font-size:12px;color:var(--muted);font-weight:800;margin:0 1px}
+  .fx-head .chev{font-size:13px;color:var(--muted);transition:transform .2s;margin-left:auto;flex:0 0 auto}
+  .fixture.open .chev{transform:rotate(180deg)}
+
+  .fx-sum{padding:0 16px 14px;font-size:12.5px;color:#bfe6d4;font-weight:600;margin-top:-4px;
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .fx-sum b{color:#eafaf2}
+  .fx-sum .grp{font-size:11px;font-weight:800;color:#bfe6d4;background:rgba(255,255,255,.08);
+    padding:3px 9px;border-radius:999px}
+  .fx-sum .sumlive{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:900;
+    color:#fff;background:var(--hot);padding:3px 9px;border-radius:999px}
+  .fx-sum .sumlive .p{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+
+  .spots{max-height:0;overflow:hidden;transition:max-height .32s ease}
+  .fixture.open .spots{max-height:640px}
+  .spot{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.06)}
+  .spot .ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;
+    background:rgba(255,255,255,.08);flex:0 0 auto}
+  .spot.party .ico{background:rgba(255,93,162,.18)}
+  .spot .b{flex:1;min-width:0}
+  .spot .b h4{margin:0;font-size:14.5px;font-weight:800}
+  .spot .b .m{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+  .spot .b .m .tag{color:var(--hot);font-weight:800}
+  .spot .going{font-size:11.5px;font-weight:800;color:#cfeede;text-align:right;white-space:nowrap}
+  .spot .going b{color:var(--green)}
+  .spot .go{border:0;cursor:pointer;font:inherit;font-weight:800;font-size:12.5px;color:#04130d;
+    background:var(--green);padding:9px 13px;border-radius:11px;flex:0 0 auto}
+  .spot .go.done{background:#eafaf2;color:var(--ink)}
+
+  /* your plan sticky */
+  .plan{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:40;
+    background:linear-gradient(#0b1f17cc,#0b1f17);backdrop-filter:blur(14px);
+    border-top:1px solid rgba(255,255,255,.08);padding:13px 18px calc(15px + env(safe-area-inset-bottom))}
+  .plan.empty .pe{display:block}.plan.empty .pf{display:none}
+  .pe{font-size:13px;color:var(--muted);font-weight:700;text-align:center}
+  .pf{display:none}
+  .plan:not(.empty) .pf{display:flex;align-items:center;gap:12px}
+  .plan:not(.empty) .pe{display:none}
+  .pf .ic{font-size:22px}
+  .pf .t{flex:1;min-width:0}
+  .pf .t b{font-size:14px;display:block;letter-spacing:-.01em}
+  .pf .t span{font-size:12px;color:var(--muted);font-weight:600}
+  .pf .cnt{font-size:12px;font-weight:800;color:var(--gold);white-space:nowrap}
+
+  .toast{position:fixed;left:50%;bottom:100px;transform:translate(-50%,20px);z-index:60;
+    background:#eafaf2;color:var(--ink);font-weight:800;font-size:13.5px;padding:11px 18px;border-radius:999px;
+    box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast b{color:var(--green-deep)}
+
+  @keyframes halo{0%{box-shadow:0 0 0 3px var(--hot)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 3px transparent}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+  .confetti{position:fixed;width:9px;height:14px;z-index:80;pointer-events:none;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="head">
+    <div class="brandrow"><span class="ball">⚽</span><b>FanWatch</b>
+      <span class="loc">📍 Jersey City ▾</span></div>
+    <div class="date"><h1>Tonight</h1><span>Thu · Jun 25</span></div>
+    <div class="daynav">
+      <button>Yesterday</button><button class="on">Today</button>
+      <button>Fri 26</button><button>Sat 27</button>
+    </div>
+  </header>
+
+  <main class="tl" id="tl"></main>
+</div>
+
+<div class="plan empty" id="plan">
+  <div class="pe">No plans yet — tap <b style="color:#bfe6d4">I'm going</b> on a spot to build your night.</div>
+  <div class="pf">
+    <span class="ic">🎟️</span>
+    <div class="t"><b id="planTitle">—</b><span id="planSub">—</span></div>
+    <span class="cnt" id="planCnt">1 plan</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const T={ARG:"🇦🇷",MEX:"🇲🇽",BRA:"🇧🇷",USA:"🇺🇸",ENG:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",GER:"🇩🇪",NED:"🇳🇱",ITA:"🇮🇹"};
+const N={ARG:"Argentina",MEX:"Mexico",BRA:"Brazil",USA:"USA",ENG:"England",GER:"Germany",NED:"Netherlands",ITA:"Italy"};
+
+// the evening, ordered by kickoff. Each match → spots (watch parties + crowds) near you.
+const SCHEDULE=[
+  {time:"2:30",a:"ENG",b:"GER",grp:"Group D",state:"past",
+   spots:[{type:"party",name:"England Supporters Takeover",where:"Barcade JC · 0.9 mi",going:88,team:"ENG"}]},
+  {time:"4:00",a:"USA",b:"NED",grp:"Group F",state:"live",
+   spots:[
+     {type:"party",name:"USA Fan Fest",where:"Liberty State Park · 1.7 mi",going:540,team:"USA"},
+     {type:"crowd",name:"Hudson Tavern",where:"Sports bar · Hoboken · 1.5 mi",going:95,team:"USA"},
+     {type:"crowd",name:"Zeppelin Hall",where:"Beer hall · Newport · 0.4 mi",going:160,team:"USA"},
+   ]},
+  {time:"7:00",a:"ARG",b:"MEX",grp:"Group C",state:"soon",
+   spots:[
+     {type:"party",name:"Argentina vs Mexico — Big-Screen Watch Party",where:"Exchange Place · 0.6 mi",going:320,team:"ARG"},
+     {type:"crowd",name:"The Ashford",where:"Pub · The Heights · 0.8 mi",going:142,team:"ARG"},
+     {type:"crowd",name:"Taqueria Downtown",where:"Cantina · Downtown · 0.6 mi",going:130,team:"MEX"},
+   ]},
+  {time:"8:00",a:"BRA",b:"ITA",grp:"Group G",state:"soon",
+   spots:[
+     {type:"party",name:"Brazil Samba Watch",where:"Newark Ave Plaza · 0.7 mi",going:230,team:"BRA"},
+     {type:"crowd",name:"Wonder Bar",where:"Bar · Journal Sq · 1.1 mi",going:176,team:"BRA"},
+   ]},
+];
+
+const tl=document.getElementById("tl");
+let plans=[];
+
+SCHEDULE.forEach((m,idx)=>{
+  const slot=document.createElement("div");
+  slot.className="slot"+(m.state==="live"?" live":m.state==="past"?" past":"");
+  const totalGoing=m.spots.reduce((s,x)=>s+x.going,0);
+  const liveBadge=m.state==="live"?`<span class="sumlive"><span class="p"></span>LIVE NOW</span>`:`<span class="grp">${m.grp}</span>`;
+  slot.innerHTML=`
+    <div class="time">${m.time}</div><div class="dot"></div>
+    <div class="fixture${idx===2?" open":""}">
+      <div class="fx-head">
+        <div class="teams">
+          <span class="f">${T[m.a]}</span><span class="nm">${m.a}</span>
+          <span class="v">v</span>
+          <span class="nm">${m.b}</span><span class="f">${T[m.b]}</span>
+        </div>
+        <span class="chev">▾</span>
+      </div>
+      <div class="fx-sum">${liveBadge}<span><b>${N[m.a]} v ${N[m.b]}</b> · ${m.spots.length} spot${m.spots.length===1?"":"s"} · <b>${totalGoing}</b> going</span></div>
+      <div class="spots"></div>
+    </div>`;
+  const fixture=slot.querySelector(".fixture");
+  fixture.querySelector(".fx-head").onclick=()=>fixture.classList.toggle("open");
+  const spotsWrap=slot.querySelector(".spots");
+  m.spots.forEach(sp=>{
+    const row=document.createElement("div");row.className="spot"+(sp.type==="party"?" party":"");
+    row.innerHTML=`
+      <div class="ico">${sp.type==="party"?"🎉":T[sp.team]}</div>
+      <div class="b"><h4>${sp.name}</h4>
+        <div class="m">${sp.type==="party"?`<span class="tag">Watch party</span> · `:""}${sp.where}</div></div>
+      <div style="text-align:right">
+        <button class="go">I'm going</button>
+        <div class="going" style="margin-top:6px"><b>${sp.going}</b> going</div></div>`;
+    const btn=row.querySelector(".go");
+    btn.onclick=e=>{e.stopPropagation();if(btn.classList.contains("done"))return;
+      btn.classList.add("done");btn.textContent="Going ✓";
+      row.querySelector(".going b").textContent=sp.going+1;
+      plans.push({name:sp.name,time:m.time,match:`${N[m.a]} v ${N[m.b]}`});
+      updatePlan();burst(e.clientX,e.clientY);
+      toast(`Added <b>${sp.name}</b> to your night.`);};
+    spotsWrap.appendChild(row);
+  });
+  tl.appendChild(slot);
+});
+
+const plan=document.getElementById("plan");
+function updatePlan(){
+  if(!plans.length){plan.classList.add("empty");return;}
+  plan.classList.remove("empty");
+  const first=plans[0];
+  document.getElementById("planTitle").textContent=first.name;
+  document.getElementById("planSub").textContent=`${first.time} · ${first.match}`;
+  document.getElementById("planCnt").textContent=plans.length===1?"1 plan":`${plans.length} plans`;
+}
+
+const toastEl=document.getElementById("toast");let tT;
+function toast(html){toastEl.innerHTML=html;toastEl.classList.add("show");clearTimeout(tT);
+  tT=setTimeout(()=>toastEl.classList.remove("show"),2200);}
+function burst(x,y){const cols=["#16c172","#ff5da2","#ffd166","#4cc9f0","#9b5de5"];
+  x=x||innerWidth/2;y=y||innerHeight/2;
+  for(let i=0;i<22;i++){const c=document.createElement("div");c.className="confetti";
+    c.style.left=x+"px";c.style.top=y+"px";c.style.background=cols[i%cols.length];document.body.appendChild(c);
+    const ang=Math.random()*Math.PI*2,dist=70+Math.random()*110,dx=Math.cos(ang)*dist,dy=Math.sin(ang)*dist-50;
+    c.animate([{transform:"translate(0,0)",opacity:1},
+      {transform:`translate(${dx}px,${dy+220}px) rotate(${Math.random()*720}deg)`,opacity:0}],
+      {duration:1000+Math.random()*400,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>c.remove();}}
+</script>
+</body>
+</html>

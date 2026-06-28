@@ -12,6 +12,7 @@
  */
 import { METROS } from "../config/metros.js";
 import { log } from "../util/logger.js";
+import type { LocalGazetteer } from "./localGazetteer.js";
 
 export interface GeocodeResult {
   lat: number;
@@ -40,6 +41,8 @@ export class GeocodeService {
   constructor(
     private readonly endpoint: string = ENDPOINT,
     private readonly fetchImpl: typeof fetch = fetch,
+    /** In-house gazetteer tried before the remote provider. */
+    private readonly gazetteer?: LocalGazetteer,
   ) {}
 
   /**
@@ -53,6 +56,14 @@ export class GeocodeService {
     const key = `${citySlug ?? ""}|${query.toLowerCase()}`;
     const hit = this.cache.get(key);
     if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.result;
+
+    // In-house gazetteer first: resolves zip/neighborhood/stadium locally at
+    // $0 with no rate limit. Remote provider is only the long-tail fallback.
+    const local = this.gazetteer?.lookup(query, citySlug) ?? null;
+    if (local) {
+      this.cache.set(key, { at: Date.now(), result: local });
+      return local;
+    }
 
     const url = new URL(this.endpoint);
     url.searchParams.set("format", "jsonv2");

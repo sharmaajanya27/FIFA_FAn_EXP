@@ -1,8 +1,9 @@
 # FanWatch — Web App (Phase 1)
 
-The fan-facing web app: location-based discovery, interactive map + list,
-team filtering, venue rankings, and recommendations (PRD §6). Consumes the
-Phase 1 discovery API.
+The fan-facing web app where supporters find their people — their team crowd,
+their place, and their shared World Cup experience. Delivers location-based
+discovery, interactive map + list, team filtering, venue rankings, and
+recommendations (PRD §6). Consumes the Phase 1 discovery API.
 
 **Stack:** Next.js 16 (App Router) + React 19 + TypeScript. Map via
 **Leaflet + OpenStreetMap tiles** (free, no API key). Directions via Google

@@ -1,8 +1,9 @@
 # FanWatch — Ingestion (Phase 0)
 
-The data aggregation layer. Scrapes and ingests the raw inventory that powers
-discovery, rankings, and recommendations (see [`../PRD.md`](../PRD.md) §5 and
-[`../WORKFLOW.md`](../WORKFLOW.md) §3).
+The data aggregation layer behind FanWatch's mission to help fans find their
+people. Scrapes and ingests the raw inventory of venues, fan events, and matches
+that powers discovery, rankings, and recommendations (see [`../PRD.md`](../PRD.md)
+§5 and [`../WORKFLOW.md`](../WORKFLOW.md) §3).
 
 **Stack:** Node.js + TypeScript (ESM), designed to run as an AWS Lambda later.
 

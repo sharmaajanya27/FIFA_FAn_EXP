@@ -4,7 +4,7 @@ title: FanWatch AI Agent Guide
 
 # FanWatch AI Agent Guide
 
-**FanWatch** is a location-based soccer fan experience platform helping fans discover the best venues to watch matches. This guide accelerates AI-assisted development by documenting project structure, patterns, and conventions.
+**FanWatch** is a community-and-belonging platform that helps soccer fans find their people — the team crowds, venues, and fan events that turn every World Cup match into a shared celebration, launching across the U.S., Canada, and Mexico. This guide accelerates AI-assisted development by documenting project structure, patterns, and conventions.
 
 > **Start here:** [README.md](./README.md) · Full architecture: [ARCHITECTURE.md](./ARCHITECTURE.md) · Workflow & diagrams: [WORKFLOW.md](./WORKFLOW.md) · PRD: [PRD.md](./PRD.md)
 

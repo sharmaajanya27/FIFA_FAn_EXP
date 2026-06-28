@@ -8,6 +8,7 @@ import { cityTheme, scatterBalls } from "@/lib/cityThemes";
 import { worldCupStatus, type SeasonStatus } from "@/lib/worldCup";
 import { TEAMS } from "@/lib/teams";
 import { FEATURES } from "@/lib/features";
+import { MAP_ENGINE } from "@/lib/mapConfig";
 import type { AiRecommendation, FanEvent, RankedVenue } from "@/lib/types";
 import { VenueList } from "@/components/VenueList";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
@@ -17,8 +18,12 @@ import { CreateEventForm } from "@/components/CreateEventForm";
 import { LiveEventsPanel } from "@/components/LiveEventsPanel";
 import { CommunityPanel } from "@/components/CommunityPanel";
 
-// Leaflet touches window — load the map only on the client.
-const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
+// The map touches window — load it only on the client. Engine is flag-selected:
+// MapLibre (our own vector tiles) when NEXT_PUBLIC_MAP_ENGINE=maplibre, else Leaflet.
+const MapView = dynamic(
+  () => (MAP_ENGINE === "maplibre" ? import("@/components/MapViewGL") : import("@/components/MapView")),
+  { ssr: false },
+);
 
 const KINDS = ["", "bar", "pub", "restaurant", "cafe", "fan_zone"];
 

@@ -1,5 +1,9 @@
 # Start Here
 
+**FanWatch** helps soccer fans find their people — the team crowds, venues, and
+fan events that turn every World Cup match into a shared celebration, launching
+across the U.S., Canada, and Mexico. *You will never watch alone.*
+
 New to this repo? Read the docs in this order:
 
 ```

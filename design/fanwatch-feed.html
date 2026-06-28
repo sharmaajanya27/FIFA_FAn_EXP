@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>FanWatch — The Crowd Feed</title>
+<style>
+  :root{
+    --green:#16c172; --green-deep:#0aa15a; --ink:#06231a;
+    --hot:#ff5da2; --gold:#ffd166; --sky:#4cc9f0;
+    --accent:#16c172;
+    --bg:#eef7f1; --card:#ffffff; --muted:#5b7a6f;
+    --shadow:0 10px 30px rgba(6,35,26,.12); --shadow-lg:0 18px 44px rgba(6,35,26,.2);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .app{max-width:480px;margin:0 auto;min-height:100%;background:var(--bg);position:relative;padding-bottom:84px}
+
+  /* sticky header */
+  .head{position:sticky;top:0;z-index:30;background:rgba(238,247,241,.86);backdrop-filter:blur(14px);
+    padding:14px 16px 8px;border-bottom:1px solid rgba(6,35,26,.06)}
+  .brandrow{display:flex;align-items:center;gap:9px}
+  .brandrow .ball{font-size:23px}
+  .brandrow b{font-size:19px;letter-spacing:-.02em}
+  .brandrow .loc{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--muted);
+    background:#fff;padding:7px 11px;border-radius:999px;box-shadow:var(--shadow);cursor:pointer}
+  .brandrow .loc b{color:var(--ink);font-weight:800}
+  .sub{margin:8px 2px 10px;font-size:13.5px;color:var(--muted);font-weight:600}
+  .sub b{color:var(--green-deep)}
+  .filterrow{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}
+  .filterrow::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;border:0;cursor:pointer;font:inherit;font-weight:700;font-size:13px;
+    background:#fff;color:var(--ink);padding:9px 13px;border-radius:999px;box-shadow:inset 0 0 0 1.5px #dcebe3;
+    display:flex;align-items:center;gap:6px;transition:transform .12s}
+  .chip:active{transform:scale(.96)}
+  .chip.on{background:var(--accent);color:#fff;box-shadow:0 6px 16px rgba(22,193,114,.32)}
+  .chip .flg{font-size:16px}
+
+  /* feed */
+  .feed{padding:12px 14px}
+  .seg{display:flex;align-items:center;gap:8px;margin:16px 4px 8px;font-size:12px;font-weight:800;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .seg .ln{flex:1;height:1px;background:rgba(6,35,26,.08)}
+
+  .card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);margin-bottom:14px;
+    overflow:hidden;animation:rise .4s both}
+  .card .top{position:relative;padding:16px 16px 0}
+  .crest{display:flex;align-items:center;gap:11px}
+  .crest .badge{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;font-size:26px;
+    background:#f3faf6;box-shadow:inset 0 0 0 3px var(--ring,#16c172)}
+  .crest h3{margin:0;font-size:18px;letter-spacing:-.01em}
+  .crest .where{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:2px}
+  .live{position:absolute;top:16px;right:16px;display:flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:800;color:var(--hot);background:#fff0f6;padding:5px 9px;border-radius:999px}
+  .live .pulse{width:7px;height:7px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 0 var(--hot);
+    animation:halo 1.6s infinite}
+  .vibe{display:inline-flex;align-items:center;gap:7px;margin:14px 0 4px;font-size:13px;font-weight:700}
+  .vibe .bars{display:flex;gap:3px}
+  .vibe .bars i{width:6px;height:14px;border-radius:2px;background:#e3efe9;display:block}
+  .vibe .bars i.on{background:var(--accent)}
+
+  .who{display:flex;align-items:center;gap:10px;padding:14px 16px 0}
+  .faces{display:flex}
+  .faces .f{width:32px;height:32px;border-radius:50%;border:2.5px solid #fff;margin-left:-10px;
+    display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  .faces .f:first-child{margin-left:0}
+  .who .cnt{font-size:13px;font-weight:700;color:var(--ink)}
+  .who .cnt b{color:var(--green-deep)}
+
+  .actions{display:flex;align-items:center;gap:10px;padding:14px 16px 16px}
+  .going{flex:1;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:15px;color:#fff;
+    background:linear-gradient(135deg,var(--green),var(--green-deep));padding:13px;border-radius:15px;
+    box-shadow:0 8px 20px rgba(22,193,114,.34);transition:transform .12s}
+  .going:active{transform:scale(.98)}
+  .going.done{background:var(--ink);box-shadow:none}
+  .icon{width:48px;height:48px;border-radius:15px;border:0;cursor:pointer;background:#fff;font-size:19px;
+    box-shadow:inset 0 0 0 1.5px #dcebe3;display:grid;place-items:center}
+  .dist{font-size:12px;font-weight:800;color:var(--muted);white-space:nowrap}
+
+  /* watch-party card (louder) */
+  .party{background:linear-gradient(150deg,#fff,#fff0f6);box-shadow:0 14px 34px rgba(255,93,162,.18)}
+  .party .crest .badge{background:#fff;box-shadow:inset 0 0 0 3px var(--hot)}
+  .party .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:#fff;background:var(--hot);padding:4px 9px;border-radius:999px;margin-bottom:10px}
+  .party .going{background:linear-gradient(135deg,#ff7db5,var(--hot));box-shadow:0 8px 20px rgba(255,93,162,.4)}
+  .party .going.done{background:var(--ink)}
+
+  /* bottom tabs */
+  .tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:480px;z-index:40;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(6,35,26,.07);
+    display:flex;justify-content:space-around;padding:10px 8px calc(10px + env(safe-area-inset-bottom))}
+  .tab{border:0;background:transparent;cursor:pointer;font:inherit;font-size:10.5px;font-weight:700;
+    color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tab .ic{font-size:21px}
+  .tab.on{color:var(--green-deep)}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:104px;transform:translate(-50%,20px);z-index:60;
+    background:var(--ink);color:#fff;font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:999px;
+    box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast b{color:var(--gold)}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes halo{0%{box-shadow:0 0 0 0 rgba(255,93,162,.5)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .confetti{position:fixed;width:9px;height:14px;z-index:80;pointer-events:none;border-radius:2px;will-change:transform}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="head">
+    <div class="brandrow">
+      <span class="ball">⚽</span><b>FanWatch</b>
+      <span class="loc">📍 <b>Jersey City</b> ▾</span>
+    </div>
+    <div class="sub">Your people are out tonight — <b id="liveCount">4 crowds buzzing</b> near you right now.</div>
+    <div class="filterrow" id="filters"></div>
+  </header>
+
+  <main class="feed" id="feed"></main>
+</div>
+
+<nav class="tabs">
+  <button class="tab on"><span class="ic">🔥</span>Feed</button>
+  <button class="tab"><span class="ic">📅</span>Tonight</button>
+  <button class="tab"><span class="ic">🫶</span>My Team</button>
+  <button class="tab"><span class="ic">🙂</span>Me</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TEAMS = [
+  {code:"ALL",flag:"🌍",name:"All crowds",color:"#16c172"},
+  {code:"ARG",flag:"🇦🇷",name:"Argentina",color:"#6CACE4"},
+  {code:"BRA",flag:"🇧🇷",name:"Brazil",   color:"#009c3b"},
+  {code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",name:"England", color:"#c8102e"},
+  {code:"USA",flag:"🇺🇸",name:"USA",      color:"#0a3161"},
+  {code:"GER",flag:"🇩🇪",name:"Germany",  color:"#111111"},
+  {code:"MEX",flag:"🇲🇽",name:"Mexico",   color:"#006847"},
+];
+const TEAM = Object.fromEntries(TEAMS.map(t=>[t.code,t]));
+
+// Feed items: crowds + interleaved watch parties (same vocabulary as the API).
+const ITEMS = [
+  {type:"party",id:"e1",team:"ARG",team2:"MEX",title:"Argentina vs Mexico — Big-Screen Watch Party",
+   where:"Exchange Place · 7:00 PM",going:320,dist:"0.6 mi",live:true,vibe:5},
+  {type:"crowd",id:"v2",team:"GER",name:"Zeppelin Hall",where:"Beer hall · Newport",going:210,dist:"0.4 mi",live:true,vibe:5},
+  {type:"crowd",id:"v1",team:"ARG",name:"The Ashford",where:"Pub · The Heights",going:142,dist:"0.8 mi",live:true,vibe:4},
+  {type:"crowd",id:"v3",team:"BRA",name:"Wonder Bar",where:"Bar · Journal Square",going:176,dist:"1.1 mi",live:true,vibe:4},
+  {type:"party",id:"e2",team:"USA",title:"USA Fan Fest",where:"Liberty State Park · 4:00 PM",going:540,dist:"1.7 mi",live:false,vibe:5},
+  {type:"crowd",id:"v5",team:"USA",name:"Hudson Tavern",where:"Sports bar · Hoboken",going:95,dist:"1.5 mi",live:false,vibe:3},
+  {type:"crowd",id:"v4",team:"ENG",name:"Barcade JC",where:"Bar · Grove St",going:68,dist:"0.9 mi",live:false,vibe:2},
+];
+
+const NAMES=["AM","JL","SK","RC","DV","NP","TO","BR","MG","KW","FA","LP"];
+const AV=["#ff5da2","#4cc9f0","#ffd166","#16c172","#9b5de5","#f15bb5","#00bbf9"];
+function faces(n){
+  const show=Math.min(4,n);let h="";
+  for(let i=0;i<show;i++){h+=`<div class="f" style="background:${AV[i%AV.length]}">${NAMES[(i*3)%NAMES.length]}</div>`;}
+  return h;
+}
+function vibeBars(v){let h="";for(let i=0;i<5;i++)h+=`<i class="${i<v?'on':''}"></i>`;return h;}
+function vibeWord(v){return v>=5?"🔥 Buzzing":v>=4?"⚡ Lively":v>=3?"🙂 Warming up":"🌱 Early";}
+
+let active="ALL";
+const feedEl=document.getElementById("feed");
+const filtersEl=document.getElementById("filters");
+
+TEAMS.forEach(t=>{
+  const b=document.createElement("button");
+  b.className="chip"+(t.code===active?" on":"");
+  b.innerHTML=`<span class="flg">${t.flag}</span>${t.name}`;
+  b.onclick=()=>{active=t.code;
+    document.documentElement.style.setProperty("--accent",t.code==="ALL"?"#16c172":t.color);
+    [...filtersEl.children].forEach(c=>c.classList.remove("on"));b.classList.add("on");render();};
+  filtersEl.appendChild(b);
+});
+
+function card(it){
+  const t=TEAM[it.team];const ring=t.color;
+  const el=document.createElement("article");
+  el.className="card"+(it.type==="party"?" party":"");
+  el.style.setProperty("--ring",ring);
+  const liveBadge=it.live?`<div class="live"><span class="pulse"></span>LIVE</div>`:"";
+  if(it.type==="party"){
+    const flags=(t.flag||"")+(it.team2?" "+TEAM[it.team2].flag:"");
+    el.innerHTML=`
+      <div class="top">
+        ${liveBadge}
+        <span class="tag">🎉 Watch party</span>
+        <div class="crest">
+          <div class="badge">${t.flag}</div>
+          <div><h3>${it.title}</h3><div class="where">${flags} · ${it.where}</div></div>
+        </div>
+        <div class="vibe"><span class="bars">${vibeBars(it.vibe)}</span>${vibeWord(it.vibe)}</div>
+      </div>
+      <div class="who"><div class="faces">${faces(it.going)}</div>
+        <div class="cnt"><b>${it.going}</b> going</div></div>
+      <div class="actions">
+        <button class="going" data-id="${it.id}" data-n="${it.going}">I'm going 🎉</button>
+        <span class="dist">${it.dist}</span>
+        <button class="icon" title="Share">↗</button>
+      </div>`;
+  }else{
+    el.innerHTML=`
+      <div class="top">
+        ${liveBadge}
+        <div class="crest">
+          <div class="badge">${t.flag}</div>
+          <div><h3>${it.name}</h3><div class="where">${t.name} crowd · ${it.where}</div></div>
+        </div>
+        <div class="vibe"><span class="bars">${vibeBars(it.vibe)}</span>${vibeWord(it.vibe)}</div>
+      </div>
+      <div class="who"><div class="faces">${faces(it.going)}</div>
+        <div class="cnt"><b>${it.going}</b> ${t.name} fans going</div></div>
+      <div class="actions">
+        <button class="going" data-id="${it.id}" data-n="${it.going}">I'm in 🙌</button>
+        <span class="dist">${it.dist}</span>
+        <button class="icon" title="Save">♡</button>
+      </div>`;
+  }
+  return el;
+}
+
+function render(){
+  feedEl.innerHTML="";
+  const list=ITEMS.filter(i=>active==="ALL"||i.team===active||i.team2===active);
+  const live=list.filter(i=>i.live), later=list.filter(i=>!i.live);
+  if(live.length){feedEl.appendChild(seg("🔥 Buzzing right now"));live.forEach(i=>feedEl.appendChild(card(i)));}
+  if(later.length){feedEl.appendChild(seg("⏳ Filling up for later"));later.forEach(i=>feedEl.appendChild(card(i)));}
+  if(!list.length){const e=document.createElement("div");e.className="sub";
+    e.style.textAlign="center";e.style.padding="40px 0";
+    e.innerHTML="No crowds for this team near you yet.<br>Be the first — start one 👇";feedEl.appendChild(e);}
+  bind();
+}
+function seg(label){const d=document.createElement("div");d.className="seg";
+  d.innerHTML=`${label}<span class="ln"></span>`;return d;}
+
+function bind(){
+  document.querySelectorAll(".going").forEach(btn=>{
+    btn.onclick=e=>{
+      if(btn.classList.contains("done"))return;
+      btn.classList.add("done");
+      const card=btn.closest(".card");
+      const cnt=card.querySelector(".cnt b");const n=+btn.dataset.n+1;
+      cnt.textContent=n;
+      const fc=card.querySelector(".faces");
+      const me=document.createElement("div");me.className="f";me.style.background="var(--ink)";me.textContent="YOU";
+      me.style.marginLeft=fc.children.length?"-10px":"0";fc.appendChild(me);
+      btn.textContent="You're going ✓";
+      burst(e.clientX||window.innerWidth/2,e.clientY||window.innerHeight/2);
+      toast(card.classList.contains("party")?"See you there! <b>Added to your night.</b>":"Nice — <b>your crowd knows you're coming.</b>");
+    };
+  });
+}
+
+const toastEl=document.getElementById("toast");let tT;
+function toast(html){toastEl.innerHTML=html;toastEl.classList.add("show");clearTimeout(tT);
+  tT=setTimeout(()=>toastEl.classList.remove("show"),2200);}
+
+function burst(x,y){
+  const cols=["#16c172","#ff5da2","#ffd166","#4cc9f0","#9b5de5"];
+  for(let i=0;i<26;i++){
+    const c=document.createElement("div");c.className="confetti";
+    c.style.left=x+"px";c.style.top=y+"px";c.style.background=cols[i%cols.length];
+    document.body.appendChild(c);
+    const ang=Math.random()*Math.PI*2,dist=80+Math.random()*120;
+    const dx=Math.cos(ang)*dist,dy=Math.sin(ang)*dist-60;
+    c.animate([{transform:"translate(0,0) rotate(0)",opacity:1},
+      {transform:`translate(${dx}px,${dy+220}px) rotate(${Math.random()*720}deg)`,opacity:0}],
+      {duration:1100+Math.random()*500,easing:"cubic-bezier(.2,.7,.3,1)"}).onfinish=()=>c.remove();
+  }
+}
+
+render();
+</script>
+</body>
+</html>

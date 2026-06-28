@@ -55,8 +55,15 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https://*.tile.openstreetmap.org https://*.openstreetmap.org",
-              "connect-src 'self' " + (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co"),
+              // MapLibre GL renders tiles on a Web Worker created from a blob URL.
+              "worker-src 'self' blob:",
+              "child-src 'self' blob:",
+              "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.openstreetmap.org " +
+                (process.env.NEXT_PUBLIC_MAP_ORIGIN || ""),
+              "connect-src 'self' " +
+                (process.env.NEXT_PUBLIC_SUPABASE_URL || "https://*.supabase.co") +
+                " https://*.protomaps.com https://protomaps.github.io " +
+                (process.env.NEXT_PUBLIC_MAP_ORIGIN || ""),
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

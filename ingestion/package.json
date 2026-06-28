@@ -9,6 +9,7 @@
   },
   "scripts": {
     "ingest": "tsx src/cli/run.ts",
+    "gazetteer": "tsx src/cli/gazetteer.ts",
     "migrate": "tsx src/cli/migrate.ts",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.json"

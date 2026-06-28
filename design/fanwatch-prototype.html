@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>FanWatch — Find your crowd</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root{
+    --green:#16c172; --green-deep:#0aa15a; --ink:#06231a;
+    --hot:#ff5da2; --gold:#ffd166; --sky:#4cc9f0;
+    --accent:#16c172;            /* recolored per city/team */
+    --glass:rgba(255,255,255,.82);
+    --shadow:0 10px 30px rgba(6,35,26,.18);
+    font-synthesis:none;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:#dff3ea; overflow:hidden;
+  }
+  #map{position:fixed; inset:0; z-index:1}
+  .leaflet-container{background:#cfeee0}
+
+  /* ---------- Top bar (3 controls only) ---------- */
+  .topbar{
+    position:fixed; z-index:600; top:14px; left:50%; transform:translateX(-50%);
+    width:min(960px,calc(100% - 24px)); display:flex; align-items:center; gap:10px;
+    padding:10px 12px; background:var(--glass); backdrop-filter:blur(14px);
+    border-radius:20px; box-shadow:var(--shadow);
+  }
+  .brand{display:flex; align-items:center; gap:8px; font-weight:800; letter-spacing:-.02em; padding-right:4px}
+  .brand .ball{font-size:22px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.2))}
+  .brand b{font-size:18px}
+  .brand small{display:block; font-size:10px; font-weight:600; color:#5b7a6f; margin-top:-2px}
+  .ctrl{display:flex; align-items:center; gap:8px; margin-left:auto}
+  .btn{
+    border:0; cursor:pointer; font:inherit; font-weight:700; color:#fff;
+    background:linear-gradient(135deg,var(--green),var(--green-deep));
+    padding:10px 14px; border-radius:14px; box-shadow:0 6px 16px rgba(22,193,114,.35);
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(1px) scale(.98)}
+  .btn.ghost{background:#fff; color:var(--ink); box-shadow:inset 0 0 0 1.5px #d6e7df}
+  select.city{
+    font:inherit; font-weight:700; color:var(--ink); border:0; cursor:pointer;
+    background:#fff; padding:10px 12px; border-radius:14px; box-shadow:inset 0 0 0 1.5px #d6e7df;
+  }
+  .more{font-weight:700; color:#3f5d52; background:transparent; border:0; cursor:pointer; padding:8px}
+
+  /* team flag row */
+  .teams{position:fixed; z-index:600; top:70px; left:50%; transform:translateX(-50%);
+    display:flex; gap:8px; padding:8px 10px; background:var(--glass); backdrop-filter:blur(14px);
+    border-radius:18px; box-shadow:var(--shadow); max-width:calc(100% - 24px); overflow:auto}
+  .teams::-webkit-scrollbar{display:none}
+  .flag{
+    border:0; cursor:pointer; background:#fff; font-size:22px; line-height:1;
+    width:44px; height:44px; border-radius:14px; display:grid; place-items:center;
+    box-shadow:inset 0 0 0 2px #e7f1ec; transition:transform .12s ease, box-shadow .12s ease;
+    position:relative;
+  }
+  .flag:hover{transform:translateY(-2px)}
+  .flag.active{box-shadow:inset 0 0 0 3px var(--accent), 0 8px 18px rgba(0,0,0,.15); transform:translateY(-2px) scale(1.06)}
+  .flag small{position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+    font-size:9px; font-weight:800; color:#3f5d52; background:#fff; padding:1px 5px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.12)}
+
+  /* tagline pill */
+  .hero{position:fixed; z-index:550; top:128px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; font-weight:700; font-size:13px; padding:8px 16px;
+    border-radius:999px; box-shadow:var(--shadow); white-space:nowrap; max-width:calc(100% - 24px)}
+  .hero b{color:var(--gold)}
+
+  /* progressive "More" filters */
+  .filters{position:fixed; z-index:600; top:118px; right:14px; width:230px; padding:14px;
+    background:var(--glass); backdrop-filter:blur(14px); border-radius:18px; box-shadow:var(--shadow);
+    display:none}
+  .filters.open{display:block; animation:pop .18s ease}
+  .filters h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#5b7a6f}
+  .filters label{display:block; font-size:13px; font-weight:600; margin:10px 0 4px}
+  .filters input[type=range]{width:100%}
+  .chips{display:flex; flex-wrap:wrap; gap:6px}
+  .chip{font-size:12px; font-weight:700; padding:6px 10px; border-radius:999px; cursor:pointer;
+    background:#fff; box-shadow:inset 0 0 0 1.5px #d6e7df}
+  .chip.on{background:var(--accent); color:#fff; box-shadow:none}
+
+  /* ---------- Watch-party rail (fan events = first class) ---------- */
+  .rail{position:fixed; z-index:500; left:0; right:0; bottom:0; padding:10px 14px 16px}
+  .rail .skyline{position:absolute; left:0; right:0; bottom:0; height:120px; z-index:-1; opacity:.85;
+    color:var(--accent); pointer-events:none}
+  .rail-head{display:flex; align-items:center; gap:8px; margin:0 4px 8px; font-weight:800;
+    text-shadow:0 1px 8px rgba(255,255,255,.7)}
+  .rail-head .dot{width:9px;height:9px;border-radius:50%;background:var(--hot);box-shadow:0 0 0 4px rgba(255,93,162,.25)}
+  .cards{display:flex; gap:12px; overflow-x:auto; padding:4px; scroll-snap-type:x mandatory}
+  .cards::-webkit-scrollbar{height:0}
+  .card{scroll-snap-align:start; flex:0 0 260px; background:#fff; border-radius:18px; padding:14px;
+    box-shadow:var(--shadow); cursor:pointer; transition:transform .12s ease}
+  .card:hover{transform:translateY(-3px)}
+  .card .ev-flags{font-size:20px}
+  .card h5{margin:6px 0 2px; font-size:15px}
+  .card .meta{font-size:12px; color:#5b7a6f; font-weight:600}
+  .card .going{display:inline-flex; align-items:center; gap:6px; margin-top:8px; font-size:12px; font-weight:800; color:var(--green-deep)}
+  .card .go{float:right; margin-top:4px; font-size:12px; padding:7px 12px; border-radius:12px}
+
+  /* ---------- Bottom sheet ---------- */
+  .scrim{position:fixed; inset:0; z-index:900; background:rgba(6,35,26,.35); backdrop-filter:blur(2px);
+    opacity:0; pointer-events:none; transition:opacity .2s ease}
+  .scrim.open{opacity:1; pointer-events:auto}
+  .sheet{position:fixed; z-index:910; left:50%; bottom:0; transform:translate(-50%,110%);
+    width:min(520px,100%); background:#fff; border-radius:26px 26px 0 0; padding:18px 18px 26px;
+    box-shadow:0 -16px 40px rgba(6,35,26,.25); transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+  .sheet.open{transform:translate(-50%,0)}
+  .grip{width:42px; height:5px; border-radius:3px; background:#e1ece7; margin:0 auto 12px}
+  .sheet .eyebrow{font-size:12px; font-weight:800; letter-spacing:.04em; color:var(--accent); text-transform:uppercase}
+  .sheet h3{margin:4px 0 2px; font-size:22px; letter-spacing:-.02em}
+  .sheet .sub{color:#5b7a6f; font-weight:600; font-size:13px}
+  .crowd{display:flex; align-items:center; gap:12px; margin:14px 0; padding:12px; border-radius:16px;
+    background:linear-gradient(135deg,rgba(22,193,114,.12),rgba(76,201,240,.12))}
+  .crowd .big{font-size:26px; font-weight:900; color:var(--green-deep)}
+  .avatars{display:flex; margin-left:auto}
+  .avatars span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;
+    background:#fff;box-shadow:0 0 0 2px #fff, var(--shadow); margin-left:-8px}
+  .sheet .actions{display:flex; gap:10px; margin-top:6px}
+  .sheet .actions .btn{flex:1; justify-content:center; text-align:center}
+  .going-state{display:none; align-items:center; gap:8px; font-weight:800; color:var(--green-deep); justify-content:center; flex:1}
+
+  /* ---------- Map pins ---------- */
+  .pin{position:relative; width:46px; height:46px; display:grid; place-items:center; transition:transform .15s ease}
+  .pin .badge{width:40px; height:40px; border-radius:50%; background:#fff; display:grid; place-items:center;
+    font-size:21px; box-shadow:inset 0 0 0 3px var(--ring,#16c172), 0 6px 14px rgba(6,35,26,.28)}
+  .pin .count{position:absolute; bottom:-6px; right:-6px; background:var(--ink); color:#fff;
+    font-size:10px; font-weight:800; padding:2px 6px; border-radius:999px; box-shadow:0 3px 8px rgba(0,0,0,.25)}
+  .pin.live::before{content:""; position:absolute; inset:-6px; border-radius:50%;
+    box-shadow:0 0 0 0 var(--ring,#16c172); animation:halo 1.8s infinite}
+  .pin.pop{transform:scale(1.18)} .pin.pop .badge{box-shadow:inset 0 0 0 3px var(--ring), 0 10px 22px rgba(6,35,26,.4)}
+  .pin.dim{opacity:.35; filter:grayscale(.5)}
+  .pin.drop{animation:drop .5s cubic-bezier(.2,.9,.2,1) both}
+
+  .evpin{position:relative; width:40px; height:48px; display:grid; place-items:start center; animation:drop .5s cubic-bezier(.2,.9,.2,1) both}
+  .evpin .flagpole{width:3px; height:48px; background:var(--ink); border-radius:2px; position:absolute; left:6px; top:0}
+  .evpin .pennant{position:absolute; left:9px; top:2px; background:var(--hot); color:#fff; font-size:14px;
+    padding:4px 8px; border-radius:6px 12px 12px 6px; font-weight:900; box-shadow:0 6px 14px rgba(255,93,162,.5)}
+  .evpin::after{content:""; position:absolute; left:3px; bottom:-3px; width:9px;height:9px;border-radius:50%;
+    background:var(--hot); box-shadow:0 0 0 0 rgba(255,93,162,.6); animation:halo 1.8s infinite}
+
+  .me{width:18px;height:18px;border-radius:50%;background:var(--sky);box-shadow:0 0 0 4px rgba(76,201,240,.35),0 0 0 8px rgba(76,201,240,.18)}
+
+  /* confetti */
+  .confetti{position:fixed; width:9px; height:14px; border-radius:2px; z-index:9999; pointer-events:none; animation:fall 1s ease-out forwards}
+
+  @keyframes halo{0%{box-shadow:0 0 0 0 var(--ring,#ff5da2)}70%{box-shadow:0 0 0 16px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  @keyframes drop{0%{transform:translateY(-22px) scale(.6);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes fall{to{transform:translate(var(--dx),var(--dy)) rotate(540deg);opacity:0}}
+
+  @media (max-width:560px){
+    .brand small{display:none}
+    .hero{font-size:12px; top:124px}
+    .card{flex-basis:230px}
+  }
+</style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- 3 controls only: Near me · City · Team(flags below) -->
+  <div class="topbar">
+    <div class="brand"><span class="ball">⚽</span><div><b>FanWatch</b><small>find your crowd</small></div></div>
+    <div class="ctrl">
+      <button class="btn" id="near">📍 Near me</button>
+      <select class="city" id="city"></select>
+      <button class="more" id="moreBtn" title="More filters">More ⚙︎</button>
+    </div>
+  </div>
+
+  <div class="teams" id="teams"></div>
+
+  <div class="hero" id="hero">Find your crowd — <b>you'll never watch alone.</b></div>
+
+  <!-- progressive disclosure: power filters hidden by default -->
+  <div class="filters" id="filters">
+    <h4>More filters</h4>
+    <label>Search radius: <span id="rkm">3.0</span> km</label>
+    <input type="range" id="radius" min="1000" max="8000" step="500" value="3000" />
+    <label>Venue type</label>
+    <div class="chips" id="kinds">
+      <span class="chip on" data-k="">All</span>
+      <span class="chip" data-k="bar">Bars</span>
+      <span class="chip" data-k="pub">Pubs</span>
+      <span class="chip" data-k="fan_zone">Fan zones</span>
+    </div>
+  </div>
+
+  <!-- Fan events = first-class persistent rail -->
+  <div class="rail">
+    <svg class="skyline" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+      <path fill="currentColor" d="M0,120 L0,70 L40,70 L40,50 L80,50 L80,80 L120,80 L120,40 L150,40 L150,20 L165,20 L165,40 L200,40 L200,60 L240,60 L240,35 L280,35 L280,75 L320,75 L320,55 L360,55 L360,25 L380,25 L380,10 L395,10 L395,25 L430,25 L430,65 L470,65 L470,45 L520,45 L520,80 L560,80 L560,50 L600,50 L600,30 L630,30 L630,70 L680,70 L680,40 L720,40 L720,60 L760,60 L760,35 L800,35 L800,75 L840,75 L840,55 L880,55 L880,25 L900,25 L900,45 L940,45 L940,70 L980,70 L980,40 L1020,40 L1020,60 L1060,60 L1060,30 L1090,30 L1090,75 L1130,75 L1130,55 L1170,55 L1170,70 L1200,70 L1200,120 Z"/>
+    </svg>
+    <div class="rail-head"><span class="dot"></span> 🎉 Tonight's watch parties near you</div>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <!-- detail sheet -->
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet">
+    <div class="grip"></div>
+    <div class="eyebrow" id="sEyebrow">Argentina crowd</div>
+    <h3 id="sTitle">The Ashford</h3>
+    <div class="sub" id="sSub">Pub · 0.4 km away · buzzing now</div>
+    <div class="crowd">
+      <div><div class="big" id="sBig">142</div><div class="sub">fans going</div></div>
+      <div class="avatars" id="sAvatars"></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="going">I'm going 🙌</button>
+      <div class="going-state" id="goingState">✅ You're in! See you there 🎉</div>
+      <button class="btn ghost" id="directions">Directions ↗</button>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ---------------- mock data (self-contained, no API) ---------------- */
+const CITIES = {
+  "jersey-city": { name:"Jersey City", center:[40.728,-74.045], accent:"#1d4e89" },
+  "new-york":    { name:"New York",    center:[40.758,-73.985], accent:"#1d4e89" },
+  "miami":       { name:"Miami",       center:[25.775,-80.190], accent:"#00b4d8" },
+};
+const TEAMS = [
+  {code:"ARG",flag:"🇦🇷",name:"Argentina",color:"#6CACE4"},
+  {code:"BRA",flag:"🇧🇷",name:"Brazil",   color:"#009c3b"},
+  {code:"ENG",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",name:"England", color:"#c8102e"},
+  {code:"USA",flag:"🇺🇸",name:"USA",      color:"#0a3161"},
+  {code:"GER",flag:"🇩🇪",name:"Germany",  color:"#111111"},
+  {code:"MEX",flag:"🇲🇽",name:"Mexico",   color:"#006847"},
+  {code:"ITA",flag:"🇮🇹",name:"Italy",    color:"#0066b3"},
+];
+const TEAM = Object.fromEntries(TEAMS.map(t=>[t.code,t]));
+const VENUES = [
+  {id:"v1",name:"The Ashford",        team:"ARG",kind:"pub",   lat:40.7205,lon:-74.0410,going:142,live:true},
+  {id:"v2",name:"Zeppelin Hall",      team:"GER",kind:"fan_zone",lat:40.7165,lon:-74.0360,going:210,live:true},
+  {id:"v3",name:"Wonder Bar",         team:"BRA",kind:"bar",   lat:40.7340,lon:-74.0500,going:176,live:true},
+  {id:"v4",name:"Barcade JC",         team:"ENG",kind:"bar",   lat:40.7215,lon:-74.0470,going:68, live:false},
+  {id:"v5",name:"Hudson Tavern",      team:"USA",kind:"bar",   lat:40.7380,lon:-74.0290,going:95, live:false},
+  {id:"v6",name:"Porta",              team:"ITA",kind:"pub",   lat:40.7270,lon:-74.0660,going:54, live:false},
+];
+const EVENTS = [
+  {id:"e1",title:"Argentina vs Mexico — Big Screen Watch Party",teams:["ARG","MEX"],venue:"Exchange Place",time:"7:00 PM",going:320,lat:40.7165,lon:-74.0335},
+  {id:"e2",title:"USA Fan Fest",teams:["USA"],venue:"Liberty State Park",time:"4:00 PM",going:540,lat:40.7050,lon:-74.0540},
+  {id:"e3",title:"Brazil Samba Watch",teams:["BRA"],venue:"Newark Ave Plaza",time:"8:00 PM",going:230,lat:40.7218,lon:-74.0455},
+  {id:"e4",title:"England Supporters Takeover",teams:["ENG"],venue:"Barcade JC",time:"2:30 PM",going:88,lat:40.7215,lon:-74.0470},
+];
+
+/* ---------------- state ---------------- */
+let map, meMarker, radiusRing;
+let venueMarkers=[], eventMarkers=[];
+let cityKey="jersey-city", selectedTeam=null, radius=3000, kind="", current=null;
+
+/* ---------------- init ---------------- */
+function init(){
+  const c = CITIES[cityKey];
+  map = L.map("map",{zoomControl:false,attributionControl:true}).setView(c.center,14);
+  L.control.zoom({position:"bottomright"}).addTo(map);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{
+    attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:"abcd", maxZoom:20
+  }).addTo(map);
+  setAccent(c.accent);
+
+  // city select
+  const sel=document.getElementById("city");
+  Object.entries(CITIES).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;sel.appendChild(o);});
+  sel.value=cityKey;
+  sel.onchange=()=>{cityKey=sel.value; const cc=CITIES[cityKey]; setAccent(cc.accent); map.flyTo(cc.center,14); placeMe(cc.center); renderAll();};
+
+  // team flags
+  const tr=document.getElementById("teams");
+  TEAMS.forEach(t=>{
+    const b=document.createElement("button"); b.className="flag"; b.innerHTML=`${t.flag}<small>${t.code}</small>`;
+    b.onclick=()=>toggleTeam(t.code,b); tr.appendChild(b);
+  });
+
+  document.getElementById("near").onclick=useMyLocation;
+  document.getElementById("moreBtn").onclick=()=>document.getElementById("filters").classList.toggle("open");
+  document.getElementById("radius").oninput=e=>{radius=+e.target.value; document.getElementById("rkm").textContent=(radius/1000).toFixed(1); drawRadius(); renderVenues();};
+  document.querySelectorAll("#kinds .chip").forEach(ch=>ch.onclick=()=>{
+    document.querySelectorAll("#kinds .chip").forEach(x=>x.classList.remove("on")); ch.classList.add("on"); kind=ch.dataset.k; renderVenues();
+  });
+  document.getElementById("scrim").onclick=closeSheet;
+  document.getElementById("going").onclick=imGoing;
+  document.getElementById("directions").onclick=()=>{ if(current) window.open(`https://www.google.com/maps/dir/?api=1&destination=${current.lat},${current.lon}`,"_blank"); };
+
+  placeMe(c.center);
+  renderAll();
+}
+
+let accentHex="#16c172";
+function setAccent(hex){ accentHex=(hex||"#16c172").trim(); document.documentElement.style.setProperty("--accent",accentHex); if(radiusRing) radiusRing.setStyle({color:accentHex,fillColor:accentHex}); }
+
+function placeMe(center){
+  if(meMarker) meMarker.remove();
+  meMarker=L.marker(center,{icon:L.divIcon({className:"",html:'<div class="me"></div>',iconSize:[18,18],iconAnchor:[9,9]}),zIndexOffset:1000}).addTo(map);
+  drawRadius(center);
+}
+function drawRadius(center){
+  const c = center || (meMarker && meMarker.getLatLng());
+  if(!c) return;
+  if(radiusRing) radiusRing.remove();
+  radiusRing=L.circle(c,{radius,color:accentHex,weight:1.5,fillColor:accentHex,fillOpacity:.05,className:"radius"}).addTo(map);
+}
+
+/* ---------------- render ---------------- */
+function renderAll(){ renderVenues(); renderEvents(); renderRail(); updateHero(); }
+
+function venueIcon(v){
+  const t=TEAM[v.team];
+  const cls=`pin drop ${v.live?"live":""} ${selectedTeam? (selectedTeam===v.team?"pop":"dim"):""}`;
+  return L.divIcon({className:"",iconSize:[46,46],iconAnchor:[23,23],
+    html:`<div class="${cls}" style="--ring:${t.color}"><div class="badge">${t.flag}</div><div class="count">${v.going}</div></div>`});
+}
+function renderVenues(){
+  venueMarkers.forEach(m=>m.remove()); venueMarkers=[];
+  VENUES.filter(v=>!kind||v.kind===kind).forEach(v=>{
+    const m=L.marker([v.lat,v.lon],{icon:venueIcon(v)}).addTo(map);
+    m.on("click",()=>openVenue(v)); venueMarkers.push(m);
+  });
+}
+function renderEvents(){
+  eventMarkers.forEach(m=>m.remove()); eventMarkers=[];
+  EVENTS.forEach(ev=>{
+    const icon=L.divIcon({className:"",iconSize:[40,48],iconAnchor:[6,48],
+      html:`<div class="evpin"><div class="flagpole"></div><div class="pennant">🎉</div></div>`});
+    const m=L.marker([ev.lat,ev.lon],{icon}).addTo(map);
+    m.on("click",()=>openEvent(ev)); eventMarkers.push(m);
+  });
+}
+function renderRail(){
+  const wrap=document.getElementById("cards"); wrap.innerHTML="";
+  const list=[...EVENTS].sort((a,b)=>{
+    if(selectedTeam){
+      const am=a.teams.includes(selectedTeam)?1:0, bm=b.teams.includes(selectedTeam)?1:0;
+      if(bm-am) return bm-am;
+    }
+    return b.going-a.going;
+  });
+  list.forEach(ev=>{
+    const flags=ev.teams.map(c=>TEAM[c].flag).join(" ");
+    const el=document.createElement("div"); el.className="card";
+    el.innerHTML=`<div class="ev-flags">${flags}</div>
+      <h5>${ev.title}</h5>
+      <div class="meta">${ev.time} · ${ev.venue}</div>
+      <span class="going">👥 ${ev.going} going</span>
+      <button class="btn go">I'm going</button>`;
+    el.onclick=()=>{ map.flyTo([ev.lat,ev.lon],15); openEvent(ev); };
+    wrap.appendChild(el);
+  });
+}
+function updateHero(){
+  const h=document.getElementById("hero");
+  if(selectedTeam){
+    const t=TEAM[selectedTeam];
+    const n=VENUES.filter(v=>v.team===selectedTeam).reduce((s,v)=>s+v.going,0)
+           +EVENTS.filter(e=>e.teams.includes(selectedTeam)).reduce((s,e)=>s+e.going,0);
+    h.innerHTML=`${t.flag} <b>${n.toLocaleString()}</b> ${t.name} fans near you tonight 🎉`;
+    setAccent(t.color==="#111111"?"#444":t.color);
+  }else{
+    h.innerHTML=`Find your crowd — <b>you'll never watch alone.</b>`;
+    setAccent(CITIES[cityKey].accent);
+  }
+}
+
+/* ---------------- interactions ---------------- */
+function toggleTeam(code,btn){
+  document.querySelectorAll(".flag").forEach(f=>f.classList.remove("active"));
+  if(selectedTeam===code){ selectedTeam=null; }
+  else { selectedTeam=code; btn.classList.add("active"); }
+  renderVenues(); renderRail(); updateHero(); drawRadius();
+}
+function useMyLocation(){
+  if(!navigator.geolocation){ flyHome(); return; }
+  navigator.geolocation.getCurrentPosition(
+    p=>{ const here=[p.coords.latitude,p.coords.longitude]; map.flyTo(here,14); placeMe(here); },
+    ()=> flyHome()
+  );
+}
+function flyHome(){ const c=CITIES[cityKey].center; map.flyTo(c,14); placeMe(c); }
+
+const AV=["😎","🧑‍🎤","🧔","👩‍🦱","🧑‍🦰","👱‍♀️"];
+function openVenue(v){
+  const t=TEAM[v.team]; current=v; setAccent(t.color==="#111111"?"#444":t.color);
+  fillSheet(`${t.name} crowd`, v.name, `${cap(v.kind)} · ${dist(v)} km away · ${v.live?"buzzing now 🔥":"filling up"}`, v.going);
+  openSheet();
+}
+function openEvent(ev){
+  current=ev; setAccent(getComputedStyle(document.documentElement).getPropertyValue("--hot"));
+  const flags=ev.teams.map(c=>TEAM[c].flag).join(" ");
+  fillSheet("Watch party", `${flags} ${ev.title}`, `${ev.time} · ${ev.venue}`, ev.going);
+  openSheet();
+}
+function fillSheet(eyebrow,title,sub,count){
+  document.getElementById("sEyebrow").textContent=eyebrow;
+  document.getElementById("sTitle").textContent=title;
+  document.getElementById("sSub").textContent=sub;
+  document.getElementById("sBig").textContent=count.toLocaleString();
+  const av=document.getElementById("sAvatars"); av.innerHTML="";
+  AV.slice(0,5).forEach(a=>{const s=document.createElement("span");s.textContent=a;av.appendChild(s);});
+  document.getElementById("going").style.display="";
+  document.getElementById("goingState").style.display="none";
+}
+function openSheet(){ document.getElementById("scrim").classList.add("open"); document.getElementById("sheet").classList.add("open"); }
+function closeSheet(){ document.getElementById("scrim").classList.remove("open"); document.getElementById("sheet").classList.remove("open"); }
+function imGoing(e){
+  const big=document.getElementById("sBig"); big.textContent=(+big.textContent.replace(/,/g,"")+1).toLocaleString();
+  document.getElementById("going").style.display="none";
+  document.getElementById("goingState").style.display="flex";
+  const r=e.target.getBoundingClientRect(); burst(r.left+r.width/2, r.top+r.height/2);
+}
+function burst(x,y){
+  const cols=["#16c172","#ff5da2","#ffd166","#4cc9f0","#f72585","#0aa15a"];
+  for(let i=0;i<100;i++){
+    const p=document.createElement("div"); p.className="confetti";
+    p.style.left=x+"px"; p.style.top=y+"px"; p.style.background=cols[i%cols.length];
+    const a=Math.random()*Math.PI*2, v=5+Math.random()*9;
+    p.style.setProperty("--dx",Math.cos(a)*v*16+"px");
+    p.style.setProperty("--dy",(Math.sin(a)*v*16 + 220)+"px");
+    document.body.appendChild(p); setTimeout(()=>p.remove(),1050);
+  }
+}
+const dist=v=>{ const c=meMarker.getLatLng(); const d=map.distance(c,[v.lat,v.lon])/1000; return d.toFixed(1); };
+const cap=s=>s.replace(/_/g," ").replace(/\b\w/g,m=>m.toUpperCase());
+
+init();
+</script>
+</body>
+</html>

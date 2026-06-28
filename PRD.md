@@ -8,49 +8,78 @@
 
 ## 1. Overview
 
-FanWatch is a location-based web application that helps soccer fans discover the
-best places to watch matches. The platform aggregates bars, pubs, fan zones,
-viewing parties, and community watch events, then ranks them based on
-popularity, atmosphere, team support, reviews, and fan engagement.
+FanWatch helps soccer fans **find their people** — connecting fans with the team
+crowds, venues, and fan events that turn every World Cup match into a shared
+celebration. It's built for supporters who want more than a bar: their team's
+crowd, their community, their place, and the match-day feeling of belonging.
 
-The goal is to become the go-to platform for fans looking for the best match-day
-experience in their city.
+**Vision.** To bring soccer fans together by helping them find their people,
+their place, and their shared World Cup experience wherever they are in the U.S.,
+Canada, and Mexico — turning every match into a shared celebration by connecting
+fans with the communities and venues that make the game come alive. The scalable
+global vision: to become the **global home for fans to discover where to watch,
+who to cheer with, and how to celebrate the teams they love.**
+
+**Taglines.** *Find your fans. Feel at home.* · *Where fans find their crowd.* ·
+*You will never watch alone.*
+
+Discovering the best venues and fan events is **how** FanWatch delivers that
+belonging: the platform aggregates bars, pubs, fan zones, viewing parties, and
+community watch events, then ranks them by popularity, atmosphere, team support,
+reviews, and fan engagement so fans can find the right crowd fast.
+
+> **Working name.** The product ships under the working name **FanWatch**.
+> Candidate names (GoalCrowd, MatchMates, WatchUnited, TeamRoar) are still under
+> consideration and the final brand is not yet decided.
 
 ### Positioning note
 
-FanWatch should **not** be positioned only as a "World Cup" app. It launches
-during the World Cup for maximum reach, but is built as a **year-round soccer
-fan discovery platform** that later supports the Premier League, UEFA Champions
-League, Major League Soccer, La Liga, and other competitions. This makes the
-business viable continuously rather than only every four years.
+FanWatch is a **community-and-belonging product, not just a venue finder** — the
+lead promise is helping fans find their people, with venue and fan-event
+discovery as the means to that end. For **V1 the focus is the World Cup and
+national teams** across the U.S., Canada, and Mexico (club competitions and other
+sports are out of near-term scope). It launches during the World Cup for maximum
+reach, but is built as a **year-round** platform that later extends to the
+Premier League, UEFA Champions League, Major League Soccer, La Liga, and other
+competitions — so the business stays viable continuously rather than only every
+four years. The scalable vision is to become the global home for fans to find
+where to watch, who to cheer with, and how to celebrate the teams they love.
 
 ---
 
 ## 2. Problem Statement
 
-During major soccer tournaments, fans struggle to identify:
+**User.** Soccer fans in the U.S. — including local U.S., Canada, and Mexico
+supporters, immigrants, travelers, and fans following their home team or favorite
+national team.
 
-- Which venues are showing matches
-- Which venues support their favorite team
-- Which locations have the best atmosphere
-- Which events are popular among other fans
-- Where official or unofficial fan gatherings are taking place
+**Need.** To find a *community* to watch matches with — people to cheer with,
+celebrate goals and wins with, and share the World Cup experience with.
 
-Today this information is fragmented across social media, Google searches, event
-sites, and local communities. **FanWatch centralizes it into one platform** — a
-core part of the product is an automated **data aggregation layer** that scrapes
-and ingests this fragmented information (see §5).
+**Insight.** Fans feel more connected, more at home, and more emotionally
+involved when they're surrounded by fellow fans who share the same nation/team
+pride, culture, and passion. As one fan puts it: *"I don't just need a bar. I need
+my people, my team crowd, and the feeling of belonging."*
+
+The hard part is finding that crowd. Today the signals that lead a fan to it —
+which venues are showing matches, which support their favorite team, which have
+the best atmosphere, which events are popular, and where official or unofficial
+fan gatherings are taking place — are fragmented across social media, Google
+searches, event sites, and local communities. **FanWatch centralizes them into
+one platform** so fans can find their people, not just a place; a core part of
+the product is an automated **data aggregation layer** that scrapes and ingests
+this fragmented information (see §5).
 
 ---
 
 ## 3. Target Audience
 
-### Primary users
-- Soccer fans
-- World Cup (and tournament) viewers
-- Travelers
-- Expats
-- Supporter groups
+### Primary users — national-team supporters looking for their crowd
+- Local U.S., Canada, and Mexico supporters
+- Immigrants and expats following their home nation
+- Travelers and visiting fans during the tournament
+- Fans supporting a favorite national team
+- Supporter groups and fan communities
 
 ### Secondary users
 - Bars
