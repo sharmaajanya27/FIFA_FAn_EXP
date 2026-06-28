@@ -49,7 +49,7 @@ npm run cleanup:wc2026 -- --dry-run --no-files
 - **South America (6):** Argentina, Brazil, Uruguay, Colombia, Ecuador, Paraguay
 - **Europe (12):** England, France, Germany, Spain, Portugal, Netherlands, Belgium, Italy, Croatia, Switzerland, Denmark, Serbia
 - **Africa (5):** Morocco, Senegal, Cameroon, Ghana, Tunisia
-- **Asia/Oceania (2):** Japan, South Korea, Iran, Saudi Arabia, Australia
+- **Asia/Oceania (5):** Japan, South Korea, Iran, Saudi Arabia, Australia
 
 ### Data Affected
 
@@ -87,7 +87,7 @@ Cleanup summary venuesRemoved=45 matchesRemoved=12 eventsRemoved=8 dryRun=true m
 
 See `src/refresh/cleanupWorldCup2026.ts` for full implementation.
 
-- Loads WC 2026 team codes from `config/teams.ts`
+- Loads WC 2026 team codes from the `WORLD_CUP_2026_CODES` constant in `src/refresh/cleanupWorldCup2026.ts`
 - Validates each venue/match/event against the team set
 - Reports stats for each city
 - Supports dry-run for safe preview

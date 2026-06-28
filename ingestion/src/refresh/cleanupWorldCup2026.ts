@@ -179,8 +179,8 @@ async function cleanupSupabase(dryRun: boolean): Promise<CleanupStats> {
     type CountRow = { count: number };
     const venueCountResult = await sql<CountRow[]>`
       SELECT COUNT(*)::int as count FROM venues
-      WHERE (supports_teams IS NULL OR supports_teams = '{}')
-        OR NOT (supports_teams && ${sql(wcTeams)}::text[])
+      WHERE supports_teams IS NOT NULL AND supports_teams <> '{}'
+        AND NOT (supports_teams && ${sql(wcTeams)}::text[])
     `;
 
     stats.venuesRemoved = venueCountResult[0]?.count ?? 0;
@@ -188,8 +188,8 @@ async function cleanupSupabase(dryRun: boolean): Promise<CleanupStats> {
     // Count matches between non-WC teams
     const matchCountResult = await sql<CountRow[]>`
       SELECT COUNT(*)::int as count FROM matches
-      WHERE home_team NOT = ANY(${sql(wcTeams)}::text[])
-        OR away_team NOT = ANY(${sql(wcTeams)}::text[])
+      WHERE home_team <> ALL(${sql(wcTeams)}::text[])
+        OR away_team <> ALL(${sql(wcTeams)}::text[])
     `;
 
     stats.matchesRemoved = matchCountResult[0]?.count ?? 0;
@@ -197,8 +197,8 @@ async function cleanupSupabase(dryRun: boolean): Promise<CleanupStats> {
     // Count events supporting only non-WC teams
     const eventCountResult = await sql<CountRow[]>`
       SELECT COUNT(*)::int as count FROM events
-      WHERE (teams IS NULL OR teams = '{}')
-        OR NOT (teams && ${sql(wcTeams)}::text[])
+      WHERE teams IS NOT NULL AND teams <> '{}'
+        AND NOT (teams && ${sql(wcTeams)}::text[])
     `;
 
     stats.eventsRemoved = eventCountResult[0]?.count ?? 0;
@@ -207,8 +207,8 @@ async function cleanupSupabase(dryRun: boolean): Promise<CleanupStats> {
       // Delete venues that only support non-WC teams
       const venueResult = await sql`
         DELETE FROM venues
-        WHERE (supports_teams IS NULL OR supports_teams = '{}')
-          OR NOT (supports_teams && ${sql(wcTeams)}::text[])
+        WHERE supports_teams IS NOT NULL AND supports_teams <> '{}'
+          AND NOT (supports_teams && ${sql(wcTeams)}::text[])
         RETURNING id
       `;
 
@@ -217,8 +217,8 @@ async function cleanupSupabase(dryRun: boolean): Promise<CleanupStats> {
       // Delete matches between non-WC teams
       const matchResult = await sql`
         DELETE FROM matches
-        WHERE home_team NOT = ANY(${sql(wcTeams)}::text[])
-          OR away_team NOT = ANY(${sql(wcTeams)}::text[])
+        WHERE home_team <> ALL(${sql(wcTeams)}::text[])
+          OR away_team <> ALL(${sql(wcTeams)}::text[])
         RETURNING id
       `;
 
@@ -227,8 +227,8 @@ async function cleanupSupabase(dryRun: boolean): Promise<CleanupStats> {
       // Delete events supporting only non-WC teams
       const eventResult = await sql`
         DELETE FROM events
-        WHERE (teams IS NULL OR teams = '{}')
-          OR NOT (teams && ${sql(wcTeams)}::text[])
+        WHERE teams IS NOT NULL AND teams <> '{}'
+          AND NOT (teams && ${sql(wcTeams)}::text[])
         RETURNING id
       `;
 
