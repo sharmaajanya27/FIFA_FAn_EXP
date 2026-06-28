@@ -90,7 +90,7 @@ export const nearbyEvents =
             ...e,
             goingCount: a.going,
             vibeCount: a.vibes,
-            ...(a.energy ? { energy: a.energy } : {}),
+            ...(a.energy !== undefined ? { energy: a.energy } : {}),
             ...(a.dominantTeam ? { dominantTeam: a.dominantTeam } : {}),
           }
         : e;

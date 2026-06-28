@@ -38,7 +38,7 @@ export class GeocodeService {
   private cache = new Map<string, { at: number; result: GeocodeResult | null }>();
 
   constructor(
-    private readonly endpoint: string = ENDPOINT,
+    private readonly endpoint: string = process.env.GEOCODE_ENDPOINT ?? ENDPOINT,
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 

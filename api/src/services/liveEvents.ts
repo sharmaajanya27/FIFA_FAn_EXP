@@ -69,7 +69,8 @@ const EMPTY_TEAM: LiveEventTeam = { name: "TBD", abbreviation: "" };
 
 export class LiveEventsService {
   constructor(
-    private readonly base = "https://site.api.espn.com/apis/site/v2/sports",
+    private readonly base = process.env.ESPN_API_BASE ??
+      "https://site.api.espn.com/apis/site/v2/sports",
   ) {}
 
   async list(): Promise<LiveEvent[]> {
