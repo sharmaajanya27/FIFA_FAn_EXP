@@ -8,7 +8,8 @@
 # Override via environment variables:
 #   FANWATCH_API_URL       Direct API base   (default: https://api.tuparea.com)
 #   FANWATCH_SITE_URL      Frontend base     (default: https://tuparea.com)
-#   FANWATCH_AUTH_TOKEN    Optional Supabase JWT; when set, also checks /cities
+#   FANWATCH_AUTH_TOKEN    Optional server-auth secret (the SERVER_AUTH_SECRET
+#                          value); when set, also checks /cities returns 200
 #
 # Usage: scripts/verify.sh
 set -euo pipefail
@@ -35,7 +36,7 @@ check "Frontend proxy health" "$SITE_URL/_api/health" '"ok":true'
 if [[ -n "${FANWATCH_AUTH_TOKEN:-}" ]]; then
   echo "==> Authenticated check"
   code="$(curl -fsS -m 15 -o /dev/null -w '%{http_code}' \
-    -H "X-Supabase-Auth: $FANWATCH_AUTH_TOKEN" "$API_URL/cities" 2>/dev/null || true)"
+    -H "X-Server-Auth: $FANWATCH_AUTH_TOKEN" "$API_URL/cities" 2>/dev/null || true)"
   if [[ "$code" == "200" ]]; then
     echo "  ok   /cities -> 200"
   else
