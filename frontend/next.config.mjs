@@ -1,14 +1,22 @@
 /** @type {import('next').NextConfig} */
+
+// CSP connect-src is built from env so no origins are hardcoded. 'self' covers
+// the same-origin /_api proxy; the Supabase origin (anonymous-auth token calls)
+// is appended only when configured, keeping local dev tight.
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const connectSrc =
+  typeof supabaseOrigin === "string" && supabaseOrigin.length > 0
+    ? "'self' " + supabaseOrigin
+    : "'self'";
+
 const nextConfig = {
   reactStrictMode: true,
   // Expose server-only env vars to SSG/SSR code. NEXT_PUBLIC_* vars are only
-  // for client bundles; these need explicit forwarding.
+  // for client bundles; these need explicit forwarding. SERVER_AUTH_SECRET is
+  // intentionally NOT listed here to avoid inlining it into the build output;
+  // it is read at runtime via process.env in server-only modules.
   env: {
-    BACKEND_URL:
-      process.env.BACKEND_URL ||
-      process.env.NEXT_PUBLIC_API_BASE ||
-      "http://localhost:3001",
-    SERVER_AUTH_SECRET: process.env.SERVER_AUTH_SECRET || "",
+    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001",
   },
   // Proxy API requests to the backend server (avoids mixed-content HTTPS→HTTP
   // and eliminates CORS entirely). In production the browser only talks to the
@@ -59,9 +67,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https://*.tile.openstreetmap.org https://*.openstreetmap.org https://a.espncdn.com",
-              "connect-src 'self' " +
-                (process.env.NEXT_PUBLIC_SUPABASE_URL ||
-                  "https://*.supabase.co"),
+              "connect-src " + connectSrc,
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

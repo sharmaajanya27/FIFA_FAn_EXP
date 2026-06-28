@@ -77,8 +77,9 @@ cd api && npm install && npm run dev        # :3001
 cd frontend && npm install && npm run dev    # :3000
 ```
 
-Open http://localhost:3000. Configure the API base with
-`NEXT_PUBLIC_API_BASE` (see `.env.local.example`).
+Open http://localhost:3000. The browser always calls the same-origin `/_api`
+proxy; configure the server-side API target with `BACKEND_URL` (see
+`.env.local.example`).
 
 ```bash
 npm run typecheck

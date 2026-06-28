@@ -2,14 +2,14 @@
  * SEO helpers shared by the server-rendered landing pages: canonical URL
  * construction, Next `Metadata` builders, and schema.org JSON-LD builders.
  *
- * The site origin comes from NEXT_PUBLIC_SITE_URL (placeholder default until a
- * production domain is wired). It must be absolute so canonical/OG tags and the
- * sitemap resolve correctly.
+ * The site origin comes from NEXT_PUBLIC_SITE_URL (defaults to the production
+ * domain). It must be absolute so canonical/OG tags and the sitemap resolve
+ * correctly.
  */
 import type { Metadata } from "next";
 import type { EventDetail, VenueDetail } from "./types";
 
-const DEFAULT_SITE_URL = "https://fanwatch.app";
+const DEFAULT_SITE_URL = "https://tuparea.com";
 
 export function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(
