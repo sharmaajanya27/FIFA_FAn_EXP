@@ -3,7 +3,7 @@
 This document is the provenance reference for the FanWatch ingestion layer: for
 every entity we ingest, **where** the data comes from, **how** it is fetched,
 and **what** fields we extract. It complements [`README.md`](README.md) (pipeline
-overview) and [`../PRD.md`](../PRD.md) §5.
+overview) and [`../knowledge-base/PRD.md`](../knowledge-base/PRD.md) §5.
 
 Every record carries a `source` block (`name`, `type`, `scrapedAt`, `externalId`,
 and a back-link `url` where available), so provenance and freshness are tracked

@@ -152,11 +152,14 @@ npm install
 # Create .env file
 cat > .env << 'EOF'
 DATABASE_URL=postgresql://postgres.[ref]:[password]@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://[ref].supabase.co
 PORT=3001
 ADMIN_EMAILS=your@email.com
 NODE_ENV=production
-ALLOWED_ORIGINS=https://main.xxxxx.amplifyapp.com
+ALLOWED_ORIGINS=https://tuparea.com,https://www.tuparea.com
+SERVER_AUTH_SECRET=replace-with-openssl-rand-hex-24
 EOF
+# Full annotated template: api/.env.production.example
 
 # Start with PM2
 pm2 start npm --name "fanwatch-api" -- start
@@ -213,21 +216,23 @@ sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx
    - Monorepo: Yes → App root: `frontend`
    - Framework: Next.js (auto-detected)
 5. Build settings: uses `amplify.yml` from repo root (already created)
-6. Environment variables:
+6. Environment variables (names must match exactly — see `frontend/.env.local.example`):
    ```
-   NEXT_PUBLIC_API_BASE = http://<YOUR_EC2_IP>
-   NEXT_PUBLIC_SITE_URL = https://main.<id>.amplifyapp.com
+   BACKEND_URL = http://<YOUR_EC2_IP>             # server-side API target (nginx :80)
+   SERVER_AUTH_SECRET = <same value as the API>   # lets SSG/SSR bypass the JWT gate
+   NEXT_PUBLIC_SITE_URL = https://<your-domain>   # canonical/OG/sitemap origin
    NEXT_PUBLIC_SUPABASE_URL = https://<ref>.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY = <your-supabase-anon-key>
+   NEXT_PUBLIC_SUPABASE_ANON_KEY = <supabase publishable key>
    ```
 7. Deploy → wait 3-5 minutes
 
 ### Step 8: Post-Deploy
 
-1. Get Amplify URL (e.g., `https://main.d1a2b3c4.amplifyapp.com`)
-2. Update EC2 `.env` → `ALLOWED_ORIGINS=https://main.d1a2b3c4.amplifyapp.com`
+1. Get your live URL (custom domain `https://tuparea.com`, or the Amplify
+   default `https://main.<id>.amplifyapp.com`)
+2. Update EC2 `.env` → `ALLOWED_ORIGINS=https://tuparea.com,https://www.tuparea.com`
 3. Restart: `pm2 restart fanwatch-api`
-4. Update Amplify env var: `NEXT_PUBLIC_SITE_URL=https://main.d1a2b3c4.amplifyapp.com`
+4. Confirm Amplify env `NEXT_PUBLIC_SITE_URL` matches the live origin
 5. Trigger Amplify redeploy
 
 ---
@@ -259,9 +264,11 @@ DATABASE_URL="postgresql://postgres.lzhgbodmdsflasvashkp:[PASSWORD]@aws-1-us-eas
 
 | Component | Details |
 |-----------|---------|
+| **Domain** | `tuparea.com` (Route 53, Amazon Registrar, expires 2027-06-28) |
+| **Frontend URL** | `https://tuparea.com` (also: `https://www.tuparea.com`) |
+| **Amplify URL** | `https://main.d3up2fndbpz28i.amplifyapp.com` (legacy, still active) |
 | **EC2 Instance** | t2.micro, Amazon Linux 2023, us-east-1 |
 | **Elastic IP** | `98.91.107.103` |
-| **Instance Public IP** | `13.221.134.50` (replaced by Elastic IP) |
 | **Supabase Project** | `fanwatch-prod` (ref: `lzhgbodmdsflasvashkp`) |
 | **Supabase Pooler** | `aws-1-us-east-1.pooler.supabase.com:6543` |
 | **GitHub Repo** | `sharmaajanya27/FIFA_FAn_EXP` (branch: `main`) |
@@ -414,16 +421,44 @@ curl http://98.91.107.103/venues/miami     # → venues in Miami
 | Phoenix ingestion 406 | Overpass API rate limit | Retry later; 29/30 cities loaded fine |
 | ingestion .env not found | `loadDotenv()` reads from CWD | Created `.env` in `ingestion/` directory |
 
+### Custom Domain Setup (tuparea.com)
+
+| Property | Value |
+|----------|-------|
+| **Domain** | `tuparea.com` |
+| **Registrar** | Amazon Registrar, Inc. (Route 53) |
+| **Expiry** | 2027-06-28 |
+| **Frontend URL** | `https://tuparea.com` |
+| **Frontend (www)** | `https://www.tuparea.com` |
+| **API Proxy** | `https://tuparea.com/_api/*` (Amplify server-side rewrite → EC2:3001) |
+| **Old Amplify URL** | `https://main.d3up2fndbpz28i.amplifyapp.com` (still works) |
+
+**Steps performed:**
+
+1. Registered `tuparea.com` via Route 53 (auto-created hosted zone + NS records)
+2. Added custom domain in Amplify Console (Amplify auto-created DNS records + SSL cert)
+3. Updated `ALLOWED_ORIGINS` on EC2 to include `https://tuparea.com,https://www.tuparea.com`
+4. Updated CSP `connect-src` in `frontend/next.config.mjs` for new domain
+5. Restarted API via PM2
+
+**DNS Records (managed by Amplify/Route 53):**
+
+- `tuparea.com` → CloudFront (Amplify-managed A/AAAA alias)
+- `www.tuparea.com` → CloudFront (Amplify-managed CNAME)
+- SSL: AWS Certificate Manager (auto-issued, auto-renewed by Amplify)
+
+**Verify:**
+```bash
+curl -s https://tuparea.com/_api/health        # → {"ok":true}
+curl -s -o /dev/null -w "%{http_code}" https://tuparea.com  # → 200
+dig tuparea.com +short                          # → CloudFront IPs
+```
+
 ### Remaining TODO
 
-- [ ] Deploy frontend to AWS Amplify (connect GitHub repo)
-- [ ] Set `ALLOWED_ORIGINS` on EC2 after getting Amplify URL
-- [ ] Set `NEXT_PUBLIC_API_BASE=http://98.91.107.103` in Amplify env vars
-- [ ] Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Amplify env vars
 - [ ] Enable Anonymous Sign-Ins in Supabase dashboard (Authentication → Providers → Anonymous)
 - [ ] Rotate SSH key (was exposed during deployment session)
 - [ ] Retry Phoenix city ingestion
-- [ ] Add HTTPS via Let's Encrypt + certbot (before sharing publicly)
 - [ ] Configure `ADMIN_EMAILS` for admin dashboard access
 
 ---

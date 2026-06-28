@@ -16,9 +16,9 @@ model:
 
 | Package                     | Role                                                                                    | Entry point          | Runtime          |
 | --------------------------- | --------------------------------------------------------------------------------------- | -------------------- | ---------------- |
-| [`ingestion/`](./ingestion) | Phase 0 batch pipeline: scrape → normalize → geocode → dedup → enrich → score → publish | `src/cli/run.ts`     | Node CLI         |
-| [`api/`](./api)             | Phase 1+ discovery + engagement API                                                     | `src/http/server.ts` | Node HTTP server |
-| [`frontend/`](./frontend)   | Web app (map, list, rankings, engagement)                                               | `src/app/page.tsx`   | Next.js 14       |
+| [`ingestion/`](../ingestion) | Phase 0 batch pipeline: scrape → normalize → geocode → dedup → enrich → score → publish | `src/cli/run.ts`     | Node CLI         |
+| [`api/`](../api)             | Phase 1+ discovery + engagement API                                                     | `src/http/server.ts` | Node HTTP server |
+| [`frontend/`](../frontend)   | Web app (map, list, rankings, engagement)                                               | `src/app/page.tsx`   | Next.js 14       |
 
 ```mermaid
 flowchart LR
@@ -58,7 +58,7 @@ with files/stubs; production satisfies them with managed services.
 
 ### 2.1 Read seam — `Repository`
 
-Discovery data is read through [`Repository`](./api/src/data/repository.ts):
+Discovery data is read through [`Repository`](../api/src/data/repository.ts):
 
 ```ts
 interface Repository {
@@ -71,7 +71,7 @@ interface Repository {
 
 - **Local:** `FileRepository` reads the JSONL the ingestion pipeline wrote to
   `ingestion/data/<city>/`.
-- **Postgres/Supabase:** [`PgRepository`](./api/src/data/pgRepository.ts) reads
+- **Postgres/Supabase:** [`PgRepository`](../api/src/data/pgRepository.ts) reads
   the `venues` / `matches` / `events` tables that ingestion upserts. The full
   canonical object lives in a `data` jsonb column, so a row maps straight back
   to the domain type — same contract as the JSONL. Plain Postgres (no PostGIS):
@@ -80,20 +80,20 @@ interface Repository {
 
 The composition root selects the backend on `DATABASE_URL` and passes the repo
 (and store) into `buildContainer(env, repo, store)` —
-[`server.ts`](./api/src/http/server.ts) / [`container.ts`](./api/src/container.ts).
+[`server.ts`](../api/src/http/server.ts) / [`container.ts`](../api/src/container.ts).
 
 ### 2.2 Write seam — `Store` / `Collection`
 
 Engagement writes (users, reviews, check-ins, predictions, posts, photos) go
 through `Store.collection<T>()`, a tiny CRUD surface
 (`all` / `find` / `findOne` / `insert` / `update`). `Store` and `Collection`
-are now interfaces in [`jsonStore.ts`](./api/src/store/jsonStore.ts); services
+are now interfaces in [`jsonStore.ts`](../api/src/store/jsonStore.ts); services
 depend on the interface, never a concrete backend.
 
 - **Local:** `JsonStore` / `JsonCollection` — full-file-rewrite JSON under
   `data/engagement/<name>.json`. Single-process only — explicitly **not** safe
   for concurrent/multi-instance.
-- **Postgres/Supabase:** [`PgStore` / `PgCollection`](./api/src/store/pgStore.ts)
+- **Postgres/Supabase:** [`PgStore` / `PgCollection`](../api/src/store/pgStore.ts)
   store every record in a generic `engagement` table keyed by `(collection, id)`
   with the record in a `data` jsonb column. `find` / `findOne` load the
   collection's rows and filter in JS — identical semantics to the file store.
@@ -108,7 +108,7 @@ The backend verifies this JWT via Supabase's public JWKS endpoint
 request originates from the app — scrapers and unauthorized clients are blocked.
 
 - **`X-Supabase-Auth` header** — attached to every frontend request.
-- **Backend:** [`jwtVerify.ts`](./api/src/auth/jwtVerify.ts) fetches the public
+- **Backend:** [`jwtVerify.ts`](../api/src/auth/jwtVerify.ts) fetches the public
   key from `SUPABASE_URL/auth/v1/.well-known/jwks.json` and verifies the token.
 - **Local dev:** `SUPABASE_URL` unset → verification disabled, all requests pass.
 
@@ -118,7 +118,7 @@ be replaced with Supabase Auth user sessions when user accounts are needed.
 
 ### 2.4 Transport seam — HTTP server
 
-[`server.ts`](./api/src/http/server.ts) maps routes to transport-agnostic
+[`server.ts`](../api/src/http/server.ts) maps routes to transport-agnostic
 handlers (`(req) => Promise<ApiResponse>`).
 
 - **Local:** Node `http` server.
@@ -127,22 +127,25 @@ handlers (`(req) => Promise<ApiResponse>`).
 
 ### 2.5 Config seam — environment variables
 
-Both [`api` env](./api/src/config/env.ts) and
-[`ingestion` env](./ingestion/src/config/env.ts) read `process.env` with
+Both [`api` env](../api/src/config/env.ts) and
+[`ingestion` env](../ingestion/src/config/env.ts) read `process.env` with
 zero-config local defaults. Hosting = setting env vars, not editing code:
 
-| Var                    | Local default               | Production                |
-| ---------------------- | --------------------------- | ------------------------- |
-| `PORT`                 | 3001                        | platform-assigned         |
-| `DATA_DIR`             | `../ingestion/data`         | unused when DB is set     |
-| `DATABASE_URL`         | _(unset → local files)_     | managed Postgres/Supabase |
-| `SUPABASE_URL`         | _(unset → no JWT check)_   | `https://<ref>.supabase.co` |
+| Var                    | Local default               | Production (actual)                  |
+| ---------------------- | --------------------------- | ------------------------------------ |
+| `PORT`                 | 3001                        | 3001 (EC2)                           |
+| `DATA_DIR`             | `../ingestion/data`         | unused (DB is set)                   |
+| `DATABASE_URL`         | _(unset → local files)_     | Supabase pooler (6543)               |
+| `SUPABASE_URL`         | _(unset → no JWT check)_   | `https://lzhgbodmdsflasvashkp.supabase.co` |
+| `ALLOWED_ORIGINS`      | _(unset)_                   | `https://tuparea.com,https://www.tuparea.com,https://main.d3up2fndbpz28i.amplifyapp.com` |
+| `BACKEND_URL`          | `http://localhost:3001`     | `http://98.91.107.103:3001` (Amplify env) |
+| `SERVER_AUTH_SECRET`   | _(unset)_                   | shared secret (SSG bypass)           |
 | `ANTHROPIC_API_KEY`    | absent → heuristic fallback | secret store              |
-| `NEXT_PUBLIC_API_BASE` | `http://localhost:3001`     | API public URL            |
+| `NEXT_PUBLIC_API_BASE` | `http://localhost:3001`     | _(unused, BACKEND_URL used instead)_ |
 
 ### 2.6 External data dependency — live scores
 
-[`LiveEventsService`](./api/src/services/liveEvents.ts) (`GET /live/events`)
+[`LiveEventsService`](../api/src/services/liveEvents.ts) (`GET /live/events`)
 proxies ESPN's public, **unofficial/undocumented** scoreboard JSON across a few
 leagues. The fetch is kept server-side (avoids browser CORS and shields the
 upstream shape behind our own `LiveEvent` contract); per-league failures are
@@ -189,19 +192,29 @@ No database, no cloud account, no secrets required.
 
 ## 4. Target production architecture
 
+> **Live at:** [`https://tuparea.com`](https://tuparea.com)
+
 ```mermaid
 flowchart LR
-    U[Browser] --> CDN[Vercel / CloudFront]
-    CDN --> FE[Next.js]
-    FE -->|X-Supabase-Auth JWT| API[API: Node service or Lambda]
+    U[Browser] --> CDN[AWS Amplify / CloudFront]
+    CDN --> FE[Next.js 16 SSR]
+    FE -->|/_api/* rewrite| API[EC2 Node API :3001]
     FE -.anon session.-> IDP[Supabase Auth]
     IDP -.JWKS.-> API
-    API --> PG[(Postgres + PostGIS)]
-    API --> OBJ[(R2 / S3 — photos)]
-    API -.optional.-> REDIS[(Redis — hot rankings)]
+    API --> PG[(Supabase Postgres)]
     CRON[Scheduled ingestion] --> SRC[OSM · fixtures · events]
     CRON --> PG
 ```
+
+**Current production deployment:**
+
+| Concern | Service | Domain / URL |
+|---------|---------|--------------|
+| Frontend | AWS Amplify (CloudFront + SSR) | `https://tuparea.com` |
+| API | EC2 t2.micro (PM2 + nginx) | `98.91.107.103:3001` (internal, via Amplify rewrite) |
+| Database | Supabase Postgres | `lzhgbodmdsflasvashkp.supabase.co` |
+| Auth | Supabase Anonymous Auth (JWKS) | auto |
+| DNS / SSL | Route 53 + ACM (Amplify-managed) | `tuparea.com`, `www.tuparea.com` |
 
 Changes vs. local: ingestion dual-writes to **Postgres/Supabase** (the
 `SupabasePublisher`, JSONL still emitted as source of truth + rollback); the API
@@ -235,7 +248,7 @@ when traffic/cost justifies it. The seams above make A → B migration cheap.
 
 ## 6. Database (target)
 
-**Shipped** ([`supabase/migrations/0001_init.sql`](./supabase/migrations/0001_init.sql)):
+**Shipped** ([`supabase/migrations/0001_init.sql`](../supabase/migrations/0001_init.sql)):
 a portable plain-Postgres schema (no PostGIS, no DB-side uuid defaults — the app
 supplies all ids) that runs identically on Supabase, a local Postgres, and a
 PGlite harness. Each row carries the full canonical object in a `data` jsonb

@@ -82,7 +82,7 @@ The script filters based on **team codes** (FIFA 3-letter format):
 
 - 🇲🇦 MAR · 🇸🇳 SEN · 🇨🇲 CMR · 🇬🇭 GHA · 🇹🇳 TUN
 
-**Asia/Oceania (2):**
+**Asia/Oceania (5):**
 
 - 🇯🇵 JPN · 🇰🇷 KOR · 🇮🇷 IRN · 🇸🇦 KSA · 🇦🇺 AUS
 
@@ -270,18 +270,18 @@ The script uses efficient SQL patterns:
 ```sql
 -- Delete venues that only support non-WC teams
 DELETE FROM venues
-WHERE (supports_teams IS NULL OR supports_teams = '{}')
-  OR NOT (supports_teams && ARRAY[...WC teams...]::text[])
+WHERE supports_teams IS NOT NULL AND supports_teams <> '{}'
+  AND NOT (supports_teams && ARRAY[...WC teams...]::text[])
 
 -- Delete matches between non-WC teams
 DELETE FROM matches
-WHERE home_team NOT = ANY(ARRAY[...WC teams...]::text[])
-  OR away_team NOT = ANY(ARRAY[...WC teams...]::text[])
+WHERE home_team <> ALL(ARRAY[...WC teams...]::text[])
+  OR away_team <> ALL(ARRAY[...WC teams...]::text[])
 
 -- Delete events with non-WC teams
 DELETE FROM events
-WHERE (teams IS NULL OR teams = '{}')
-  OR NOT (teams && ARRAY[...WC teams...]::text[])
+WHERE teams IS NOT NULL AND teams <> '{}'
+  AND NOT (teams && ARRAY[...WC teams...]::text[])
 ```
 
 ---

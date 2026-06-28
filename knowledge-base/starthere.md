@@ -8,6 +8,6 @@ PRD.md      →  WHAT & WHY   (prose spec)
 WORKFLOW.md →  HOW          (visual/technical)
 ```
 
-- **[README.md](./README.md)** — quick overview of FanWatch and where to go next.
+- **[README.md](../README.md)** — quick overview of FanWatch and where to go next.
 - **[PRD.md](./PRD.md)** — the product requirements: what we're building and why.
 - **[WORKFLOW.md](./WORKFLOW.md)** — diagrams of how the pieces fit together.

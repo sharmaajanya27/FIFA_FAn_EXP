@@ -6,20 +6,21 @@ title: FanWatch AI Agent Guide
 
 **FanWatch** is a location-based soccer fan experience platform helping fans discover the best venues to watch matches. This guide accelerates AI-assisted development by documenting project structure, patterns, and conventions.
 
-> **Start here:** [README.md](./README.md) · Full architecture: [ARCHITECTURE.md](./ARCHITECTURE.md) · Workflow & diagrams: [WORKFLOW.md](./WORKFLOW.md) · PRD: [PRD.md](./PRD.md)
+> **Start here:** [README.md](./README.md) · Full architecture: [ARCHITECTURE.md](./knowledge-base/ARCHITECTURE.md) · Workflow & diagrams: [WORKFLOW.md](./knowledge-base/WORKFLOW.md) · PRD: [PRD.md](./knowledge-base/PRD.md)
 
 ---
 
 ## Quick Facts
 
-| Property          | Value                                                                 |
-| ----------------- | --------------------------------------------------------------------- |
-| **Tech Stack**    | TypeScript (Node.js 20+), Next.js 16, React 19, Postgres/Supabase     |
-| **Module Format** | ESM (`import` / `export`) across all packages                         |
-| **TypeScript**    | Strict mode enabled; `noUncheckedIndexedAccess: true`                 |
-| **Packages**      | 3 monorepo packages: `ingestion/`, `api/`, `frontend/`                |
-| **Storage**       | Pluggable via interfaces (local JSONL in dev, Postgres in production) |
-| **Development**   | No tests; validation via Zod (ingestion) and runtime helpers (api)    |
+| Property | Value |
+|----------|-------|
+| **Live URL** | [`https://tuparea.com`](https://tuparea.com) |
+| **Tech Stack** | TypeScript (Node.js 20+), Next.js 16, React 19, Postgres/Supabase |
+| **Module Format** | ESM (`import` / `export`) across all packages |
+| **TypeScript** | Strict mode enabled; `noUncheckedIndexedAccess: true` |
+| **Packages** | 3 monorepo packages: `ingestion/`, `api/`, `frontend/` |
+| **Storage** | Pluggable via interfaces (local JSONL in dev, Postgres in production) |
+| **Development** | No tests; validation via Zod (ingestion) and runtime helpers (api) |
 
 ---
 
@@ -344,6 +345,11 @@ cd frontend && npm run dev
 - API docs: See `api/README.md` for endpoints
 - Admin dashboard: http://localhost:3000/admin (gated by `ADMIN_EMAILS`)
 
+**Production URLs:**
+- Frontend: https://tuparea.com
+- API (proxied): https://tuparea.com/_api/health
+- Admin: https://tuparea.com/admin
+
 ---
 
 ## Debugging Tips
@@ -395,9 +401,14 @@ cd ingestion && npm run typecheck   # Type-check
 ## Links to Detailed Documentation
 
 - [README.md](./README.md) — Project overview
-- [ARCHITECTURE.md](./ARCHITECTURE.md) — Deep dive into the storage seams, abstractions, and production target
-- [WORKFLOW.md](./WORKFLOW.md) — User flow and system architecture diagrams
-- [PRD.md](./PRD.md) — Product requirements and vision
+- [knowledge-base/starthere.md](./knowledge-base/starthere.md) — Orientation: where to go next
+- [knowledge-base/ARCHITECTURE.md](./knowledge-base/ARCHITECTURE.md) — Deep dive into the storage seams, abstractions, and production target
+- [knowledge-base/WORKFLOW.md](./knowledge-base/WORKFLOW.md) — User flow and system architecture diagrams
+- [knowledge-base/PRD.md](./knowledge-base/PRD.md) — Product requirements and vision
+- [knowledge-base/FEATURES.md](./knowledge-base/FEATURES.md) — Feature inventory by user type, with build status
+- [knowledge-base/DEPLOYMENT.md](./knowledge-base/DEPLOYMENT.md) — Production deployment runbook
+- [knowledge-base/INTEGRATION_GUIDE.md](./knowledge-base/INTEGRATION_GUIDE.md) — Integration notes and cleanup CLIs
+- [knowledge-base/SECURITY.md](./knowledge-base/SECURITY.md) — Security hardening findings
 - [api/README.md](./api/README.md) — API endpoints and development notes
 - [frontend/README.md](./frontend/README.md) — Frontend architecture and components
 - [ingestion/README.md](./ingestion/README.md) — Data pipeline documentation

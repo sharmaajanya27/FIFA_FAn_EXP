@@ -2,7 +2,7 @@
 
 The discovery backend. Serves venue discovery, location/team search, ranking,
 and recommendations over the dataset produced by Phase 0 ingestion (see
-[`../PRD.md`](../PRD.md) §6).
+[`../knowledge-base/PRD.md`](../knowledge-base/PRD.md) §6).
 
 **Stack:** Node.js + TypeScript (ESM). Handlers are transport-agnostic, designed
 to run behind **API Gateway → AWS Lambda**; a local HTTP server drives them in
@@ -87,7 +87,7 @@ contract); a failing fetch is skipped, never fatal.
 > rate-limited** — great for local/demo, not SLA-grade. Before launch, swap to a
 > licensed provider (football-data.org / Sportradar / API-Football, keyed via
 > the config seam) or add a short-TTL cache + graceful fallback. Only
-> `liveEvents.ts` changes. See [`ARCHITECTURE.md`](../ARCHITECTURE.md) §2.6.
+> `liveEvents.ts` changes. See [`ARCHITECTURE.md`](../knowledge-base/ARCHITECTURE.md) §2.6.
 
 ### Matchday recommendations (Phase 3)
 

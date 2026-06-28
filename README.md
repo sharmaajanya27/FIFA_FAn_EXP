@@ -1,5 +1,7 @@
 # FanWatch
 
+> **Live at:** [https://tuparea.com](https://tuparea.com)
+
 A location-based web app that helps soccer fans discover the best places to
 watch matches — bars, pubs, fan zones, viewing parties, and community events —
 ranked by popularity, atmosphere, team support, and fan engagement.
@@ -14,15 +16,16 @@ recommendations.
 
 ## Documentation
 
-- [`PRD.md`](./PRD.md) — Product Requirements Document
-- [`FEATURES.md`](./FEATURES.md) — Feature inventory by user type, with build status
-- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — How it's built, the seams, and the production target
-- [`WORKFLOW.md`](./WORKFLOW.md) — Workflow & architecture diagrams for the dev team
+- [`knowledge-base/`](./knowledge-base/) — all narrative docs (start with [`starthere.md`](./knowledge-base/starthere.md))
+- [`PRD.md`](./knowledge-base/PRD.md) — Product Requirements Document
+- [`FEATURES.md`](./knowledge-base/FEATURES.md) — Feature inventory by user type, with build status
+- [`ARCHITECTURE.md`](./knowledge-base/ARCHITECTURE.md) — How it's built, the seams, and the production target
+- [`WORKFLOW.md`](./knowledge-base/WORKFLOW.md) — Workflow & architecture diagrams for the dev team
 - [`api/README.md`](./api/README.md) · [`frontend/README.md`](./frontend/README.md) — per-package docs & endpoints
 
 ## What's built
 
-Three TypeScript packages (see [`ARCHITECTURE.md`](./ARCHITECTURE.md)):
+Three TypeScript packages (see [`ARCHITECTURE.md`](./knowledge-base/ARCHITECTURE.md)):
 
 - **`ingestion/`** — Phase 0 batch pipeline (scrape → normalize → geocode → dedup → enrich → score → publish JSONL).
 - **`api/`** — discovery API (location/team search, ranking, recommendations), Phase 2 engagement writes (accounts, reviews, check-ins, crowd, predictions, communities), Phase 3 (AI rec scaffold, crowd estimation, user events, sponsorship), and **first-party traffic analytics** (`/analytics/*`, admin-gated by `ADMIN_EMAILS`).
@@ -38,4 +41,4 @@ Three TypeScript packages (see [`ARCHITECTURE.md`](./ARCHITECTURE.md)):
 
 ## Status
 
-Phases 0–3 implemented and runnable locally; storage/auth/transport sit behind seams for the production swap (see [`ARCHITECTURE.md`](./ARCHITECTURE.md) §2). Not yet deployed — no production domain wired (`NEXT_PUBLIC_SITE_URL` is a placeholder).
+Phases 0–3 implemented and **deployed in production** at [tuparea.com](https://tuparea.com) — frontend on AWS Amplify, API on EC2 behind `api.tuparea.com`, data in Supabase Postgres. Storage/auth/transport sit behind seams for the production swap (see [`ARCHITECTURE.md`](./knowledge-base/ARCHITECTURE.md) §2).
