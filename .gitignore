@@ -26,5 +26,9 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+# Map tiles (large local artifacts, exceed GitHub's 100MB limit; not referenced in-branch)
+*.pmtiles
+frontend/public/maps/
+
 # Claude
 .claude/
