@@ -58,29 +58,34 @@ export function LiveEventsPanel() {
 
   return (
     <div className="panel">
-      <div className="header" style={{ justifyContent: "space-between" }}>
-        <div>
-          <h2 style={{ margin: 0 }}>
+      <div className="scores-head">
+        <div className="scores-head-main">
+          <h2 className="scores-title">
             World Cup 2026 scores
             {liveCount > 0 && (
-              <span className="live-pill" style={{ marginLeft: 10 }}>
+              <span className="live-pill">
                 <span className="season-live" aria-hidden /> {liveCount} live
               </span>
             )}
           </h2>
-          <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
-            Live &amp; upcoming FIFA World Cup 2026 matches
+          <p className="scores-sub">
+            Live &amp; upcoming
             {updatedAt
               ? ` · updated ${updatedAt.toLocaleTimeString(undefined, {
                   hour: "numeric",
                   minute: "2-digit",
-                  second: "2-digit",
                 })}`
               : ""}
-          </div>
+          </p>
         </div>
-        <button onClick={() => void load()} disabled={loading}>
-          {loading ? "…" : "Refresh"}
+        <button
+          type="button"
+          className="refresh-btn"
+          onClick={() => void load()}
+          disabled={loading}
+          aria-label="Refresh scores"
+        >
+          <span aria-hidden="true">↻</span> {loading ? "…" : "Refresh"}
         </button>
       </div>
 

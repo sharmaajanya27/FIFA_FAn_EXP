@@ -36,7 +36,7 @@ export async function generateMetadata({
   const { event } = data;
   const where = event.city ? ` in ${event.city}` : "";
   return buildMetadata({
-    title: `${event.title} — Fan watch party${where} | FanWatch`,
+    title: `${event.title} — Fan watch party${where} | Tu Parea`,
     description: `Join fellow fans${where} for ${event.title}. RSVP, see who's going, share the live vibe, and review the atmosphere. ${formatKickoff(event.startTime)}.`,
     path: paths.event(event.id),
   });

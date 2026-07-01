@@ -14,9 +14,10 @@
   margin-bottom: 1.5rem;
 }
 .title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 2rem;
+  letter-spacing: 0;
   margin: 0;
 }
 .sub {
@@ -53,13 +54,14 @@
 .kpiCard {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius);
   padding: 1.1rem 1.2rem;
 }
 .kpiNum {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  letter-spacing: 0;
+  line-height: 1;
 }
 .kpiLabel {
   color: var(--muted);
@@ -70,13 +72,17 @@
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius);
   padding: 1.2rem 1.3rem;
   margin-bottom: 1.2rem;
 }
 .panelTitle {
-  font-size: 1.05rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
   margin: 0 0 1rem;
 }
 
@@ -134,12 +140,14 @@
   margin: 4rem auto;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius);
   padding: 1.75rem;
   text-align: center;
 }
 .gate h1 {
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 1.6rem;
   margin: 0 0 0.5rem;
 }
 .gate p {
@@ -156,20 +164,20 @@
 }
 .field input {
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
   font-size: 0.95rem;
   background: var(--bg-2);
   color: var(--text);
 }
 .btn {
   width: 100%;
-  background: var(--accent-2);
-  color: #fff;
+  background: var(--accent);
+  color: #fff4e2;
   border: none;
-  border-radius: 10px;
+  border-radius: 5px;
   padding: 0.7rem 1rem;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
   cursor: pointer;
 }

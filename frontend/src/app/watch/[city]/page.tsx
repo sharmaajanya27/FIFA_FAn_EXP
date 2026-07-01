@@ -51,30 +51,36 @@ function cityFaq(cityName: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: { city: string };
+  params: Promise<{ city: string }>;
 }): Promise<Metadata> {
-  const city = cityBySlug(params.city);
+  const { city: citySlug } = await params;
+  const city = cityBySlug(citySlug);
   if (!city) return {};
-  const venues = await getCityVenues(params.city, { limit: 24 });
+  const venues = await getCityVenues(citySlug, { limit: 24 });
   const count = venues.length;
   const description =
     `The best bars, pubs, and fan zones to watch FIFA World Cup 2026 matches in ${city.name}, ranked by atmosphere and live coverage.` +
     (count ? ` ${count} watch spots near ${city.stadium?.name ?? "downtown"}.` : "");
   return buildMetadata({
-    title: `Where to Watch the World Cup in ${city.name} (2026) | FanWatch`,
+    title: `Where to Watch the World Cup in ${city.name} (2026) | Tu Parea`,
     description,
-    path: paths.city(params.city),
+    path: paths.city(citySlug),
     noindex: count < INDEX_MIN_VENUES,
   });
 }
 
-export default async function CityPage({ params }: { params: { city: string } }) {
-  const city = cityBySlug(params.city);
+export default async function CityPage({
+  params,
+}: {
+  params: Promise<{ city: string }>;
+}) {
+  const { city: citySlug } = await params;
+  const city = cityBySlug(citySlug);
   if (!city) notFound();
 
   const [venues, matches] = await Promise.all([
-    getCityVenues(params.city, { limit: 24 }),
-    getCityMatches(params.city),
+    getCityVenues(citySlug, { limit: 24 }),
+    getCityMatches(citySlug),
   ]);
   const season = worldCupStatus();
   const faq = cityFaq(city.name);
@@ -82,7 +88,7 @@ export default async function CityPage({ params }: { params: { city: string } })
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "Where to watch", path: paths.watchIndex() },
-    { name: city.name, path: paths.city(params.city) },
+    { name: city.name, path: paths.city(citySlug) },
   ];
   const ld = [
     breadcrumbLd(crumbs),
@@ -90,7 +96,7 @@ export default async function CityPage({ params }: { params: { city: string } })
       ? itemListLd(
           venues
             .slice(0, 10)
-            .map((v) => ({ name: v.name, path: paths.venue(params.city, v.id) })),
+            .map((v) => ({ name: v.name, path: paths.venue(citySlug, v.id) })),
         )
       : null,
     faqLd(faq),
@@ -127,7 +133,7 @@ export default async function CityPage({ params }: { params: { city: string } })
         {venues.length ? (
           <ol className={styles.venueList}>
             {venues.map((v, i) => (
-              <VenueCard key={v.id} venue={v} citySlug={params.city} rank={i + 1} />
+              <VenueCard key={v.id} venue={v} citySlug={citySlug} rank={i + 1} />
             ))}
           </ol>
         ) : (
@@ -165,7 +171,7 @@ export default async function CityPage({ params }: { params: { city: string } })
           {QUICK_LINK_TEAMS.map((t) => (
             <Link
               key={t.code}
-              href={paths.cityTeam(params.city, t.code)}
+              href={paths.cityTeam(citySlug, t.code)}
               className={styles.pill}
             >
               <span>{t.flag}</span> {t.name}

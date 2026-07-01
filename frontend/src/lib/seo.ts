@@ -58,7 +58,7 @@ export function buildMetadata({
       title,
       description,
       url,
-      siteName: "FanWatch",
+      siteName: "Tu Parea",
       type: "website",
     },
     twitter: { card: "summary_large_image", title, description },
@@ -72,7 +72,7 @@ export function websiteLd(): Ld {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "FanWatch",
+    name: "Tu Parea",
     url: siteUrl(),
     description: "Find the best place to watch the match.",
   };

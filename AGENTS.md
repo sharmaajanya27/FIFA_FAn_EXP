@@ -125,10 +125,11 @@ const myHandler = (c: Container) => async (req: ApiRequest) => {
 **Key files:**
 
 - `src/app/` — Next.js App Router pages (layout, discovery, `/watch/[city]`, `/venue/[city]/[id]`)
-- `src/components/` — React components (MapView, VenueList, EventsPanel, etc.)
+- `src/components/` — React components (MapView, EventsPanel, `festival/Masthead`, `festival/Lineup`, etc.)
 - `src/lib/api.ts` — Client-side API fetching (calls `api/`)
+- `src/lib/festival.ts` — "Fan Festival" presentation helpers (rank colors, labels, capacity)
 - `src/lib/types.ts` — Frontend types (mirrors API domain models)
-- `public/cities/` — City-specific static assets (flags, themes, etc.)
+- `public/cities/` — City-specific static assets (flags, etc.)
 
 **SEO & Programmatic Landing Pages:**
 

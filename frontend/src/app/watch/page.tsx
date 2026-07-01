@@ -16,7 +16,7 @@ import styles from "@/components/seo/seo.module.css";
 
 export const revalidate = 3600;
 
-const TITLE = "Where to Watch the FIFA World Cup 2026 | FanWatch";
+const TITLE = "Where to Watch the FIFA World Cup 2026 | Tu Parea";
 const DESCRIPTION =
   "Find the best bars, pubs, and fan zones to watch the 2026 FIFA World Cup near you — ranked by atmosphere, team support, and live-match coverage across every host city.";
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = buildMetadata({
 
 const FAQ = [
   {
-    q: "How does FanWatch rank venues?",
+    q: "How does Tu Parea rank venues?",
     a: "Each venue is scored on atmosphere, how reliably it shows live matches, fan and team support, ratings, and distance from your chosen spot — so the top of every list is genuinely the best place to catch the game.",
   },
   {
@@ -36,7 +36,7 @@ const FAQ = [
     a: "Every 2026 World Cup host city across the United States, Canada, and Mexico, plus major football cities worldwide. Pick a city to see ranked watch spots near the stadium and downtown.",
   },
   {
-    q: "Is FanWatch free?",
+    q: "Is Tu Parea free?",
     a: "Yes. Browsing watch spots, fan zones, and fixtures is completely free.",
   },
 ];

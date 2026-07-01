@@ -77,6 +77,8 @@ const nextConfig = {
       },
     ];
   },
+  // Allow slower API responses during SSG without failing the build.
+  staticPageGenerationTimeout: 120,
 };
 
 export default nextConfig;

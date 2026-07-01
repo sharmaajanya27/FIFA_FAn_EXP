@@ -55,7 +55,7 @@ export default function AdminPage() {
   if (state === "denied" || state === "idle") {
     return (
       <div className={styles.gate}>
-        <h1>FanWatch Admin</h1>
+        <h1>Tu Parea Admin</h1>
         <p>Admin access is not available in this version.</p>
       </div>
     );
@@ -72,7 +72,7 @@ export default function AdminPage() {
         <div>
           <h1 className={styles.title}>Traffic</h1>
           <div className={styles.sub}>
-            FanWatch Admin
+            Tu Parea Admin
             {summary
               ? ` · updated ${new Date(summary.generatedAt).toLocaleTimeString()}`
               : ""}
