@@ -11,6 +11,7 @@ import {
 import type { VenueDetail } from "@/lib/types";
 import { breadcrumbLd, buildMetadata, paths, venueLd } from "@/lib/seo";
 import { isSafeUrl } from "@/lib/security";
+import { directionsUrl } from "@/lib/format";
 import { SeoShell } from "@/components/seo/SeoShell";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
@@ -34,11 +35,13 @@ const isIndexable = (v: VenueDetail): boolean =>
     v.name && v.address && (typeof v.ratingAvg === "number" || v.website),
   );
 
-// Pre-render the top few venues per city; the long tail renders on demand (ISR).
+// Pre-render only a few high-traffic venues; the rest render on-demand (ISR)
+// since dynamicParams=true and revalidate=3600 handle the long tail.
 export async function generateStaticParams() {
+  const TOP_CITIES = CITIES.slice(0, 3);
   const params: { city: string; id: string }[] = [];
-  for (const c of CITIES) {
-    const venues = await getCityVenues(c.slug, { limit: 8 });
+  for (const c of TOP_CITIES) {
+    const venues = await getCityVenues(c.slug, { limit: 4 });
     for (const v of venues) params.push({ city: c.slug, id: v.id });
   }
   return params;
@@ -56,7 +59,7 @@ export async function generateMetadata({
   const { venue } = data;
   const kind = KIND_LABEL[venue.kind] ?? "venue";
   return buildMetadata({
-    title: `${venue.name} — Watch the World Cup in ${city.name} | FanWatch`,
+    title: `${venue.name} — Watch the World Cup in ${city.name} | Tu Parea`,
     description: `${venue.name} is a ${kind.toLowerCase()} in ${city.name} for watching FIFA World Cup 2026 matches.${venue.address ? ` ${venue.address}.` : ""} See hours, location, ratings, and live crowd levels.`,
     path: paths.venue(citySlug, venue.id),
     noindex: !isIndexable(venue),
@@ -182,9 +185,24 @@ export default async function VenuePage({
       </section>
 
       <section className={styles.section}>
-        <Link href={`/?city=${city.slug}`} className={styles.cta}>
-          See {venue.name} on the live map →
-        </Link>
+        <div className={styles.directions}>
+          <a
+            href={directionsUrl(venue.geo.lat, venue.geo.lon, venue.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.cta}
+          >
+            Get directions →
+          </a>
+          <a
+            href={`https://maps.apple.com/?daddr=${venue.geo.lat},${venue.geo.lon}&dirflg=d&t=m`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.ctaSecondary}
+          >
+            Open in Apple Maps
+          </a>
+        </div>
       </section>
     </SeoShell>
   );

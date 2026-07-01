@@ -64,7 +64,7 @@ export default function BusinessPage() {
             require a business account — sign out and register a business account
             from the home page.
           </p>
-          <Link href="/" className="toggle">← Back to FanWatch</Link>
+          <Link href="/" className="toggle">← Back to Tu Parea</Link>
         </Gate>
       </main>
     );

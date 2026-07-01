@@ -85,3 +85,23 @@ proxy; configure the server-side API target with `BACKEND_URL` (see
 npm run typecheck
 npm run build
 ```
+
+## Design system — "The Fan Festival"
+
+The UI uses an editorial broadsheet theme (warm paper canvas, sticky masthead,
+bunting, a five-hue festival palette, Anton/Archivo/Newsreader type). The home
+page is organized as a three-tab programme: **Crews** (hero + headliner +
+map/lineup), **Fixtures** (live scores + fan events), **My Team** (community).
+
+- **Tokens** live in `:root` in `src/app/globals.css`; the SEO and admin CSS
+  modules consume them, so token changes propagate. Note the **two-tier
+  palette**: vivid `--c1…--c5` are decorative-only (bunting), while readable
+  colored text uses the **AA-safe** `--c*-text` / `--accent-text` tokens.
+- **Fonts** are self-hosted via `next/font` in `src/app/layout.tsx`.
+- **Helpers** for festival presentation (rank colors, category labels,
+  capacity) are in `src/lib/festival.ts`; components in `src/components/festival/`.
+- **Accessibility** is a release gate (landmarks, one `<h1>`/page, skip links,
+  `aria-pressed` toggles, reduced-motion, AA contrast on every color pair).
+
+> Full changelog — replaced files, a11y/SEO details — is in
+> [`../knowledge-base/REDESIGN.md`](../knowledge-base/REDESIGN.md).

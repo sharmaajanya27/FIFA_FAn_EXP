@@ -56,7 +56,7 @@
 }
 .goingBtn.active {
   background: transparent;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .select {
@@ -198,13 +198,13 @@
   padding: 0;
 }
 .star.on {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .avg {
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .error {
-  color: #ef6d6d;
+  color: var(--danger);
   font-size: 0.85rem;
 }

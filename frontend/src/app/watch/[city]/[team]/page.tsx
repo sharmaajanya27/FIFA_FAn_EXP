@@ -37,17 +37,18 @@ const supporting = (venues: RankedVenue[], code: string): RankedVenue[] =>
 export async function generateMetadata({
   params,
 }: {
-  params: { city: string; team: string };
+  params: Promise<{ city: string; team: string }>;
 }): Promise<Metadata> {
-  const city = cityBySlug(params.city);
-  const team = teamByCode(params.team);
+  const { city: citySlug, team: teamCode } = await params;
+  const city = cityBySlug(citySlug);
+  const team = teamByCode(teamCode);
   if (!city || !team) return {};
-  const venues = await getCityVenues(params.city, { team: team.code, limit: 24 });
+  const venues = await getCityVenues(citySlug, { team: team.code, limit: 24 });
   const supportCount = supporting(venues, team.code).length;
   return buildMetadata({
-    title: `Where to Watch ${team.name} Matches in ${city.name} (2026) | FanWatch`,
+    title: `Where to Watch ${team.name} Matches in ${city.name} (2026) | Tu Parea`,
     description: `Find the best bars and fan zones to watch ${team.name} ${team.flag} play at the 2026 World Cup in ${city.name} — where ${team.name} fans gather, ranked by atmosphere.`,
-    path: paths.cityTeam(params.city, team.code),
+    path: paths.cityTeam(citySlug, team.code),
     noindex: supportCount < INDEX_MIN_SUPPORTING,
   });
 }
@@ -55,15 +56,16 @@ export async function generateMetadata({
 export default async function CityTeamPage({
   params,
 }: {
-  params: { city: string; team: string };
+  params: Promise<{ city: string; team: string }>;
 }) {
-  const city = cityBySlug(params.city);
-  const team = teamByCode(params.team);
+  const { city: citySlug, team: teamCode } = await params;
+  const city = cityBySlug(citySlug);
+  const team = teamByCode(teamCode);
   if (!city || !team) notFound();
 
   const [venues, matches] = await Promise.all([
-    getCityVenues(params.city, { team: team.code, limit: 24 }),
-    getCityMatches(params.city, team.code),
+    getCityVenues(citySlug, { team: team.code, limit: 24 }),
+    getCityMatches(citySlug, team.code),
   ]);
   const supporters = supporting(venues, team.code);
   // Prefer venues that explicitly support the team; otherwise show the best
@@ -88,8 +90,8 @@ export default async function CityTeamPage({
   const crumbs = [
     { name: "Home", path: "/" },
     { name: "Where to watch", path: paths.watchIndex() },
-    { name: city.name, path: paths.city(params.city) },
-    { name: team.name, path: paths.cityTeam(params.city, team.code) },
+    { name: city.name, path: paths.city(citySlug) },
+    { name: team.name, path: paths.cityTeam(citySlug, team.code) },
   ];
   const ld = [
     breadcrumbLd(crumbs),
@@ -97,7 +99,7 @@ export default async function CityTeamPage({
       ? itemListLd(
           list
             .slice(0, 10)
-            .map((v) => ({ name: v.name, path: paths.venue(params.city, v.id) })),
+            .map((v) => ({ name: v.name, path: paths.venue(citySlug, v.id) })),
         )
       : null,
     faqLd(faq),
@@ -110,7 +112,7 @@ export default async function CityTeamPage({
         items={[
           { name: "Home", path: "/" },
           { name: "Where to watch", path: paths.watchIndex() },
-          { name: city.name, path: paths.city(params.city) },
+          { name: city.name, path: paths.city(citySlug) },
           { name: team.name },
         ]}
       />
@@ -133,7 +135,7 @@ export default async function CityTeamPage({
         {list.length ? (
           <ol className={styles.venueList}>
             {list.map((v, i) => (
-              <VenueCard key={v.id} venue={v} citySlug={params.city} rank={i + 1} />
+              <VenueCard key={v.id} venue={v} citySlug={citySlug} rank={i + 1} />
             ))}
           </ol>
         ) : (

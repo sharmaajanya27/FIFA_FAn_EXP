@@ -7,8 +7,13 @@ export const alt = "Where to watch the FIFA World Cup 2026";
 
 // Branded social-share card per city. Satori-safe: every container is flex and
 // every leaf holds a single text node.
-export default function Image({ params }: { params: { city: string } }) {
-  const city = cityBySlug(params.city);
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ city: string }>;
+}) {
+  const { city: citySlug } = await params;
+  const city = cityBySlug(citySlug);
   return new ImageResponse(
     (
       <div
@@ -26,7 +31,7 @@ export default function Image({ params }: { params: { city: string } }) {
         }}
       >
         <div style={{ display: "flex", fontSize: "40px", fontWeight: 700, color: "#e0a44e" }}>
-          FanWatch
+          Tu Parea
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div

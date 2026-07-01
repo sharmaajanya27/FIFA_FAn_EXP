@@ -1,34 +1,59 @@
 :root {
-  /* Claude-inspired warm editorial theme, tuned for World Cup fan energy.
-     A paper-cream canvas with a clay/coral primary and warm espresso ink; the
-     tournament's gold and pitch-green live on as lively secondary accents. The
-     page background is still tinted per selected city. */
-  --bg: #faf7f1; /* warm paper */
-  --bg-2: #fffdf8; /* raised card surface */
-  --panel: #fffdf8;
-  --panel-2: #f3ece1; /* warm sunken fill */
-  --border: #e8dfd0; /* warm hairline */
-  --border-strong: #daccb6;
-  --text: #211c16; /* warm espresso ink */
-  --muted: #6f6557; /* warm taupe */
-  --accent: #d97757; /* Claude clay — primary */
-  --accent-deep: #b85c3e; /* deeper clay for hovers / contrast */
-  --accent-2: #2f8f5b; /* pitch green (secondary fan accent) */
-  --accent-3: #c4456b; /* host magenta, warmed */
-  --accent-4: #2a7d9b; /* host teal, used for links */
-  --ink: #1c150f; /* deep espresso for the hero base */
+  /* "The Fan Festival" — a printed-broadside aesthetic: warm paper, espresso
+     ink, a coral-red lead over a five-colour bunting palette. One consistent
+     look across the whole site (no per-city tinting). Legacy token names are
+     kept stable so the SEO + admin CSS modules inherit the new palette for
+     free. The three font families (Anton / Archivo / Newsreader) are provided
+     as --font-display / --font-body / --font-serif by next/font on <html>. */
+  --paper: #f7eeda; /* page paper */
+  --bg: #f7eeda;
+  --bg-2: #fbf4e2; /* raised surface (inputs, cards) */
+  --panel: #fbf4e2;
+  --panel-2: #efe4c8; /* sunken fill */
+  --border: rgba(36, 27, 18, 0.16); /* printed hairline */
+  --border-strong: rgba(36, 27, 18, 0.34);
+  --text: #241b12; /* espresso ink */
+  --ink: #241b12;
+  --muted: #6e6047; /* secondary text — AA on paper */
+  --faint: #8a7b5f; /* decorative / large text only */
+  --accent: #ff5436; /* coral-red lead (fills, large display) */
+  --accent-deep: #e23a2e; /* hover / AA-large on light */
+  --accent-text: #b8301c; /* deeper red — AA for SMALL text on paper */
+  /* Bunting palette — bright festival hues for the decorative pennants
+     (flags only, aria-hidden) so the triangles pop against the warm paper. */
+  --c1: #f2542f;
+  --c2: #14a08f;
+  --c3: #7d5be6;
+  --c4: #ee5b97;
+  --c5: #f5a623;
+  /* AA-safe text variants of the palette (≥4.5:1 on paper) for coloured
+     readable text — rank numbers and category tags in the lineup. */
+  --c1-text: #bd3019;
+  --c2-text: #0c6055;
+  --c3-text: #5436bd;
+  --c4-text: #b62a6a;
+  --c5-text: #8f5a05;
+  --gold: #ffc23c;
+  --purple: #6b4dd6;
+  --on-purple: #fcefd8;
+  --on-purple-2: #d8c9f5;
+  /* Secondary accents kept under their legacy names for the SEO/admin modules. */
+  --accent-2: #138a7e; /* teal */
+  --accent-3: #e0428a; /* pink */
+  --accent-4: #6b4dd6; /* purple — links */
   --danger: #c0392b;
-  --radius: 18px;
-  /* Editorial serif for display headings — Fraunces when the webfont loads
-     (see layout head), otherwise a warm system serif. Zero build dependency. */
-  --font-serif:
-    "Fraunces", "Iowan Old Style", "Palatino Linotype", Palatino,
-    "Book Antiqua", Georgia, serif;
-  /* Overridden per selected city via inline style on .city-bg. */
-  --city-accent: #d97757;
-  --gold-grad: linear-gradient(135deg, #eaa07d 0%, #d97757 52%, #b85c3e 100%);
-  --host-grad: linear-gradient(90deg, #d97757 0%, #e0a44e 50%, #2f8f5b 100%);
-  --hero-grad: linear-gradient(125deg, #1c150f 0%, #3a271c 45%, #6e3f28 100%);
+  --radius: 5px; /* sharp editorial corners */
+  /* Gradients (legacy names kept; restyled for the festival). */
+  --gold-grad: linear-gradient(135deg, #ff5436 0%, #e23a2e 100%);
+  --host-grad: linear-gradient(
+    90deg,
+    #ff5436 0 20%,
+    #e8950c 20% 40%,
+    #138a7e 40% 60%,
+    #6b4dd6 60% 80%,
+    #e0428a 80% 100%
+  );
+  --hero-grad: linear-gradient(135deg, #2c2114 0%, #241b12 55%, #3a2a18 100%);
 }
 
 * {
@@ -36,7 +61,7 @@
 }
 
 html {
-  background: var(--bg);
+  background: var(--paper);
 }
 
 html,
@@ -45,60 +70,26 @@ body {
   padding: 0;
   color: var(--text);
   background-color: transparent;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Helvetica,
-    Arial,
-    sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* --- Per-city tinted background + skyline silhouette band --- */
-.city-bg {
+/* Faint halftone dot texture across the whole page (decorative). */
+body::before {
+  content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
-  overflow: hidden;
-  background:
-    radial-gradient(
-      1100px 720px at 82% -12%,
-      color-mix(in srgb, var(--city-accent) 30%, transparent),
-      transparent 62%
-    ),
-    radial-gradient(
-      900px 620px at -5% 105%,
-      color-mix(in srgb, var(--city-accent) 18%, transparent),
-      transparent 58%
-    ),
-    var(--bg);
-  transition: background 0.6s ease;
+  opacity: 0.5;
+  background-image: radial-gradient(rgba(36, 27, 18, 0.045) 1px, transparent 1.3px);
+  background-size: 3px 3px;
 }
-/* Footballs scattered at deterministic-but-random spots per city. */
-.city-bg .ball {
-  position: absolute;
-  background-color: var(--city-accent);
-  -webkit-mask: url("/football-pattern.svg") center / contain no-repeat;
-  mask: url("/football-pattern.svg") center / contain no-repeat;
-  opacity: 0.13;
-  pointer-events: none;
-}
-.city-skyline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: min(42vh, 380px);
-  background-color: var(--city-accent);
-  opacity: 0.16;
-  /* Tint the silhouette SVG with the city accent via a mask. */
-  -webkit-mask: var(--city-shape) bottom center / cover no-repeat;
-  mask: var(--city-shape) bottom center / cover no-repeat;
-  transition: opacity 0.6s ease;
+
+::selection {
+  background: var(--accent);
+  color: #fff4e2;
 }
 
 a {
@@ -109,119 +100,753 @@ a:hover {
   text-decoration: underline;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 16px 64px;
+/* Keyboard focus — visible on every interactive element (the design ships
+   none). A gold ring is used on dark/purple surfaces via .on-dark. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.on-dark :focus-visible,
+.on-dark:focus-visible {
+  outline-color: var(--gold);
 }
 
-/* --- FIFA World Cup 2026 hero header --- */
-.hero {
-  position: relative;
+/* Screen-reader-only + skip link (accessibility). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
   overflow: hidden;
-  border-radius: 20px;
-  background: var(--hero-grad);
-  color: #fff;
-  padding: 22px 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 18px 44px rgba(6, 20, 13, 0.28);
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-.hero::before {
-  /* faint pitch stripes */
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.05) 0 2px,
-    transparent 2px 84px
-  );
-  pointer-events: none;
+.skip-link {
+  position: fixed;
+  top: -60px;
+  left: 12px;
+  z-index: 100;
+  background: var(--ink);
+  color: #fff4e2;
+  padding: 10px 16px;
+  border-radius: 5px;
+  font-weight: 700;
+  transition: top 0.15s ease;
 }
-.hero::after {
-  /* tri-host gold glow */
-  content: "";
-  position: absolute;
-  top: -60%;
-  right: -10%;
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(
-    circle,
-    rgba(217, 119, 87, 0.42),
-    transparent 62%
-  );
-  pointer-events: none;
+.skip-link:focus {
+  top: 12px;
+  text-decoration: none;
 }
-.hero-top {
+
+.container {
   position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 32px);
+}
+
+/* ===================== MASTHEAD ===================== */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.mast-head {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 16px clamp(16px, 4vw, 32px) 12px;
+}
+.mast-brand {
+  font-family: var(--font-display);
+  font-size: 25px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mast-brand .tp-2 {
+  color: var(--accent-deep);
+}
+.mast-fest {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  padding-left: 18px;
+  border-left: 1px solid var(--border-strong);
+}
+.mast-day {
+  margin-left: auto;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.mast-nav-row {
+  border-top: 1px solid var(--border);
+}
+.mast-nav {
+  max-width: 1180px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 6px;
+  padding: 7px clamp(16px, 4vw, 32px);
   flex-wrap: wrap;
 }
-.hero-brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+.nav-link {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 6px 10px 8px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
 }
-.crest {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  background: var(--gold-grad);
-  font-size: 24px;
-  box-shadow: 0 8px 20px rgba(244, 163, 0, 0.4);
-  flex-shrink: 0;
+.nav-link:hover {
+  color: var(--ink);
 }
-.hero h1 {
-  font-family: var(--font-serif);
-  font-size: 38px;
-  margin: 0;
-  letter-spacing: -0.015em;
-  font-weight: 600;
-  line-height: 1.02;
-  color: #fff;
+.nav-link[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
 }
-.hero .brand {
-  background: var(--gold-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.hero .eyebrow {
+.following {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.following select {
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+/* Page-level nav row (homepage Crews/Fixtures/My Team tabs). */
+.page-nav-row {
+  border-bottom: 1px solid var(--border);
+}
+
+/* Bunting strip — triangular pennants in the festival palette. */
+.bunting {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 6px;
+  overflow: hidden;
+}
+.bunting .flag {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 30px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+/* ===================== LIVE SCORE TICKER ===================== */
+/* Auto-scrolling scores strip under the masthead. Motion is decorative:
+   duplicated for a seamless loop (copy is aria-hidden), pauses on hover/focus
+   and via the Pause control, and stops under prefers-reduced-motion. */
+.ticker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  background: var(--ink);
+  color: var(--paper);
+  overflow: hidden;
+  min-height: 34px;
+}
+.ticker-empty {
+  visibility: hidden;
+}
+.ticker-tag {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
-  margin-bottom: 6px;
 }
-.hero .eyebrow .flags {
-  letter-spacing: 0;
+.ticker-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  animation: ticker-pulse 1.8s ease-out infinite;
+}
+@keyframes ticker-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+.ticker-viewport {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 42s linear infinite;
+}
+.ticker:hover .ticker-track,
+.ticker.paused .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.ticker-list {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ticker-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  white-space: nowrap;
   font-size: 13px;
+  border-right: 1px solid rgba(247, 238, 218, 0.14);
 }
-.hero .eyebrow .pill {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+.ticker-team {
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
-.tagline {
-  position: relative;
-  color: rgba(255, 255, 255, 0.78);
-  margin: 6px 0 0;
-  font-size: 14px;
+.ticker-score {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+.ticker-chip.live .ticker-score {
+  color: #fff;
+}
+.ticker-detail {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffb0a3;
+}
+.ticker-toggle {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid rgba(247, 238, 218, 0.18);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0 12px;
+  cursor: pointer;
+  opacity: 0.72;
+}
+.ticker-toggle:hover {
+  opacity: 1;
+}
+.ticker-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+  .ticker-list[aria-hidden="true"] {
+    display: none;
+  }
+  .ticker-viewport {
+    overflow-x: auto;
+  }
+  .ticker-toggle {
+    display: none;
+  }
 }
 
-/* Seasonal "World Cup is happening now" context banner — distinct from the
-   FanWatch brand so the app reads as a standalone product with a live event. */
+/* ===================== BUTTONS ===================== */
+.btn-primary,
+.btn-ghost {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary {
+  background: var(--accent);
+  color: var(--ink);
+  border: 2.5px solid transparent;
+  padding: 13px 28px;
+}
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--accent-deep);
+  color: #fff;
+  text-decoration: none;
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  padding: 11px 24px;
+}
+.btn-ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+}
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  border-radius: 5px;
+  padding: 11px 22px;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-gold:hover {
+  background: #ffd061;
+  text-decoration: none;
+}
+
+/* ===================== HERO (Crews) ===================== */
+.crew-hero {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--ink);
+}
+.crew-hero-main {
+  flex: 1.45 1 460px;
+  min-width: 300px;
+  padding: clamp(32px, 5vw, 50px) clamp(0px, 3vw, 48px) 48px 0;
+}
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #9a4f12; /* warm amber — AA (5.2:1) on paper */
+}
+.hero-eyebrow .rule {
+  width: 30px;
+  height: 3px;
+  background: var(--accent);
+  flex: none;
+}
+.hero-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  font-size: clamp(40px, 6vw, 80px);
+}
+.hero-title .pop {
+  color: var(--accent-deep);
+}
+.hero-lede {
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 2.3vw, 22px);
+  line-height: 1.5;
+  color: #5c4f39;
+  max-width: 30em;
+  margin: 28px 0 32px;
+  overflow: hidden;
+}
+.dropcap {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 74px;
+  line-height: 0.74;
+  padding: 7px 16px 0 0;
+  color: var(--accent-deep);
+}
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Headliner panel — the night's top crew. */
+.headliner {
+  flex: 1 1 320px;
+  min-width: 280px;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  background: var(--purple);
+  color: var(--on-purple);
+  padding: 32px 30px 28px;
+  margin: 34px 0;
+  border: 2px solid var(--ink);
+}
+.headliner-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--on-purple-2);
+}
+.headliner-top .no {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0;
+}
+.headliner-pitch {
+  position: relative;
+  height: 170px;
+  border: 1px solid rgba(252, 239, 216, 0.4);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.headliner-pitch .fan {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 194, 60, 0.3) 0 9deg,
+    transparent 9deg 18deg
+  );
+}
+.headliner-crest {
+  position: relative;
+  width: 58px;
+  height: 68px;
+  background: var(--purple);
+  border: 2px solid var(--on-purple);
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.headliner-name {
+  font-family: var(--font-display);
+  font-size: 30px;
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 0.4px;
+  margin-top: 18px;
+}
+.headliner-meta {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--on-purple-2);
+  margin-top: 7px;
+  line-height: 1.45;
+}
+.headliner-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 20px;
+}
+.headliner-going {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.headliner-going .n {
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--gold);
+}
+.headliner-going .u {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--on-purple-2);
+}
+
+/* ===================== LINEUP ===================== */
+.lineup {
+  padding: clamp(24px, 3vw, 36px) 0 64px;
+}
+.lineup-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.lineup-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 34px);
+  text-transform: uppercase;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+.lineup-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sort button {
+  background: none;
+  border: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  padding-bottom: 3px;
+  border-bottom: 2px solid transparent;
+}
+.sort button[aria-pressed="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+.sort .sep {
+  color: var(--faint);
+}
+.lineup-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 2px solid var(--ink);
+}
+.lineup-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+  color: inherit;
+  text-decoration: none;
+}
+.lineup-row:hover {
+  background: rgba(255, 84, 54, 0.06);
+  text-decoration: none;
+}
+.lineup-rank {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 0.8;
+}
+.lineup-main {
+  min-width: 0;
+}
+.lineup-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.lineup-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+.lineup-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.lineup-meta {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.lineup-side {
+  text-align: right;
+  white-space: nowrap;
+}
+.lineup-going {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 7px;
+}
+.lineup-going .n {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ink);
+}
+.lineup-going .u {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--muted);
+}
+.lineup-cap {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  color: var(--muted);
+}
+.lineup-cap.packed {
+  color: var(--accent-text);
+}
+
+/* Fan events — compact horizontal cards above venue rows. */
+.lineup-events {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.lineup-event {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--paper));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+.lineup-event:hover {
+  background: color-mix(in srgb, var(--accent) 14%, var(--paper));
+}
+.lineup-event-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.lineup-event-title {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+.lineup-event-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* "Show all" toggle below collapsed venue list. */
+.lineup-expand {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+}
+.lineup-expand:hover {
+  background: color-mix(in srgb, var(--ink) 4%, var(--paper));
+}
+
+@media (max-width: 560px) {
+  .lineup-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .lineup-rank {
+    font-size: 22px;
+  }
+  .lineup-events {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Seasonal "World Cup is happening now" context chip — sits on paper. */
 .season-banner {
   position: relative;
   display: inline-flex;
@@ -230,28 +855,28 @@ a:hover {
   margin-top: 16px;
   padding: 7px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
   font-size: 12px;
+  color: var(--text);
 }
 .season-live {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.6);
+  box-shadow: 0 0 0 0 rgba(255, 84, 54, 0.6);
   animation: season-pulse 1.8s ease-out infinite;
 }
 @keyframes season-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(217, 119, 87, 0.55);
+    box-shadow: 0 0 0 0 rgba(255, 84, 54, 0.55);
   }
   70% {
-    box-shadow: 0 0 0 8px rgba(217, 119, 87, 0);
+    box-shadow: 0 0 0 8px rgba(255, 84, 54, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(217, 119, 87, 0);
+    box-shadow: 0 0 0 0 rgba(255, 84, 54, 0);
   }
 }
 .season-flags {
@@ -264,7 +889,7 @@ a:hover {
   gap: 6px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent-text);
   vertical-align: middle;
 }
 .live-pill .season-live,
@@ -274,13 +899,13 @@ a:hover {
 .season-title {
   font-weight: 800;
   letter-spacing: 0.02em;
-  color: #fff;
+  color: var(--ink);
 }
 .season-status {
   padding: 2px 9px;
   border-radius: 999px;
-  background: var(--gold-grad);
-  color: #fff;
+  background: var(--gold);
+  color: var(--ink);
   font-weight: 800;
   letter-spacing: 0.01em;
 }
@@ -294,45 +919,37 @@ a:hover {
 }
 .header h1,
 .header h2 {
-  font-family: var(--font-serif);
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  font-weight: 400;
 }
 .header h1 {
-  font-size: 32px;
+  font-size: 30px;
   margin: 0;
-  font-weight: 600;
 }
 .header .brand {
-  background: linear-gradient(
-    135deg,
-    var(--accent) 0%,
-    var(--accent-deep) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--accent-deep);
 }
 
 .controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(6px);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(20, 39, 29, 0.06);
 }
 .controls::before {
-  /* pitch top-line accent */
+  /* festival ribbon accent */
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 3px;
+  height: 4px;
   background: var(--host-grad);
 }
 .field {
@@ -341,9 +958,10 @@ a:hover {
   gap: 6px;
 }
 .field label {
-  font-size: 12px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.12em;
+  font-weight: 700;
   color: var(--muted);
 }
 select,
@@ -353,9 +971,10 @@ input[type="text"],
 button {
   background: var(--bg-2);
   color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
   padding: 9px 10px;
+  font-family: var(--font-body);
   font-size: 14px;
 }
 input[type="range"] {
@@ -365,37 +984,34 @@ select:focus,
 input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(217, 119, 87, 0.18);
+  box-shadow: 0 0 0 3px rgba(255, 84, 54, 0.2);
 }
 button {
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease,
     transform 0.05s ease;
 }
-button:hover {
-  border-color: var(--accent);
-}
 button:active {
   transform: translateY(1px);
 }
 button.primary {
-  background: var(--gold-grad);
-  color: #fff;
-  border-color: var(--accent-deep);
-  font-weight: 700;
-  box-shadow: 0 6px 18px rgba(217, 119, 87, 0.34);
+  background: var(--accent);
+  color: var(--ink);
+  border: 2px solid transparent;
+  font-weight: 800;
 }
-button.primary:hover {
-  border-color: var(--accent-deep);
-  box-shadow: 0 8px 22px rgba(217, 119, 87, 0.42);
+button.primary:hover,
+button.primary:focus-visible {
+  background: var(--accent-deep);
+  color: #fff;
 }
 button.toggle.active {
-  background: var(--accent-2);
-  color: #ffffff;
-  border-color: var(--accent-2);
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
 }
 
 .layout {
@@ -410,21 +1026,82 @@ button.toggle.active {
 }
 
 .panel {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(6px);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(20, 39, 29, 0.08);
 }
 .panel h2 {
-  font-size: 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
+  font-weight: 700;
   color: var(--muted);
   margin: 0;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
+}
+
+/* Live-scores panel header: title + italic gloss on the left, ghost refresh on
+   the right. Keeps the panel-title convention but hangs a serif sub + pill. */
+.scores-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.panel .scores-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.scores-sub {
+  margin: 5px 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+}
+.refresh-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+.refresh-btn:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.refresh-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.refresh-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .list {
@@ -451,8 +1128,9 @@ button.toggle.active {
   color: var(--accent-deep);
 }
 .rank {
-  font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
   color: var(--accent-deep);
   min-width: 26px;
 }
@@ -461,7 +1139,7 @@ button.toggle.active {
   min-width: 0;
 }
 .venue .name {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 15px;
 }
 .venue .meta {
@@ -486,7 +1164,7 @@ button.toggle.active {
 .badge.team {
   color: var(--accent-deep);
   border-color: var(--accent);
-  background: #fbeee7;
+  background: #fbe7e2;
 }
 .badge.kind {
   text-transform: capitalize;
@@ -520,19 +1198,22 @@ button.toggle.active {
 }
 .metric {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   display: inline-flex;
   align-items: center;
   gap: 3px;
 }
 .metric.hot {
-  color: var(--accent-deep);
+  color: var(--accent-text);
 }
 
 .map {
   height: 652px;
   width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 @media (max-width: 880px) {
   .map {
@@ -566,7 +1247,7 @@ button.toggle.active {
   font-size: 12px;
 }
 .event .event-title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   text-decoration: none;
 }
@@ -584,16 +1265,14 @@ button.toggle.active {
   gap: 8px;
 }
 
-/* Primary navigation rendered as a premium segmented control. */
+/* Secondary segmented control (sub-tabs inside panels). */
 .nav-tabs {
   gap: 4px;
   padding: 5px;
   width: fit-content;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(6px);
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(20, 39, 29, 0.06);
 }
 .nav-tabs .toggle {
   border: none;
@@ -608,15 +1287,16 @@ button.toggle.active {
   background: var(--panel-2);
 }
 .nav-tabs .toggle.active {
-  color: #fff;
-  background: var(--gold-grad);
-  box-shadow: 0 6px 16px rgba(217, 119, 87, 0.34);
+  color: var(--paper);
+  background: var(--ink);
 }
 
-/* Site-wide copyright footer. */
+/* Site-wide festival colophon footer. */
 .site-footer {
+  position: relative;
+  z-index: 1;
   margin-top: 40px;
-  padding: 24px 16px 8px;
+  padding: 0 16px 8px;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -625,19 +1305,171 @@ button.toggle.active {
   text-align: center;
 }
 .site-footer .footer-brand {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: 18px;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 26px;
+  letter-spacing: 0.5px;
   color: var(--text);
+}
+.site-footer .footer-brand .brand {
+  color: var(--accent-deep);
+}
+.site-footer .footer-host {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-top: 2px;
 }
 .site-footer .footer-copy {
   font-size: 13px;
   color: var(--muted);
+  margin-top: 10px;
 }
 .site-footer .footer-note {
   font-size: 11px;
   color: var(--muted);
-  opacity: 0.8;
+  opacity: 0.85;
   max-width: 440px;
+}
+
+/* ---------- Small screens: keep the broadsheet tidy on phones ---------- */
+@media (max-width: 680px) {
+  .mast-head {
+    flex-wrap: wrap;
+    row-gap: 3px;
+    padding-top: 12px;
+    padding-bottom: 10px;
+  }
+  .mast-brand {
+    font-size: 22px;
+  }
+  .mast-fest {
+    order: 3;
+    flex-basis: 100%;
+    padding-left: 0;
+    border-left: 0;
+    font-size: 12.5px;
+  }
+  .mast-day {
+    font-size: 11px;
+  }
+  .crew-hero-main {
+    padding-bottom: 36px;
+  }
+  .hero-title {
+    font-size: clamp(40px, 11vw, 74px);
+  }
+  .hero-lede {
+    font-size: 17px;
+    margin: 22px 0 26px;
+  }
+  .dropcap {
+    font-size: 58px;
+  }
+  .scores-head {
+    flex-wrap: wrap;
+  }
+  .refresh-btn {
+    order: 3;
+  }
+  .ticker-chip {
+    padding: 8px 15px;
+  }
+  .footer-brand {
+    font-size: 23px;
+  }
+  .site-footer .footer-host {
+    letter-spacing: 0.12em;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero-title {
+    font-size: clamp(34px, 12vw, 60px);
+  }
+  .ticker-tag {
+    padding: 0 10px;
+    letter-spacing: 0.12em;
+  }
+  .ticker-toggle {
+    padding: 0 9px;
+  }
+}
+
+/* ── Error pages (404 / 500) ────────────────────────────── */
+.error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 60dvh;
+  padding: 48px 24px;
+}
+.error-page-code {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(72px, 14vw, 140px);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--accent);
+}
+.error-page-title {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(22px, 4vw, 32px);
+  margin: 12px 0 8px;
+}
+.error-page-msg {
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 380px;
+  margin-bottom: 28px;
+}
+.error-page-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.error-page-cta {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+.error-page-cta:hover {
+  background: var(--accent-deep);
+  text-decoration: none;
+}
+.error-page-link {
+  display: inline-block;
+  padding: 12px 28px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+}
+.error-page-link:hover {
+  background: var(--ink);
+  color: var(--paper);
+  text-decoration: none;
+}
+
+/* Respect users who prefer reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

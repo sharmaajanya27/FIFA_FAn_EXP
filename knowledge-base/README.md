@@ -13,6 +13,7 @@ the repo entry points are [`../README.md`](../README.md) and [`../AGENTS.md`](..
 - [PRD.md](./PRD.md) — product requirements: what we're building and why.
 - [FEATURES.md](./FEATURES.md) — feature inventory by user type, with build status.
 - [WORKFLOW.md](./WORKFLOW.md) — user-flow and system-architecture diagrams.
+- [REDESIGN.md](./REDESIGN.md) — "The Fan Festival" UI redesign: what changed, replaced files, a11y/SEO notes.
 
 ## Engineering
 
