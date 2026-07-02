@@ -8,6 +8,7 @@
  * city center (lat/lon) is resolved from `lib/cities.ts` rather than the user's
  * geolocation.
  */
+import "server-only";
 import { cityBySlug } from "../cities";
 import type {
   EventDetailResponse,

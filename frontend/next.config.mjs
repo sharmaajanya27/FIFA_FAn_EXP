@@ -12,11 +12,21 @@ const connectSrc =
 const nextConfig = {
   reactStrictMode: true,
   // Expose server-only env vars to SSG/SSR code. NEXT_PUBLIC_* vars are only
-  // for client bundles; these need explicit forwarding. SERVER_AUTH_SECRET is
-  // intentionally NOT listed here to avoid inlining it into the build output;
-  // it is read at runtime via process.env in server-only modules.
+  // for client bundles; these need explicit forwarding.
+  //
+  // SERVER_AUTH_SECRET must be listed here even though it's server-only:
+  // Amplify's WEB_COMPUTE SSR runtime does not pass Console-configured
+  // environment variables into the on-demand render Lambda's process.env
+  // unless they're declared in this `env` map (confirmed empirically —
+  // BACKEND_URL, which stays listed, resolves fine at runtime; when this var
+  // was previously omitted, every on-demand-rendered page's server fetch got
+  // a 401 from the API and silently 404'd). Client-bundle leakage is guarded
+  // structurally instead: its only consumer, lib/server/fetchers.ts, imports
+  // the `server-only` package, which fails the build if any Client Component
+  // ever imports it.
   env: {
     BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3001",
+    SERVER_AUTH_SECRET: process.env.SERVER_AUTH_SECRET || "",
   },
   // Proxy API requests to the backend server (avoids mixed-content HTTPS→HTTP
   // and eliminates CORS entirely). In production the browser only talks to the
