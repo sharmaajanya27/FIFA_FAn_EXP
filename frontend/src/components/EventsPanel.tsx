@@ -14,7 +14,9 @@ export function EventsPanel({ events }: { events: FanEvent[] }) {
   return (
     <div>
       {events.map((e) => {
-        const isPast = new Date(e.startTime).getTime() < Date.now();
+        const start = new Date(e.startTime).getTime();
+        const isPast =
+          !Number.isNaN(start) && Date.now() >= start + 3 * 60 * 60 * 1000;
         return (
         <div
           className={`event clickable${isPast ? " past" : ""}`}
