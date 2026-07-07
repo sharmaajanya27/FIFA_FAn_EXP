@@ -1,9 +1,8 @@
 # Scheduled FanWatch Phase 0 ingestion.
 #
-# Runs the pipeline for all configured cities and uploads the published JSONL +
-# Excel artifacts. Today it publishes a build artifact; when the Postgres
-# migration lands (ARCHITECTURE.md §2/§6), point the same job at the DB by
-# setting DATA_DIR / DATABASE_URL secrets — the workflow shape stays the same.
+# Runs the pipeline for all configured cities, dual-writes to Supabase
+# (DATABASE_URL secret) alongside the local JSONL/Excel files, and uploads the
+# local files as a build artifact for rollback.
 name: ingestion
 
 on:
@@ -26,7 +25,7 @@ concurrency:
 jobs:
   ingest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: ingestion
@@ -46,7 +45,10 @@ jobs:
         env:
           # Be a good OSM citizen from CI runners (see ingestion/.env.example).
           INGEST_USER_AGENT: "FanWatch-Ingestion/0.0.1 (contact: you@example.com)"
-          OVERPASS_THROTTLE_MS: "2000"
+          OVERPASS_THROTTLE_MS: "3000"
+          # Dual-writes to Supabase when set (see src/cli/run.ts) — same
+          # connection string the api service uses (api/src/data/db.ts).
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npm run ingest -- ${{ github.event.inputs.cities || 'all' }}
 
       - name: Upload dataset artifact

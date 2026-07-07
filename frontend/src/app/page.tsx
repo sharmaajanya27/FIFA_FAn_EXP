@@ -20,11 +20,75 @@ import { CommunityPanel } from "@/components/CommunityPanel";
 // Leaflet touches window — load the map only on the client.
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
+// Cache the resolved location across visits so repeat landings skip both the
+// browser location prompt and the IP lookup below.
+const GEO_CACHE_KEY = "fanwatch:geo-cache";
+const GEO_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface GeoCache {
+  lat: number;
+  lon: number;
+  ts: number;
+}
+
+function readGeoCache(): GeoCache | undefined {
+  try {
+    const raw = localStorage.getItem(GEO_CACHE_KEY);
+    if (!raw) return undefined;
+    const cached = JSON.parse(raw) as Partial<GeoCache>;
+    if (
+      typeof cached.lat !== "number" ||
+      typeof cached.lon !== "number" ||
+      typeof cached.ts !== "number" ||
+      !Number.isFinite(cached.lat) ||
+      !Number.isFinite(cached.lon) ||
+      !Number.isFinite(cached.ts)
+    ) {
+      return undefined;
+    }
+    if (Date.now() - cached.ts > GEO_CACHE_TTL_MS) return undefined;
+    return cached as GeoCache;
+  } catch {
+    return undefined;
+  }
+}
+
+function writeGeoCache(here: { lat: number; lon: number }) {
+  try {
+    localStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ ...here, ts: Date.now() }));
+  } catch {
+    // Storage unavailable (private mode, quota) — just skip caching.
+  }
+}
+
+// Coarse, permission-free location from the visitor's public IP — used only
+// to pick a sensible default city on landing (no browser prompt involved).
+// Precise location remains opt-in via the "Use my location" button.
+async function detectCityByIp(): Promise<{ lat: number; lon: number } | undefined> {
+  try {
+    const res = await fetch("https://get.geojs.io/v1/ip/geo.json");
+    if (!res.ok) return undefined;
+    const data = await res.json();
+    const lat = parseFloat(data.latitude);
+    const lon = parseFloat(data.longitude);
+    if (Number.isNaN(lat) || Number.isNaN(lon)) return undefined;
+    return { lat, lon };
+  } catch {
+    return undefined;
+  }
+}
+
 export default function Home() {
   const router = useRouter();
 
   // Derive initial city/team from URL params at state-init time (avoids a
   // second render+fetch that caused the flicker).
+  // Whether the URL explicitly pinned a city — if so, the landing-page
+  // geolocation default below is skipped so we don't override a shared link.
+  const [cityExplicit] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return Boolean(new URLSearchParams(window.location.search).get("city"));
+  });
   const [city, setCity] = useState(() => {
     if (typeof window === "undefined") return "jersey-city";
     const c = new URLSearchParams(window.location.search).get("city");
@@ -58,6 +122,8 @@ export default function Home() {
   const [error, setError] = useState<string | undefined>();
   // Label of the current search origin (set when the user shares their location).
   const [placeLabel, setPlaceLabel] = useState<string | undefined>();
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | undefined>();
 
   // Seasonal World Cup banner status. Lazy-init avoids a hydration mismatch
   // (date-based) while eliminating a post-mount re-render.
@@ -73,25 +139,79 @@ export default function Home() {
     if (c) setOrigin(c.center);
   };
 
+  // Snap a raw coordinate to the closest of the 16 supported cities and make
+  // that city (and its center) the active search — venues are stored
+  // per-city, so the city must match the search origin to return results.
+  const applyNearestCity = (here: { lat: number; lon: number }) => {
+    const near = nearestCity(here);
+    setCity(near.slug);
+    setOrigin(near.center);
+    setPlaceLabel(`Near you · ${near.name}`);
+  };
+
+  const geolocationErrorMessage = (err: GeolocationPositionError) => {
+    switch (err.code) {
+      case err.PERMISSION_DENIED:
+        return "Location access denied — enable it in your browser settings to use this.";
+      case err.POSITION_UNAVAILABLE:
+        return "Couldn't determine your location right now.";
+      case err.TIMEOUT:
+        return "Location request timed out.";
+      default:
+        return "Could not get your location.";
+    }
+  };
+
+  const geolocationOptions: PositionOptions = {
+    enableHighAccuracy: false,
+    timeout: 8000,
+    maximumAge: 5 * 60 * 1000,
+  };
+
+  // Explicit click — precise, permission-based browser location. Always
+  // asks fresh since the user is deliberately requesting a better fix than
+  // whatever silently set the default city below.
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      setError("Geolocation is not available in this browser.");
+      setLocationError("Geolocation is not available in this browser.");
       return;
     }
+    setLocating(true);
+    setLocationError(undefined);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-        // Venues are stored per-city, so snap the dataset to the closest
-        // supported city — otherwise searching a far-away city's venues from
-        // here returns nothing within the radius.
-        const near = nearestCity(here);
-        if (near.slug !== city) setCity(near.slug);
-        setPlaceLabel(`Your location · ${near.name}`);
-        setOrigin(here);
+        writeGeoCache(here);
+        applyNearestCity(here);
+        setLocating(false);
       },
-      () => setError("Could not get your location — using city center."),
+      (err) => {
+        setLocationError(geolocationErrorMessage(err));
+        setLocating(false);
+      },
+      geolocationOptions,
     );
   };
+
+  // On first landing (no ?city= in the URL), default to the nearest of the
+  // 16 supported cities instead of the hardcoded Jersey City fallback. Uses a
+  // cached fix if we have one (from a prior IP lookup or a prior "Use my
+  // location" click), otherwise falls back to a permission-free IP lookup —
+  // never triggers the browser's location prompt on its own.
+  useEffect(() => {
+    if (cityExplicit) return;
+    const cached = readGeoCache();
+    if (cached) {
+      applyNearestCity({ lat: cached.lat, lon: cached.lon });
+      return;
+    }
+    void detectCityByIp().then((here) => {
+      if (!here) return;
+      writeGeoCache(here);
+      applyNearestCity(here);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const load = useCallback(async () => {
     setError(undefined);
@@ -365,12 +485,26 @@ export default function Home() {
                       </option>
                     ))}
                 </select>{" "}
-                <button type="button" onClick={useMyLocation}>
-                  📍 Use my location
+                <button
+                  type="button"
+                  onClick={useMyLocation}
+                  disabled={locating}
+                  aria-busy={locating}
+                >
+                  {locating ? "Locating…" : "📍 Use my location"}
                 </button>
-                {placeLabel && (
+                {placeLabel && !locationError && (
                   <div className="muted" style={{ fontSize: 12, marginTop: 6 }}>
                     📍 Centered on {placeLabel}
+                  </div>
+                )}
+                {locationError && (
+                  <div
+                    className="muted"
+                    style={{ fontSize: 12, marginTop: 6, color: "var(--danger)" }}
+                    role="alert"
+                  >
+                    {locationError}
                   </div>
                 )}
               </div>

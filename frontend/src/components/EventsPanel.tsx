@@ -13,9 +13,13 @@ export function EventsPanel({ events }: { events: FanEvent[] }) {
   }
   return (
     <div>
-      {events.map((e) => (
+      {events.map((e) => {
+        const start = new Date(e.startTime).getTime();
+        const isPast =
+          !Number.isNaN(start) && Date.now() >= start + 3 * 60 * 60 * 1000;
+        return (
         <div
-          className="event clickable"
+          className={`event clickable${isPast ? " past" : ""}`}
           key={e.id}
           role="button"
           tabIndex={0}
@@ -42,6 +46,7 @@ export function EventsPanel({ events }: { events: FanEvent[] }) {
             {formatKickoff(e.startTime)} · {formatDistance(e.distanceMeters)}{" "}
             away
             {e.estAttendance ? ` · ~${e.estAttendance} fans` : ""}
+            {isPast ? " · Ended" : ""}
           </div>
           {/* Live engagement metrics from anonymous RSVPs / vibes. */}
           {(e.goingCount || e.energy !== undefined) && (
@@ -72,7 +77,8 @@ export function EventsPanel({ events }: { events: FanEvent[] }) {
             ))}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

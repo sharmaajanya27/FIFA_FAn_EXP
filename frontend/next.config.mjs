@@ -2,12 +2,20 @@
 
 // CSP connect-src is built from env so no origins are hardcoded. 'self' covers
 // the same-origin /_api proxy; the Supabase origin (anonymous-auth token calls)
-// is appended only when configured, keeping local dev tight.
+// is appended only when configured, keeping local dev tight. geojs.io is always
+// allowed — it's the permission-free IP lookup behind the default-city detect
+// on landing (see src/app/page.tsx's detectCityByIp).
+const GEOIP_ORIGIN = "https://get.geojs.io";
 const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const connectSrc =
+const connectSrc = [
+  "'self'",
+  GEOIP_ORIGIN,
   typeof supabaseOrigin === "string" && supabaseOrigin.length > 0
-    ? "'self' " + supabaseOrigin
-    : "'self'";
+    ? supabaseOrigin
+    : null,
+]
+  .filter(Boolean)
+  .join(" ");
 
 const nextConfig = {
   reactStrictMode: true,
