@@ -1,6 +1,6 @@
 # Data Cleanup Scripts
 
-This directory contains utilities for managing and cleaning up FanWatch data in both local files and Supabase.
+This directory contains utilities for managing and cleaning up FanFndr data in both local files and Supabase.
 
 ## World Cup 2026 Cleanup
 

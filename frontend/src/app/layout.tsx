@@ -34,7 +34,7 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   // Absolute base so canonical/OG URLs on every page resolve correctly.
   metadataBase: new URL(siteUrl()),
-  title: "Tu Parea — Find the best place to watch the match",
+  title: "FanFndr — Find the best place to watch the match",
   description:
     "Discover bars, pubs, fan zones, and viewing parties near you, ranked by atmosphere, team support, and fan engagement.",
   // Self-canonical for the homepage; query variants like /?city= dedupe to "/".

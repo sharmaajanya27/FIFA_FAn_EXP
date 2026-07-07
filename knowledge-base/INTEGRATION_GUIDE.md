@@ -1,8 +1,8 @@
-# FanWatch Supabase Integration Script — World Cup 2026 Cleanup
+# FanFndr Supabase Integration Script — World Cup 2026 Cleanup
 
 ## Overview
 
-You now have a fully functional CLI tool that cleans up your FanWatch data to keep only teams playing in FIFA World Cup 2026. The script handles both **local JSONL files** and **Supabase database** simultaneously.
+You now have a fully functional CLI tool that cleans up your FanFndr data to keep only teams playing in FIFA World Cup 2026. The script handles both **local JSONL files** and **Supabase database** simultaneously.
 
 ### Quick Start
 

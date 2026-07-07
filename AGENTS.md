@@ -1,10 +1,10 @@
 ---
-title: FanWatch AI Agent Guide
+title: FanFndr AI Agent Guide
 ---
 
-# FanWatch AI Agent Guide
+# FanFndr AI Agent Guide
 
-**FanWatch** is a location-based soccer fan experience platform helping fans discover the best venues to watch matches. This guide accelerates AI-assisted development by documenting project structure, patterns, and conventions.
+**FanFndr** is a location-based soccer fan experience platform helping fans discover the best venues to watch matches. This guide accelerates AI-assisted development by documenting project structure, patterns, and conventions.
 
 > **Start here:** [README.md](./README.md) · Full architecture: [ARCHITECTURE.md](./knowledge-base/ARCHITECTURE.md) · Workflow & diagrams: [WORKFLOW.md](./knowledge-base/WORKFLOW.md) · PRD: [PRD.md](./knowledge-base/PRD.md)
 
@@ -14,7 +14,7 @@ title: FanWatch AI Agent Guide
 
 | Property | Value |
 |----------|-------|
-| **Live URL** | [`https://tuparea.com`](https://tuparea.com) |
+| **Live URL** | [`https://fanfndr.com`](https://fanfndr.com) |
 | **Tech Stack** | TypeScript (Node.js 20+), Next.js 16, React 19, Postgres/Supabase |
 | **Module Format** | ESM (`import` / `export`) across all packages |
 | **TypeScript** | Strict mode enabled; `noUncheckedIndexedAccess: true` |
@@ -347,9 +347,9 @@ cd frontend && npm run dev
 - Admin dashboard: http://localhost:3000/admin (gated by `ADMIN_EMAILS`)
 
 **Production URLs:**
-- Frontend: https://tuparea.com
-- API (proxied): https://tuparea.com/_api/health
-- Admin: https://tuparea.com/admin
+- Frontend: https://fanfndr.com
+- API (proxied): https://fanfndr.com/_api/health
+- Admin: https://fanfndr.com/admin
 
 ---
 

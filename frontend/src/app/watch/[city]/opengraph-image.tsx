@@ -31,7 +31,7 @@ export default async function Image({
         }}
       >
         <div style={{ display: "flex", fontSize: "40px", fontWeight: 700, color: "#e0a44e" }}>
-          Tu Parea
+          FanFndr
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div

@@ -1,8 +1,8 @@
 {
-  "name": "@fanwatch/frontend",
+  "name": "@fanfndr/frontend",
   "version": "0.0.1",
   "private": true,
-  "description": "FanWatch Phase 1 — web app (discovery, map, rankings, recommendations).",
+  "description": "FanFndr Phase 1 — web app (discovery, map, rankings, recommendations).",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

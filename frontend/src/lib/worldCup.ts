@@ -1,5 +1,5 @@
 /**
- * Seasonal status for the FIFA World Cup 2026. FanWatch is a standalone app,
+ * Seasonal status for the FIFA World Cup 2026. FanFndr is a standalone app,
  * but while the tournament is on we surface a contextual banner whose message
  * updates automatically based on the current date relative to the schedule.
  */

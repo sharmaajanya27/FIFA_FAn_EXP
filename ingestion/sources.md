@@ -1,6 +1,6 @@
 # Data Sources — what we scrape, from where, and how
 
-This document is the provenance reference for the FanWatch ingestion layer: for
+This document is the provenance reference for the FanFndr ingestion layer: for
 every entity we ingest, **where** the data comes from, **how** it is fetched,
 and **what** fields we extract. It complements [`README.md`](README.md) (pipeline
 overview) and [`../knowledge-base/PRD.md`](../knowledge-base/PRD.md) §5.

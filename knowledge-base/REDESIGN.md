@@ -19,12 +19,20 @@ or the SEO/admin styling.
 > **§10 below is the current record;** where sections differ, the higher number
 > wins.
 
+> **Update (FanFndr rebrand):** the app was subsequently rebranded again from
+> **Tu Parea → FanFndr** (wordmark rendered two-tone as **Fan** + **Fndr**), the
+> production domain moved to **fanfndr.com** (API at **api.fanfndr.com**), and
+> the internal browser storage keys were renamed `fanwatch_*` → `fanfndr_*`
+> (`fanfndr_anon_id`, `fanfndr_fav_team`, `fanfndr_sid`). **FanFndr is the
+> current brand;** the "Tu Parea" mentions in §9–§10 below are retained as the
+> historical record of that earlier pass.
+
 ---
 
 ## 1. What it looks like now
 
 A warm **paper/newsprint** canvas (`--paper #f7eeda`) with a faint halftone dot
-texture, a sticky **masthead** ("Tu Parea", tagline *Your team · Your people ·
+texture, a sticky **masthead** ("FanFndr", tagline *Your team · Your people ·
 Your sport*), triangular **bunting**, a **muted** five-hue **festival palette**,
 a **live-score marquee ticker**, and three display typefaces. Content is
 organized like a festival programme:
@@ -202,9 +210,11 @@ section supersedes the brand/palette details in §1–§5 above.
   `/watch/[city]/[team]`, `/venue/[city]/[id]`, `/event/[id]`, the OG-image
   routes, `/admin`, `/business`). Canonical URLs, structured data, `sitemap.ts`,
   and `robots.ts` are otherwise unchanged.
-- Internal storage keys (`fanwatch_anon_id`, `fanwatch_fav_team`, analytics
-  `fanwatch_sid`) were **left as-is on purpose** — renaming them would reset
-  every existing visitor's anonymous id and favourite team.
+- Internal storage keys were originally kept as `fanwatch_anon_id`,
+  `fanwatch_fav_team`, and analytics `fanwatch_sid` to avoid resetting existing
+  visitors' anonymous ids and favourite teams. **(Superseded by the FanFndr
+  rebrand:** they were later renamed to `fanfndr_anon_id`, `fanfndr_fav_team`,
+  and `fanfndr_sid` — see the FanFndr update note at the top.)
 
 ### Live-score ticker (new)
 

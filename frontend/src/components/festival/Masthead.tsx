@@ -23,7 +23,7 @@ interface Props {
 
 /**
  * Sticky site masthead in the festival broadsheet style: red rule, the
- * "Tu Parea" wordmark with its Fan Festival gloss, the day line, and a
+ * "FanFndr" wordmark with its Fan Festival gloss, the day line, and a
  * primary nav whose active item is reflected with aria-current. "Following" is
  * the national-team filter that scopes the whole experience.
  */
@@ -39,7 +39,7 @@ export function Masthead({
     <header className="masthead">
       <div className="mast-head">
         <span className="mast-brand">
-          Tu <span className="tp-2">Parea</span>
+          Fan<span className="tp-2">Fndr</span>
         </span>
         <span className="mast-fest">The Fan Festival</span>
         <span className="mast-day">{dayLabel}</span>

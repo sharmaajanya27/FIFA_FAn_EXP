@@ -1,4 +1,4 @@
-# FanWatch — Web App (Phase 1)
+# FanFndr — Web App (Phase 1)
 
 The fan-facing web app: location-based discovery, interactive map + list,
 team filtering, venue rankings, and recommendations (PRD §6). Consumes the

@@ -1,5 +1,5 @@
 /**
- * Security utilities for the FanWatch frontend.
+ * Security utilities for the FanFndr frontend.
  */
 
 /** Validate that a URL is safe to render as an href (http or https only). */

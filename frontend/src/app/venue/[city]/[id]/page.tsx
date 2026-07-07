@@ -59,7 +59,7 @@ export async function generateMetadata({
   const { venue } = data;
   const kind = KIND_LABEL[venue.kind] ?? "venue";
   return buildMetadata({
-    title: `${venue.name} — Watch the World Cup in ${city.name} | Tu Parea`,
+    title: `${venue.name} — Watch the World Cup in ${city.name} | FanFndr`,
     description: `${venue.name} is a ${kind.toLowerCase()} in ${city.name} for watching FIFA World Cup 2026 matches.${venue.address ? ` ${venue.address}.` : ""} See hours, location, ratings, and live crowd levels.`,
     path: paths.venue(citySlug, venue.id),
     noindex: !isIndexable(venue),

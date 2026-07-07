@@ -46,7 +46,7 @@ export async function generateMetadata({
   const venues = await getCityVenues(citySlug, { team: team.code, limit: 24 });
   const supportCount = supporting(venues, team.code).length;
   return buildMetadata({
-    title: `Where to Watch ${team.name} Matches in ${city.name} (2026) | Tu Parea`,
+    title: `Where to Watch ${team.name} Matches in ${city.name} (2026) | FanFndr`,
     description: `Find the best bars and fan zones to watch ${team.name} ${team.flag} play at the 2026 World Cup in ${city.name} — where ${team.name} fans gather, ranked by atmosphere.`,
     path: paths.cityTeam(citySlug, team.code),
     noindex: supportCount < INDEX_MIN_SUPPORTING,

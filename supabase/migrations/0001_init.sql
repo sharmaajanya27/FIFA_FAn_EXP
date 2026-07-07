@@ -1,4 +1,4 @@
--- FanWatch data layer — initial schema (discovery + engagement).
+-- FanFndr data layer — initial schema (discovery + engagement).
 --
 -- Portable plain-Postgres: no PostGIS, no DB-side uuid defaults (the app
 -- supplies all ids), so this runs identically on Supabase, a local Postgres,

@@ -20,7 +20,7 @@ export function loadEnv(): Env {
       process.env.OVERPASS_URL ?? "https://overpass-api.de/api/interpreter",
     userAgent:
       process.env.INGEST_USER_AGENT ??
-      "FanWatch-Ingestion/0.0.1 (contact: you@example.com)",
+      "FanFndr-Ingestion/0.0.1 (contact: you@example.com)",
     overpassThrottleMs: Number(process.env.OVERPASS_THROTTLE_MS ?? 1500),
     dataDir: process.env.DATA_DIR ?? "data",
     fixturesUrl: process.env.FIXTURES_URL || undefined,

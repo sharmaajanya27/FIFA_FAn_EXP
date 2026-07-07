@@ -1,4 +1,4 @@
-# FanWatch — Resolved Security Fixes
+# FanFndr — Resolved Security Fixes
 
 > Companion to [`SECURITY.md`](./SECURITY.md). That file is the **backlog** of
 > open hardening gaps; this file documents vulnerabilities that have been
@@ -15,7 +15,7 @@
 **Severity:** HIGH · **Resolved:** TLS termination + auto-renewal on the EC2 origin.
 
 ### Detection
-During the hardening pass on the `tuparea.com` deployment, the EC2 API was found
+During the hardening pass on the `fanfndr.com` deployment, the EC2 API was found
 answering directly over plain HTTP on port 80 (nginx) from the open internet:
 `GET http://<elastic-ip>/health` → `200`. The frontend's server-side `/_api`
 proxy and SSG fetchers reached the origin via an `http://` `BACKEND_URL`.
@@ -35,24 +35,24 @@ secret and replay it against every non-`/health` route. Edge protections were
 also trivially bypassed by hitting the raw IP.
 
 ### Steps to mitigate
-1. Create a DNS A record `api.tuparea.com` → origin Elastic IP.
+1. Create a DNS A record `api.fanfndr.com` → origin Elastic IP.
 2. Issue a Let's Encrypt certificate for that hostname via certbot.
 3. Configure an nginx `443` TLS server block and a `80` → `443` `301` redirect,
    proxying to the Node process on `127.0.0.1:3001`.
-4. Point the frontend `BACKEND_URL` (Amplify env) at `https://api.tuparea.com`.
+4. Point the frontend `BACKEND_URL` (Amplify env) at `https://api.fanfndr.com`.
 5. Enable automatic certificate renewal so the cert never lapses.
 
 ### Solution implemented
-- **DNS:** `api.tuparea.com` A record (Route 53) → Elastic IP.
+- **DNS:** `api.fanfndr.com` A record (Route 53) → Elastic IP.
 - **nginx:** `listen 443 ssl` with the Let's Encrypt cert at
-  `/etc/letsencrypt/live/api.tuparea.com/fullchain.pem`; `listen 80` returns
+  `/etc/letsencrypt/live/api.fanfndr.com/fullchain.pem`; `listen 80` returns
   `301 https://$host$request_uri`; `proxy_pass http://127.0.0.1:3001`.
-- **Frontend:** Amplify `BACKEND_URL=https://api.tuparea.com`; the browser now
+- **Frontend:** Amplify `BACKEND_URL=https://api.fanfndr.com`; the browser now
   only ever talks to the same HTTPS origin via the `/_api` proxy.
 - **Renewal:** `certbot-renew.timer` enabled and active (was previously
   `disabled` — a latent expiry risk); renewal validated with
   `certbot renew --dry-run`.
-- **Verified:** `https://api.tuparea.com/health` → `{"ok":true}`; HTTP→HTTPS
+- **Verified:** `https://api.fanfndr.com/health` → `{"ok":true}`; HTTP→HTTPS
   redirect in place; certificate valid through 2026-09-26.
 
 > **Residual / follow-up:** restricting the origin security group to a CDN
@@ -100,7 +100,7 @@ cleartext is a full auth-bypass primitive.
   read at runtime via `process.env` in server-only modules and is never inlined.
 - **Rotation:** generated a new value and set it on both the EC2 `.env` and the
   Amplify environment (old value retired). Values are not reproduced here.
-- **Transport:** now only sent over `https://api.tuparea.com` (H1).
+- **Transport:** now only sent over `https://api.fanfndr.com` (H1).
 - **Verified:** frontend production build succeeds (31 pages); the secret does
   not appear in the client bundle; `/_api/health` via the proxy returns `200`.
 

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 // This server-component layout carries the metadata; the page itself is a
 // client component (needs the bearer token), which can't export metadata.
 export const metadata: Metadata = {
-  title: "Admin · Tu Parea",
+  title: "Admin · FanFndr",
   robots: { index: false, follow: false },
 };
 

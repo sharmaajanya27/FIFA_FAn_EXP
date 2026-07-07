@@ -20,7 +20,7 @@ import type { RawRecord } from "../sources/types.js";
 import { geohash } from "../util/geo.js";
 import { log } from "../util/logger.js";
 
-/** Deterministic FanWatch id from provenance, so re-runs are idempotent. */
+/** Deterministic FanFndr id from provenance, so re-runs are idempotent. */
 function venueId(sourceName: string, externalId: string): string {
   return createHash("sha1")
     .update(`${sourceName}:${externalId}`)

@@ -1,4 +1,4 @@
-# FanWatch — Architecture
+# FanFndr — Architecture
 
 > **Status:** Living document
 > **Scope:** Current implementation, the seams that make it hostable, and the
@@ -11,7 +11,7 @@
 
 ## 1. System overview
 
-FanWatch is three independent TypeScript packages that share a canonical data
+FanFndr is three independent TypeScript packages that share a canonical data
 model:
 
 | Package                     | Role                                                                                    | Entry point          | Runtime          |
@@ -137,7 +137,7 @@ zero-config local defaults. Hosting = setting env vars, not editing code:
 | `DATA_DIR`             | `../ingestion/data`         | unused (DB is set)                   |
 | `DATABASE_URL`         | _(unset → local files)_     | Supabase pooler (6543)               |
 | `SUPABASE_URL`         | _(unset → no JWT check)_   | `https://lzhgbodmdsflasvashkp.supabase.co` |
-| `ALLOWED_ORIGINS`      | _(unset)_                   | `https://tuparea.com,https://www.tuparea.com,https://main.d3up2fndbpz28i.amplifyapp.com` |
+| `ALLOWED_ORIGINS`      | _(unset)_                   | `https://fanfndr.com,https://www.fanfndr.com,https://main.d3up2fndbpz28i.amplifyapp.com` |
 | `BACKEND_URL`          | `http://localhost:3001`     | `http://98.91.107.103:3001` (Amplify env) |
 | `SERVER_AUTH_SECRET`   | _(unset)_                   | shared secret (SSG bypass)           |
 | `ANTHROPIC_API_KEY`    | absent → heuristic fallback | secret store              |
@@ -192,7 +192,7 @@ No database, no cloud account, no secrets required.
 
 ## 4. Target production architecture
 
-> **Live at:** [`https://tuparea.com`](https://tuparea.com)
+> **Live at:** [`https://fanfndr.com`](https://fanfndr.com)
 
 ```mermaid
 flowchart LR
@@ -210,11 +210,11 @@ flowchart LR
 
 | Concern | Service | Domain / URL |
 |---------|---------|--------------|
-| Frontend | AWS Amplify (CloudFront + SSR) | `https://tuparea.com` |
+| Frontend | AWS Amplify (CloudFront + SSR) | `https://fanfndr.com` |
 | API | EC2 t2.micro (PM2 + nginx) | `98.91.107.103:3001` (internal, via Amplify rewrite) |
 | Database | Supabase Postgres | `lzhgbodmdsflasvashkp.supabase.co` |
 | Auth | Supabase Anonymous Auth (JWKS) | auto |
-| DNS / SSL | Route 53 + ACM (Amplify-managed) | `tuparea.com`, `www.tuparea.com` |
+| DNS / SSL | Route 53 + ACM (Amplify-managed) | `fanfndr.com`, `www.fanfndr.com` |
 
 Changes vs. local: ingestion dual-writes to **Postgres/Supabase** (the
 `SupabasePublisher`, JSONL still emitted as source of truth + rollback); the API

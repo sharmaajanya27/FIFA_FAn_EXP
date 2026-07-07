@@ -1,4 +1,4 @@
-/** Response shapes from the FanWatch discovery API (Phase 1 backend). */
+/** Response shapes from the FanFndr discovery API (Phase 1 backend). */
 export interface GeoPoint {
   lat: number;
   lon: number;

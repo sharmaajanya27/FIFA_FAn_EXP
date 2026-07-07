@@ -46,7 +46,7 @@ export default function AdminBusinessPage() {
   if (state === "denied" || state === "idle") {
     return (
       <div className={styles.gate}>
-        <h1>Tu Parea Admin</h1>
+        <h1>FanFndr Admin</h1>
         <p>Admin access is not available in this version.</p>
       </div>
     );
@@ -58,7 +58,7 @@ export default function AdminBusinessPage() {
         <div>
           <h1 className={styles.title}>Business activity</h1>
           <div className={styles.sub}>
-            Tu Parea Admin
+            FanFndr Admin
             {data ? ` · ${data.counts.listings} listings · ${data.counts.events} events` : ""}
           </div>
         </div>

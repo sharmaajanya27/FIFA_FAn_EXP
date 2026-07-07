@@ -8,8 +8,8 @@
  * own RSVP and keep a single review/vibe identity. The same key also remembers
  * the fan's chosen favorite team so we can pre-fill it next time.
  */
-const ANON_KEY = "fanwatch_anon_id";
-const TEAM_KEY = "fanwatch_fav_team";
+const ANON_KEY = "fanfndr_anon_id";
+const TEAM_KEY = "fanfndr_fav_team";
 
 function randomId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {

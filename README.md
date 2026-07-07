@@ -1,6 +1,6 @@
-# FanWatch
+# FanFndr
 
-> **Live at:** [https://tuparea.com](https://tuparea.com)
+> **Live at:** [https://fanfndr.com](https://fanfndr.com)
 
 A location-based web app that helps soccer fans discover the best places to
 watch matches — bars, pubs, fan zones, viewing parties, and community events —
@@ -41,4 +41,4 @@ Three TypeScript packages (see [`ARCHITECTURE.md`](./knowledge-base/ARCHITECTURE
 
 ## Status
 
-Phases 0–3 implemented and **deployed in production** at [tuparea.com](https://tuparea.com) — frontend on AWS Amplify, API on EC2 behind `api.tuparea.com`, data in Supabase Postgres. Storage/auth/transport sit behind seams for the production swap (see [`ARCHITECTURE.md`](./knowledge-base/ARCHITECTURE.md) §2).
+Phases 0–3 implemented and **deployed in production** at [fanfndr.com](https://fanfndr.com) — frontend on AWS Amplify, API on EC2 behind `api.fanfndr.com`, data in Supabase Postgres. Storage/auth/transport sit behind seams for the production swap (see [`ARCHITECTURE.md`](./knowledge-base/ARCHITECTURE.md) §2).

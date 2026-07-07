@@ -1,4 +1,4 @@
-# FanWatch — Feature Inventory
+# FanFndr — Feature Inventory
 
 Status of every feature, grouped by the type of user it serves. See
 [`PRD.md`](./PRD.md) for the product spec and [`ARCHITECTURE.md`](./ARCHITECTURE.md)

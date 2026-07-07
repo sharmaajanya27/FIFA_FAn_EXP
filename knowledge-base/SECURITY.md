@@ -1,7 +1,7 @@
-# FanWatch — Security & Hardening Notes
+# FanFndr — Security & Hardening Notes
 
 > **Status:** Living document. Findings from the hardening pass on the
-> `tuparea.com` production deployment (Amplify frontend + EC2 API + Supabase).
+> `fanfndr.com` production deployment (Amplify frontend + EC2 API + Supabase).
 > Severity reflects exploitability **given the current architecture**, not a
 > formal CVSS score.
 
@@ -45,7 +45,7 @@ Key variables:
 ### HIGH
 
 #### H1 — Backend origin is publicly reachable over plain HTTP
-> **RESOLVED** — TLS now terminates at `api.tuparea.com` (nginx + Let's Encrypt,
+> **RESOLVED** — TLS now terminates at `api.fanfndr.com` (nginx + Let's Encrypt,
 > HTTP→HTTPS redirect, auto-renew enabled). See
 > [`SECURITY-FIXES.md` § H1](./SECURITY-FIXES.md#h1--backend-origin-reachable-over-plain-http-resolved).
 > The network-level origin restriction below remains open.
@@ -62,8 +62,8 @@ open internet, bypassing Amplify/CloudFront. Verified: `GET /health` → `200`.
 
 **Remediation**
 1. Terminate TLS at the origin: either an ALB + ACM cert, or
-   `api.tuparea.com` with nginx + Let's Encrypt (certbot), then point
-   `BACKEND_URL` at `https://api.tuparea.com`.
+   `api.fanfndr.com` with nginx + Let's Encrypt (certbot), then point
+   `BACKEND_URL` at `https://api.fanfndr.com`.
 2. Restrict the EC2 security group inbound (80/443) to the CloudFront
    origin-facing managed prefix list
    (`com.amazonaws.global.cloudfront.origin-facing`) so only the CDN can reach
@@ -141,7 +141,7 @@ was exposed during initial setup — see `DEPLOYMENT.md`).
 | Item | Status | Recommendation |
 | ---- | ------ | -------------- |
 | `NEXT_PUBLIC_API_BASE` | Superseded by `BACKEND_URL`; only a fallback in `next.config.mjs` | Keep one cycle, then remove to avoid two names for one thing |
-| Legacy Amplify origin in `ALLOWED_ORIGINS` | Needed only during domain cutover | Remove once `tuparea.com` is the sole entry point |
+| Legacy Amplify origin in `ALLOWED_ORIGINS` | Needed only during domain cutover | Remove once `fanfndr.com` is the sole entry point |
 | `X-XSS-Protection` header | Deprecated | Safe to drop (see L1) |
 | `DEFAULT_RADIUS_M`, `AI_MODEL`, `NEXT_PUBLIC_ENABLE_AI_PITCH` | Verified still referenced | Keep |
 | `amplify.yml` | No secrets, drives the frontend build | Keep |

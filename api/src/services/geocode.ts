@@ -77,7 +77,7 @@ export class GeocodeService {
       const res = await this.fetchImpl(url.toString(), {
         headers: {
           // Nominatim requires an identifying User-Agent.
-          "User-Agent": "FanWatch/0.1 (discovery geocoder)",
+          "User-Agent": "FanFndr/0.1 (discovery geocoder)",
           Accept: "application/json",
         },
       });

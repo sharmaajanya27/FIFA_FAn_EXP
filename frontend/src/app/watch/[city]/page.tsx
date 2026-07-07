@@ -62,7 +62,7 @@ export async function generateMetadata({
     `The best bars, pubs, and fan zones to watch FIFA World Cup 2026 matches in ${city.name}, ranked by atmosphere and live coverage.` +
     (count ? ` ${count} watch spots near ${city.stadium?.name ?? "downtown"}.` : "");
   return buildMetadata({
-    title: `Where to Watch the World Cup in ${city.name} (2026) | Tu Parea`,
+    title: `Where to Watch the World Cup in ${city.name} (2026) | FanFndr`,
     description,
     path: paths.city(citySlug),
     noindex: count < INDEX_MIN_VENUES,

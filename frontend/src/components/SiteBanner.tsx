@@ -28,7 +28,7 @@ export function SiteBanner() {
       <header className="masthead">
         <div className="mast-head">
           <Link href="/" className="mast-brand">
-            Tu <span className="tp-2">Parea</span>
+            Fan<span className="tp-2">Fndr</span>
           </Link>
           <span className="mast-fest">The Fan Festival</span>
           <span className="mast-day">{dayLabel}</span>

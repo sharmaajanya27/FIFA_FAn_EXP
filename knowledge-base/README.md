@@ -1,6 +1,6 @@
 # Knowledge Base
 
-Narrative documentation for FanWatch. Source code lives one level up in
+Narrative documentation for FanFndr. Source code lives one level up in
 [`../api`](../api), [`../frontend`](../frontend), and [`../ingestion`](../ingestion);
 the repo entry points are [`../README.md`](../README.md) and [`../AGENTS.md`](../AGENTS.md).
 

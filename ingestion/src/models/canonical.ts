@@ -1,5 +1,5 @@
 /**
- * Canonical FanWatch data model (Phase 0).
+ * Canonical FanFndr data model (Phase 0).
  *
  * Every source connector normalizes its raw records into these shapes, so the
  * rest of the platform (discovery, ranking, recommendations) reads one schema
@@ -43,7 +43,7 @@ export type VenueKind = z.infer<typeof VenueKind>;
 
 /** A place where matches can be watched. */
 export const VenueSchema = z.object({
-  /** Stable FanWatch id (deterministic hash of source + externalId). */
+  /** Stable FanFndr id (deterministic hash of source + externalId). */
   id: z.string(),
   name: z.string().min(1),
   kind: VenueKind,
@@ -124,9 +124,9 @@ export const EventSchema = z.object({
   startTime: z.string().datetime(),
   city: z.string().optional(),
   country: z.string().optional(),
-  /** FanWatch venue id this event is hosted at, if resolved. */
+  /** FanFndr venue id this event is hosted at, if resolved. */
   venueId: z.string().optional(),
-  /** FanWatch match id this event shows, if known. */
+  /** FanFndr match id this event shows, if known. */
   matchId: z.string().optional(),
   /** Team codes this event is oriented toward. */
   teams: z.array(z.string()).default([]),

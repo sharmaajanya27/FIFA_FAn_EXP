@@ -1,4 +1,4 @@
-# Scheduled FanWatch Phase 0 ingestion.
+# Scheduled FanFndr Phase 0 ingestion.
 #
 # Runs the pipeline for all configured cities, dual-writes to Supabase
 # (DATABASE_URL secret) alongside the local JSONL/Excel files, and uploads the
@@ -44,7 +44,7 @@ jobs:
       - name: Run ingestion
         env:
           # Be a good OSM citizen from CI runners (see ingestion/.env.example).
-          INGEST_USER_AGENT: "FanWatch-Ingestion/0.0.1 (contact: you@example.com)"
+          INGEST_USER_AGENT: "FanFndr-Ingestion/0.0.1 (contact: you@example.com)"
           OVERPASS_THROTTLE_MS: "3000"
           # Dual-writes to Supabase when set (see src/cli/run.ts) — same
           # connection string the api service uses (api/src/data/db.ts).
@@ -54,7 +54,7 @@ jobs:
       - name: Upload dataset artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fanwatch-data
+          name: fanfndr-data
           path: ingestion/data/
           retention-days: 14
           if-no-files-found: error

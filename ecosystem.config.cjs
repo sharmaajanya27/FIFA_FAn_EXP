@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "fanwatch-api",
+      name: "fanfndr-api",
       script: "npm",
       args: "start",
       cwd: "./api",
@@ -13,8 +13,8 @@ module.exports = {
       autorestart: true,
       max_memory_restart: "256M",
       // Log settings
-      error_file: "/var/log/fanwatch/api-error.log",
-      out_file: "/var/log/fanwatch/api-out.log",
+      error_file: "/var/log/fanfndr/api-error.log",
+      out_file: "/var/log/fanfndr/api-out.log",
       log_date_format: "YYYY-MM-DD HH:mm:ss Z",
       // Graceful shutdown
       kill_timeout: 5000,

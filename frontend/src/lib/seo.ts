@@ -9,7 +9,7 @@
 import type { Metadata } from "next";
 import type { EventDetail, VenueDetail } from "./types";
 
-const DEFAULT_SITE_URL = "https://tuparea.com";
+const DEFAULT_SITE_URL = "https://fanfndr.com";
 
 export function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_SITE_URL).replace(
@@ -58,7 +58,7 @@ export function buildMetadata({
       title,
       description,
       url,
-      siteName: "Tu Parea",
+      siteName: "FanFndr",
       type: "website",
     },
     twitter: { card: "summary_large_image", title, description },
@@ -72,7 +72,7 @@ export function websiteLd(): Ld {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Tu Parea",
+    name: "FanFndr",
     url: siteUrl(),
     description: "Find the best place to watch the match.",
   };

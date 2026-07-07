@@ -1,4 +1,4 @@
-/** Typed client for the FanWatch discovery + engagement API. */
+/** Typed client for the FanFndr discovery + engagement API. */
 import type {
   AdminBusinessSummary,
   AiRecommendation,

@@ -6,16 +6,16 @@
 # the frontend proxy health endpoint, and the API TLS certificate expiry.
 #
 # Override via environment variables:
-#   FANWATCH_API_URL       Direct API base   (default: https://api.tuparea.com)
-#   FANWATCH_SITE_URL      Frontend base     (default: https://tuparea.com)
-#   FANWATCH_AUTH_TOKEN    Optional server-auth secret (the SERVER_AUTH_SECRET
+#   FANFNDR_API_URL        Direct API base   (default: https://api.fanfndr.com)
+#   FANFNDR_SITE_URL       Frontend base     (default: https://fanfndr.com)
+#   FANFNDR_AUTH_TOKEN     Optional server-auth secret (the SERVER_AUTH_SECRET
 #                          value); when set, also checks /cities returns 200
 #
 # Usage: scripts/verify.sh
 set -euo pipefail
 
-API_URL="${FANWATCH_API_URL:-https://api.tuparea.com}"
-SITE_URL="${FANWATCH_SITE_URL:-https://tuparea.com}"
+API_URL="${FANFNDR_API_URL:-https://api.fanfndr.com}"
+SITE_URL="${FANFNDR_SITE_URL:-https://fanfndr.com}"
 fail=0
 
 check() {
@@ -33,10 +33,10 @@ echo "==> Health checks"
 check "API health (direct)"   "$API_URL/health"     '"ok":true'
 check "Frontend proxy health" "$SITE_URL/_api/health" '"ok":true'
 
-if [[ -n "${FANWATCH_AUTH_TOKEN:-}" ]]; then
+if [[ -n "${FANFNDR_AUTH_TOKEN:-}" ]]; then
   echo "==> Authenticated check"
   code="$(curl -fsS -m 15 -o /dev/null -w '%{http_code}' \
-    -H "X-Server-Auth: $FANWATCH_AUTH_TOKEN" "$API_URL/cities" 2>/dev/null || true)"
+    -H "X-Server-Auth: $FANFNDR_AUTH_TOKEN" "$API_URL/cities" 2>/dev/null || true)"
   if [[ "$code" == "200" ]]; then
     echo "  ok   /cities -> 200"
   else

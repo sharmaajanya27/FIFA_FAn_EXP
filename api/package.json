@@ -1,8 +1,8 @@
 {
-  "name": "@fanwatch/api",
+  "name": "@fanfndr/api",
   "version": "0.0.1",
   "private": true,
-  "description": "FanWatch Phase 1 — discovery API (venues, search, ranking, recommendations).",
+  "description": "FanFndr Phase 1 — discovery API (venues, search, ranking, recommendations).",
   "type": "module",
   "engines": {
     "node": ">=20"

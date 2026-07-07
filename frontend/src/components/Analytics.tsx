@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import type { PageContext, PageViewPayload } from "@/lib/types";
 
-const SESSION_KEY = "fanwatch_sid";
-const SESSION_TS_KEY = "fanwatch_sid_ts";
+const SESSION_KEY = "fanfndr_sid";
+const SESSION_TS_KEY = "fanfndr_sid_ts";
 /** Rotate the anonymous session ID every 30 minutes. */
 const SESSION_MAX_AGE_MS = 30 * 60 * 1000;
 

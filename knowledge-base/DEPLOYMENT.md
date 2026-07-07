@@ -1,4 +1,4 @@
-# FanWatch — AWS Deployment Guide (Minimum Cost)
+# FanFndr — AWS Deployment Guide (Minimum Cost)
 
 > **Target cost:** $0/mo (AWS Free Tier + Supabase Free)  
 > **Architecture:** EC2 (API) + Amplify (Frontend) + Supabase (Postgres)  
@@ -114,7 +114,7 @@ Verify in Supabase dashboard: Table Editor → `venues` table has rows.
 ### Step 5: Launch EC2 Instance
 
 1. **EC2 → Launch Instance:**
-   - Name: `fanwatch-api`
+   - Name: `fanfndr-api`
    - AMI: **Amazon Linux 2023** (free tier eligible)
    - Type: **t2.micro** (free tier: 750 hrs/mo)
    - Key pair: Create new → `fanwatch-key` → Download `.pem`
@@ -156,13 +156,13 @@ SUPABASE_URL=https://[ref].supabase.co
 PORT=3001
 ADMIN_EMAILS=your@email.com
 NODE_ENV=production
-ALLOWED_ORIGINS=https://tuparea.com,https://www.tuparea.com
+ALLOWED_ORIGINS=https://fanfndr.com,https://www.fanfndr.com
 SERVER_AUTH_SECRET=replace-with-openssl-rand-hex-24
 EOF
 # Full annotated template: api/.env.production.example
 
 # Start with PM2
-pm2 start npm --name "fanwatch-api" -- start
+pm2 start npm --name "fanfndr-api" -- start
 pm2 save
 pm2 startup  # run the command it prints
 
@@ -172,7 +172,7 @@ curl http://localhost:3001/health
 
 Configure nginx:
 ```bash
-sudo tee /etc/nginx/conf.d/fanwatch.conf << 'EOF'
+sudo tee /etc/nginx/conf.d/fanfndr.conf << 'EOF'
 server {
     listen 80;
     server_name _;
@@ -228,10 +228,10 @@ sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx
 
 ### Step 8: Post-Deploy
 
-1. Get your live URL (custom domain `https://tuparea.com`, or the Amplify
+1. Get your live URL (custom domain `https://fanfndr.com`, or the Amplify
    default `https://main.<id>.amplifyapp.com`)
-2. Update EC2 `.env` → `ALLOWED_ORIGINS=https://tuparea.com,https://www.tuparea.com`
-3. Restart: `pm2 restart fanwatch-api`
+2. Update EC2 `.env` → `ALLOWED_ORIGINS=https://fanfndr.com,https://www.fanfndr.com`
+3. Restart: `pm2 restart fanfndr-api`
 4. Confirm Amplify env `NEXT_PUBLIC_SITE_URL` matches the live origin
 5. Trigger Amplify redeploy
 
@@ -243,7 +243,7 @@ sudo nginx -t && sudo systemctl enable nginx && sudo systemctl start nginx
 ```bash
 ssh -i fanwatch-key.pem ec2-user@98.91.107.103
 cd FIFA_FAn_EXP && git pull origin main
-cd api && npm install && pm2 restart fanwatch-api
+cd api && npm install && pm2 restart fanfndr-api
 ```
 
 **Frontend (automatic):**
@@ -264,8 +264,8 @@ DATABASE_URL="postgresql://postgres.lzhgbodmdsflasvashkp:[PASSWORD]@aws-1-us-eas
 
 | Component | Details |
 |-----------|---------|
-| **Domain** | `tuparea.com` (Route 53, Amazon Registrar, expires 2027-06-28) |
-| **Frontend URL** | `https://tuparea.com` (also: `https://www.tuparea.com`) |
+| **Domain** | `fanfndr.com` (Route 53, Amazon Registrar, expires 2027-06-28) |
+| **Frontend URL** | `https://fanfndr.com` (also: `https://www.fanfndr.com`) |
 | **Amplify URL** | `https://main.d3up2fndbpz28i.amplifyapp.com` (legacy, still active) |
 | **EC2 Instance** | t2.micro, Amazon Linux 2023, us-east-1 |
 | **Elastic IP** | `98.91.107.103` |
@@ -306,7 +306,7 @@ ALLOWED_ORIGINS=
 EOF
 
 # 5. Start API with PM2
-pm2 start npm --name "fanwatch-api" -- start
+pm2 start npm --name "fanfndr-api" -- start
 pm2 save
 pm2 startup  # then run the command it outputs with sudo
 ```
@@ -337,7 +337,7 @@ http {
 EOF
 
 # Create the proxy config
-sudo tee /etc/nginx/conf.d/fanwatch.conf << 'EOF'
+sudo tee /etc/nginx/conf.d/fanfndr.conf << 'EOF'
 limit_req_zone $binary_remote_addr zone=api:10m rate=30r/s;
 
 server {
@@ -400,7 +400,7 @@ git add -A && git commit -m "feat: description" && git push origin main
 
 # Then update EC2
 ssh -i ~/Documents/Fanwatch-aws/fanwatch-key.pem ec2-user@98.91.107.103 \
-  "cd FIFA_FAn_EXP && git pull origin main && cd api && npm install && pm2 restart fanwatch-api"
+  "cd FIFA_FAn_EXP && git pull origin main && cd api && npm install && pm2 restart fanfndr-api"
 ```
 
 ### Verify Deployment
@@ -416,42 +416,42 @@ curl http://98.91.107.103/venues/miami     # → venues in Miami
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | nginx 80 conflict | Default nginx.conf has its own server block | Replace entire `nginx.conf` with minimal config |
-| `ECONNRESET` on /cities | Stale DB pool after Elastic IP reassignment | `pm2 restart fanwatch-api` |
+| `ECONNRESET` on /cities | Stale DB pool after Elastic IP reassignment | `pm2 restart fanfndr-api` |
 | SSH host key mismatch | Elastic IP changed from original IP | `ssh-keygen -R 98.91.107.103` then reconnect |
 | Phoenix ingestion 406 | Overpass API rate limit | Retry later; 29/30 cities loaded fine |
 | ingestion .env not found | `loadDotenv()` reads from CWD | Created `.env` in `ingestion/` directory |
 
-### Custom Domain Setup (tuparea.com)
+### Custom Domain Setup (fanfndr.com)
 
 | Property | Value |
 |----------|-------|
-| **Domain** | `tuparea.com` |
+| **Domain** | `fanfndr.com` |
 | **Registrar** | Amazon Registrar, Inc. (Route 53) |
 | **Expiry** | 2027-06-28 |
-| **Frontend URL** | `https://tuparea.com` |
-| **Frontend (www)** | `https://www.tuparea.com` |
-| **API Proxy** | `https://tuparea.com/_api/*` (Amplify server-side rewrite → EC2:3001) |
+| **Frontend URL** | `https://fanfndr.com` |
+| **Frontend (www)** | `https://www.fanfndr.com` |
+| **API Proxy** | `https://fanfndr.com/_api/*` (Amplify server-side rewrite → EC2:3001) |
 | **Old Amplify URL** | `https://main.d3up2fndbpz28i.amplifyapp.com` (still works) |
 
 **Steps performed:**
 
-1. Registered `tuparea.com` via Route 53 (auto-created hosted zone + NS records)
+1. Registered `fanfndr.com` via Route 53 (auto-created hosted zone + NS records)
 2. Added custom domain in Amplify Console (Amplify auto-created DNS records + SSL cert)
-3. Updated `ALLOWED_ORIGINS` on EC2 to include `https://tuparea.com,https://www.tuparea.com`
+3. Updated `ALLOWED_ORIGINS` on EC2 to include `https://fanfndr.com,https://www.fanfndr.com`
 4. Updated CSP `connect-src` in `frontend/next.config.mjs` for new domain
 5. Restarted API via PM2
 
 **DNS Records (managed by Amplify/Route 53):**
 
-- `tuparea.com` → CloudFront (Amplify-managed A/AAAA alias)
-- `www.tuparea.com` → CloudFront (Amplify-managed CNAME)
+- `fanfndr.com` → CloudFront (Amplify-managed A/AAAA alias)
+- `www.fanfndr.com` → CloudFront (Amplify-managed CNAME)
 - SSL: AWS Certificate Manager (auto-issued, auto-renewed by Amplify)
 
 **Verify:**
 ```bash
-curl -s https://tuparea.com/_api/health        # → {"ok":true}
-curl -s -o /dev/null -w "%{http_code}" https://tuparea.com  # → 200
-dig tuparea.com +short                          # → CloudFront IPs
+curl -s https://fanfndr.com/_api/health        # → {"ok":true}
+curl -s -o /dev/null -w "%{http_code}" https://fanfndr.com  # → 200
+dig fanfndr.com +short                          # → CloudFront IPs
 ```
 
 ### Remaining TODO

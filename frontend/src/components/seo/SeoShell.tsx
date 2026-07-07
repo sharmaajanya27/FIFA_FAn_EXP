@@ -10,7 +10,7 @@ export function SeoShell({ children }: { children: React.ReactNode }) {
       </main>
       <footer className={styles.footer}>
         <span>
-          © {new Date().getFullYear()} Tu Parea — your team, your people, your
+          © {new Date().getFullYear()} FanFndr — your team, your people, your
           sport.
         </span>
       </footer>

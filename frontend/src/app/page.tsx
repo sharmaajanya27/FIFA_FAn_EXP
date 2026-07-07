@@ -22,7 +22,7 @@ const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 // Cache the resolved location across visits so repeat landings skip both the
 // browser location prompt and the IP lookup below.
-const GEO_CACHE_KEY = "fanwatch:geo-cache";
+const GEO_CACHE_KEY = "fanfndr:geo-cache";
 const GEO_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 interface GeoCache {
@@ -570,11 +570,11 @@ export default function Home() {
 
       <footer className="site-footer">
         <span className="footer-brand">
-          Tu <span className="brand">Parea</span>
+          Fan<span className="brand">Fndr</span>
         </span>
         <span className="footer-host">World Cup 2026</span>
         <span className="footer-copy">
-          © {new Date().getFullYear()} Tu Parea. All rights reserved.
+          © {new Date().getFullYear()} FanFndr. All rights reserved.
         </span>
         <span className="footer-note">
           Not affiliated with FIFA. Team and tournament names are trademarks of

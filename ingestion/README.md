@@ -1,4 +1,4 @@
-# FanWatch — Ingestion (Phase 0)
+# FanFndr — Ingestion (Phase 0)
 
 The data aggregation layer. Scrapes and ingests the raw inventory that powers
 discovery, rankings, and recommendations (see [`../knowledge-base/PRD.md`](../knowledge-base/PRD.md) §5 and
