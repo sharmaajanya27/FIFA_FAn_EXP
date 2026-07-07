@@ -1254,6 +1254,12 @@ button.toggle.active {
 .event .event-title:hover {
   text-decoration: underline;
 }
+.event.past {
+  opacity: 0.5;
+}
+.event.past:hover {
+  opacity: 0.7;
+}
 .row {
   display: flex;
   justify-content: space-between;

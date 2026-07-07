@@ -112,7 +112,7 @@ export class OverpassConnector implements SourceConnector {
     query: string,
     city: City,
   ): Promise<OverpassResponse> {
-    const maxAttempts = 4;
+    const maxAttempts = 5;
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -144,7 +144,12 @@ export class OverpassConnector implements SourceConnector {
       }
 
       if (attempt < maxAttempts) {
-        const backoff = this.env.overpassThrottleMs * 2 ** attempt;
+        // Cap the backoff — overpass-api.de's 406 load-shedding can outlast a
+        // couple of doublings, but there's no point waiting minutes per city.
+        const backoff = Math.min(
+          this.env.overpassThrottleMs * 2 ** attempt,
+          30_000,
+        );
         log.warn("Overpass: transient failure, retrying", {
           city: city.slug,
           attempt,
