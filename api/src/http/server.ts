@@ -216,6 +216,15 @@ async function main(): Promise<void> {
   }
   const env = loadApiEnv();
 
+  // Refuse to boot in production with an open CORS policy: an empty allowlist
+  // would otherwise fall back to "*". Fail fast rather than silently open up.
+  if (env.isProduction && env.allowedOrigins.length === 0) {
+    log.error(
+      "api: ALLOWED_ORIGINS is empty in production — refusing to start with open CORS",
+    );
+    process.exit(1);
+  }
+
   // Initialize request-level JWT verification (Supabase JWKS).
   initJwtVerification(env.supabaseUrl);
 
@@ -236,11 +245,14 @@ async function main(): Promise<void> {
   const c = buildContainer(env, repo, store);
   const routes = buildRoutes(c);
 
-  // CORS: in production restrict to configured origins; in dev allow all.
-  const corsOrigin = (reqOrigin: string | undefined): string => {
+  // CORS: restrict to configured origins. A disallowed origin gets no ACAO
+  // header at all (the browser then blocks the cross-origin read) instead of
+  // echoing an allowlisted origin. An empty allowlist only reaches here in dev
+  // — production fails fast at boot (above), so "*" here is dev-only convenience.
+  const corsOrigin = (reqOrigin: string | undefined): string | null => {
     if (env.allowedOrigins.length === 0) return "*";
     if (reqOrigin && env.allowedOrigins.includes(reqOrigin)) return reqOrigin;
-    return env.allowedOrigins[0]!;
+    return null;
   };
 
   const server = createServer(async (req, res) => {
@@ -251,14 +263,16 @@ async function main(): Promise<void> {
     const origin = req.headers.origin;
 
     const send = (status: number, body: unknown) => {
-      res.writeHead(status, {
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": corsOrigin(origin),
         "Access-Control-Allow-Headers":
           "Content-Type, Authorization, X-Supabase-Auth",
         "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
         "X-Content-Type-Options": "nosniff",
-      });
+      };
+      const acao = corsOrigin(origin);
+      if (acao !== null) headers["Access-Control-Allow-Origin"] = acao;
+      res.writeHead(status, headers);
       res.end(body === undefined ? "" : JSON.stringify(body));
     };
 
