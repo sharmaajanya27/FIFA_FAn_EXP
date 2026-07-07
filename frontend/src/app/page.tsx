@@ -35,9 +35,19 @@ function readGeoCache(): GeoCache | undefined {
   try {
     const raw = localStorage.getItem(GEO_CACHE_KEY);
     if (!raw) return undefined;
-    const cached = JSON.parse(raw) as GeoCache;
+    const cached = JSON.parse(raw) as Partial<GeoCache>;
+    if (
+      typeof cached.lat !== "number" ||
+      typeof cached.lon !== "number" ||
+      typeof cached.ts !== "number" ||
+      !Number.isFinite(cached.lat) ||
+      !Number.isFinite(cached.lon) ||
+      !Number.isFinite(cached.ts)
+    ) {
+      return undefined;
+    }
     if (Date.now() - cached.ts > GEO_CACHE_TTL_MS) return undefined;
-    return cached;
+    return cached as GeoCache;
   } catch {
     return undefined;
   }
