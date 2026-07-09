@@ -1,0 +1,147 @@
+# Provision all AWS infrastructure with Terraform.
+#
+#   PR touching infra/**        -> fmt + validate + plan (review only)
+#   Push to main touching infra -> fmt + validate + plan (review only)
+#   Manual dispatch             -> plan | apply | destroy any region/workspace
+#
+# Applies are manual-only (workflow_dispatch with action=apply|destroy): pushing
+# main never mutates infrastructure on its own, which is the human-in-the-loop
+# gate. Add required reviewers to the `production` environment for a second gate.
+#
+# Auth is GitHub OIDC (no static AWS keys). Each region is a Terraform workspace,
+# so `region` fully parameterizes a stand-up.
+name: infra
+
+on:
+  pull_request:
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/infra.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/infra.yml"
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Region / Terraform workspace (must have envs/<region>.tfvars)"
+        default: "us-east-1"
+        required: true
+      action:
+        description: "plan | apply | destroy"
+        default: "plan"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: infra-${{ github.event.inputs.region || 'us-east-1' }}
+  cancel-in-progress: false
+
+env:
+  # Region of the bootstrap state bucket (created once by infra/terraform/bootstrap).
+  TF_STATE_REGION: us-east-1
+  # Target region == Terraform workspace.
+  REGION: ${{ github.event.inputs.region || 'us-east-1' }}
+  TF_IN_AUTOMATION: "true"
+  # Secrets -> Terraform variables. Non-secret, region-specific values live in
+  # envs/<region>.tfvars. Unset optional secrets resolve to "" (== var defaults).
+  TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+  TF_VAR_supabase_anon_key: ${{ secrets.SUPABASE_ANON_KEY }}
+  TF_VAR_server_auth_secret: ${{ secrets.SERVER_AUTH_SECRET }}
+  TF_VAR_amplify_access_token: ${{ secrets.AMPLIFY_ACCESS_TOKEN }}
+  TF_VAR_anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+  TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+  TF_VAR_allowed_ssh_cidr: ${{ secrets.ALLOWED_SSH_CIDR }}
+
+defaults:
+  run:
+    working-directory: infra/terraform
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+          terraform_wrapper: false
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.REGION }}
+
+      - name: Format check
+        run: terraform fmt -check -recursive
+
+      - name: Init
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=fanfndr/terraform.tfstate" \
+            -backend-config="region=${TF_STATE_REGION}" \
+            -backend-config="encrypt=true"
+
+      - name: Select workspace (region)
+        run: terraform workspace select -or-create "${REGION}"
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Plan
+        run: |
+          terraform plan -input=false \
+            -var="region=${REGION}" \
+            -var-file="envs/${REGION}.tfvars"
+
+  apply:
+    needs: plan
+    # Manual-only: never auto-apply on push. Someone must dispatch the workflow
+    # with action=apply|destroy, which is the human gate. (If the `production`
+    # environment later gets required reviewers, that adds an approval step too.)
+    if: >
+      github.event_name == 'workflow_dispatch' && github.event.inputs.action != 'plan'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+          terraform_wrapper: false
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.REGION }}
+
+      - name: Init
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=fanfndr/terraform.tfstate" \
+            -backend-config="region=${TF_STATE_REGION}" \
+            -backend-config="encrypt=true"
+
+      - name: Select workspace (region)
+        run: terraform workspace select -or-create "${REGION}"
+
+      - name: Apply or Destroy
+        run: |
+          ACTION="${{ github.event.inputs.action || 'apply' }}"
+          if [ "$ACTION" = "destroy" ]; then
+            terraform destroy -input=false -auto-approve \
+              -var="region=${REGION}" \
+              -var-file="envs/${REGION}.tfvars"
+          else
+            terraform apply -input=false -auto-approve \
+              -var="region=${REGION}" \
+              -var-file="envs/${REGION}.tfvars"
+          fi
