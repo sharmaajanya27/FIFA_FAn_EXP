@@ -45,6 +45,18 @@ resource "aws_instance" "api" {
   tags = {
     Name = "${local.name}-api"
   }
+
+  # This box is long-lived and the API deploys out-of-band (a GitHub Action does
+  # git-pull + pm2 restart, matching on the Name tag), so first-boot inputs must
+  # not trigger unattended rebuilds once `main` auto-applies:
+  #   - user_data: lets us edit the provisioning template (e.g. letsencrypt_email)
+  #     without destroying the running instance.
+  #   - ami: the "latest AL2023" alias floats as AWS republishes it (~monthly);
+  #     ignoring it keeps AWS's cadence from replacing prod behind our backs.
+  # Roll a new box deliberately with `terraform apply -replace=aws_instance.api`.
+  lifecycle {
+    ignore_changes = [ami, user_data]
+  }
 }
 
 # Stable public address for the API DNS record.

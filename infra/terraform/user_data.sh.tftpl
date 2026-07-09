@@ -52,8 +52,12 @@ else
 fi
 
 # --- Materialize api/.env from SSM SecureString params ----------------------
+# Disable xtrace across this block: with `set -x`, the shell traces each printf
+# with its arguments expanded, which would write the DECRYPTED secret values to
+# /var/log/user-data.log. Re-enable it right after.
 ENV_FILE="$REPO_DIR/api/.env"
 : > "$ENV_FILE"
+set +x
 aws ssm get-parameters-by-path \
   --region "$AWS_REGION" \
   --path "$SSM_PREFIX" \
@@ -63,6 +67,7 @@ aws ssm get-parameters-by-path \
     key="$(basename "$name")"
     printf '%s=%s\n' "$key" "$value" >> "$ENV_FILE"
   done
+set -x
 # Runtime-fixed values (nginx proxies :80/:443 -> :3001).
 grep -q '^PORT=' "$ENV_FILE" || echo "PORT=3001" >> "$ENV_FILE"
 grep -q '^NODE_ENV=' "$ENV_FILE" || echo "NODE_ENV=production" >> "$ENV_FILE"

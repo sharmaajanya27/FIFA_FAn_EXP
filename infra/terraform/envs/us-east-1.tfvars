@@ -10,6 +10,6 @@ frontend_subdomain     = "" # "" => apex + www
 instance_type     = "t2.micro"
 root_volume_gb    = 8
 enable_origin_tls = true
-letsencrypt_email = "you@example.com"              # fill in
-supabase_url      = "https://your-ref.supabase.co" # fill in (public value)
-admin_emails      = ""                             # optional, comma-separated
+letsencrypt_email = "viryaventures11@gmail.com"                # cert-expiry notices only
+supabase_url      = "https://lzhgbodmdsflasvashkp.supabase.co" # public value (ships in frontend bundle)
+admin_emails      = ""                                         # optional, comma-separated

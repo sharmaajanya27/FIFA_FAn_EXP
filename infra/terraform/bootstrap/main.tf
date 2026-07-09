@@ -12,8 +12,9 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 
 # --------------------------------------------------------------------------
-# Remote state backend: S3 bucket (versioned + encrypted) and a DynamoDB lock
-# table. The main stack's backend.tf points here.
+# Remote state backend: a versioned, encrypted S3 bucket. State locking uses
+# S3 native locking (use_lockfile) in the main stack — no DynamoDB table needed.
+# The main stack's backend.tf points here.
 # --------------------------------------------------------------------------
 resource "aws_s3_bucket" "state" {
   bucket = var.state_bucket_name
@@ -41,17 +42,6 @@ resource "aws_s3_bucket_public_access_block" "state" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-}
-
-resource "aws_dynamodb_table" "lock" {
-  name         = var.lock_table_name
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
 }
 
 # --------------------------------------------------------------------------
@@ -101,7 +91,7 @@ resource "aws_iam_role" "ci" {
 }
 
 # PowerUserAccess covers everything the stack needs (EC2, Amplify, Route53, SSM,
-# S3, DynamoDB, ...) EXCEPT IAM. IAM is granted narrowly below, scoped to the
+# S3, ...) EXCEPT IAM. IAM is granted narrowly below, scoped to the
 # project's own roles/instance-profiles only.
 resource "aws_iam_role_policy_attachment" "ci_poweruser" {
   role       = aws_iam_role.ci.name

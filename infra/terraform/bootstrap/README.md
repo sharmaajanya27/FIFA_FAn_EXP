@@ -2,8 +2,7 @@
 
 Creates the shared pieces the CI-driven stack depends on:
 
-- **S3 bucket** for Terraform remote state (versioned + encrypted)
-- **DynamoDB table** for state locking
+- **S3 bucket** for Terraform remote state (versioned + encrypted; native S3 locking)
 - **GitHub OIDC provider** + **CI IAM role** (`fanfndr-ci`) that GitHub Actions
   assumes — no long-lived AWS keys in GitHub
 
@@ -28,7 +27,6 @@ variables → Actions):
 |--------|-------|
 | `AWS_ROLE_ARN` | `terraform output -raw ci_role_arn` |
 | `TF_STATE_BUCKET` | `terraform output -raw state_bucket` |
-| `TF_LOCK_TABLE` | `terraform output -raw lock_table` |
 
 Then continue with the main stack — see [`../README.md`](../README.md).
 

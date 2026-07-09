@@ -22,7 +22,7 @@ one value.
 | SSM Parameter Store secrets | `secrets.tf` | Replaces the hand-written `.env` |
 | Route 53 `api.<domain>` A record | `dns.tf` | `api.fanfndr.com` → EIP |
 | GitHub OIDC provider + CI role | `bootstrap/` | — (new, enables keyless CI) |
-| S3 + DynamoDB remote state | `bootstrap/` | — (new) |
+| S3 remote state (native locking) | `bootstrap/` | — (new) |
 
 The imperative box setup from [DEPLOYMENT.md](../knowledge-base/DEPLOYMENT.md)
 is now [`user_data.sh.tftpl`](terraform/user_data.sh.tftpl): a fresh instance
@@ -33,7 +33,7 @@ proxy, starts PM2, and requests a Let's Encrypt cert — all on first boot.
 
 ```
 infra/terraform/
-  bootstrap/           # run ONCE: state bucket, lock table, GitHub OIDC + CI role
+  bootstrap/           # run ONCE: state bucket, GitHub OIDC + CI role
   *.tf                 # the main stack (one workspace per region)
   user_data.sh.tftpl   # EC2 cloud-init (codifies the manual box setup)
   envs/<region>.tfvars # non-secret, per-region topology (committed)
@@ -61,7 +61,6 @@ Repo → Settings → Secrets and variables → Actions:
 |--------|------|-------|
 | `AWS_ROLE_ARN` | bootstrap output `ci_role_arn` | Keyless OIDC role |
 | `TF_STATE_BUCKET` | bootstrap output `state_bucket` | |
-| `TF_LOCK_TABLE` | bootstrap output `lock_table` | |
 | `DATABASE_URL` | Supabase | Postgres pooler URI (port 6543) |
 | `SUPABASE_ANON_KEY` | Supabase | Publishable/anon key |
 | `SERVER_AUTH_SECRET` | `openssl rand -hex 24` | Same value used on API + frontend |
@@ -118,7 +117,6 @@ terraform init \
   -backend-config="bucket=$TF_STATE_BUCKET" \
   -backend-config="key=fanfndr/terraform.tfstate" \
   -backend-config="region=us-east-1" \
-  -backend-config="dynamodb_table=$TF_LOCK_TABLE" \
   -backend-config="encrypt=true"
 terraform workspace select -or-create us-east-1
 export TF_VAR_database_url=... TF_VAR_server_auth_secret=... TF_VAR_supabase_anon_key=... TF_VAR_amplify_access_token=...

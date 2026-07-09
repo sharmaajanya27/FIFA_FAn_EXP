@@ -1,0 +1,102 @@
+# Deploy the API code to the EC2 instance(s) — keyless, via SSM Run Command.
+#
+#   Push to main touching api/** -> deploy the primary region (us-east-1)
+#   Manual dispatch              -> deploy any region
+#
+# Mirrors scripts/deploy-api.sh (git pull + npm install + pm2 restart) but uses
+# the instance role + SSM instead of an SSH key. The frontend deploys itself via
+# Amplify's GitHub webhook, so it isn't handled here.
+name: deploy-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "ecosystem.config.cjs"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Region of the API instance to deploy"
+        default: "us-east-1"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-api-${{ github.event.inputs.region || 'us-east-1' }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      REGION: ${{ github.event.inputs.region || 'us-east-1' }}
+      BRANCH: main
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ github.event.inputs.region || 'us-east-1' }}
+
+      - name: Find API instance
+        id: find
+        run: |
+          set -euo pipefail
+          IID=$(aws ec2 describe-instances --region "$REGION" \
+            --filters "Name=tag:Name,Values=fanfndr-$REGION-api" \
+                      "Name=instance-state-name,Values=running" \
+            --query "Reservations[].Instances[].InstanceId" --output text)
+          if [ -z "$IID" ] || [ "$IID" = "None" ]; then
+            echo "::error::No running instance tagged fanfndr-$REGION-api"; exit 1
+          fi
+          echo "instance_id=$IID" >> "$GITHUB_OUTPUT"
+          echo "Deploying to $IID in $REGION"
+
+      - name: Deploy via SSM Run Command
+        run: |
+          set -euo pipefail
+          IID="${{ steps.find.outputs.instance_id }}"
+
+          cat > params.json <<JSON
+          {
+            "commands": [
+              "sudo -u ec2-user -H bash -lc 'set -e; cd ~/FIFA_FAn_EXP && git fetch --all && git checkout $BRANCH && git pull --ff-only origin $BRANCH && cd api && npm install && npm run typecheck && pm2 restart fanfndr-api --update-env && pm2 save'"
+            ]
+          }
+          JSON
+
+          CMD_ID=$(aws ssm send-command --region "$REGION" \
+            --instance-ids "$IID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "deploy-api ${GITHUB_SHA::7}" \
+            --parameters file://params.json \
+            --query "Command.CommandId" --output text)
+          echo "SSM command: $CMD_ID"
+
+          # Poll up to ~15 minutes for a terminal state.
+          FINAL="Pending"
+          for _ in $(seq 1 90); do
+            sleep 10
+            FINAL=$(aws ssm get-command-invocation --region "$REGION" \
+              --command-id "$CMD_ID" --instance-id "$IID" \
+              --query "Status" --output text 2>/dev/null || echo "Pending")
+            echo "status: $FINAL"
+            case "$FINAL" in
+              Success|Failed|Cancelled|TimedOut) break ;;
+            esac
+          done
+
+          echo "----- stdout -----"
+          aws ssm get-command-invocation --region "$REGION" \
+            --command-id "$CMD_ID" --instance-id "$IID" \
+            --query "StandardOutputContent" --output text || true
+          echo "----- stderr -----"
+          aws ssm get-command-invocation --region "$REGION" \
+            --command-id "$CMD_ID" --instance-id "$IID" \
+            --query "StandardErrorContent" --output text || true
+
+          [ "$FINAL" = "Success" ] || { echo "::error::Deploy status: $FINAL"; exit 1; }
