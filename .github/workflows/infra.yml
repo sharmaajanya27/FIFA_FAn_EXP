@@ -1,8 +1,12 @@
 # Provision all AWS infrastructure with Terraform.
 #
 #   PR touching infra/**        -> fmt + validate + plan (review only)
-#   Push to main touching infra -> apply the primary region (us-east-1)
+#   Push to main touching infra -> fmt + validate + plan (review only)
 #   Manual dispatch             -> plan | apply | destroy any region/workspace
+#
+# Applies are manual-only (workflow_dispatch with action=apply|destroy): pushing
+# main never mutates infrastructure on its own, which is the human-in-the-loop
+# gate. Add required reviewers to the `production` environment for a second gate.
 #
 # Auth is GitHub OIDC (no static AWS keys). Each region is a Terraform workspace,
 # so `region` fully parameterizes a stand-up.
@@ -98,12 +102,12 @@ jobs:
 
   apply:
     needs: plan
-    # Auto-apply on push to main; on manual dispatch only when apply/destroy.
+    # Manual-only: never auto-apply on push. Someone must dispatch the workflow
+    # with action=apply|destroy, which is the human gate. (If the `production`
+    # environment later gets required reviewers, that adds an approval step too.)
     if: >
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.action != 'plan')
+      github.event_name == 'workflow_dispatch' && github.event.inputs.action != 'plan'
     runs-on: ubuntu-latest
-    # Add required reviewers to this GitHub Environment to gate applies.
     environment: production
     steps:
       - uses: actions/checkout@v4
