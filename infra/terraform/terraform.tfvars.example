@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# NON-SECRET example values. Copy region topology into envs/<region>.tfvars.
+# SECRETS (database_url, supabase_anon_key, server_auth_secret, amplify_access_token,
+# anthropic_api_key) are NEVER put in tfvars — pass them via TF_VAR_* env vars,
+# sourced from GitHub Actions secrets. See infra/README.md.
+# ---------------------------------------------------------------------------
+
+region                 = "us-east-1"
+project                = "fanfndr"
+github_repo_url        = "https://github.com/sharmaajanya27/FIFA_FAn_EXP"
+deploy_branch          = "main"
+
+root_domain            = "fanfndr.com"
+frontend_domain        = "fanfndr.com"
+api_subdomain          = "api"
+manage_dns             = true
+manage_frontend_domain = true
+
+instance_type          = "t2.micro"
+root_volume_gb         = 8
+enable_origin_tls      = true
+letsencrypt_email      = "you@example.com"
+
+# Break-glass SSH is OFF by default (use SSM Session Manager). To enable:
+# ssh_public_key   = "ssh-ed25519 AAAA... you@host"
+# allowed_ssh_cidr = "203.0.113.10/32"
+
+# Non-secret values that Terraform needs but which are safe to see:
+supabase_url = "https://your-ref.supabase.co"
+admin_emails = "you@example.com"

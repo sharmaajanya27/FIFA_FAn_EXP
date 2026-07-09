@@ -1,0 +1,22 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Local variable files that may contain real secrets — never commit.
+# (Committed: terraform.tfvars.example and envs/*.tfvars, which are non-secret.)
+terraform.tfvars
+*.secret.tfvars
+secrets.tfvars
+*.auto.tfvars
+
+# Keep the provider lock file committed.
+!.terraform.lock.hcl

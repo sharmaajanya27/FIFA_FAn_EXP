@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and edit. Run once by an admin (local state).
+aws_region        = "us-east-1"
+project           = "fanfndr"
+github_repo       = "sharmaajanya27/FIFA_FAn_EXP"
+state_bucket_name = "fanfndr-tfstate-CHANGEME-unique" # must be globally unique
+lock_table_name   = "fanfndr-tf-lock"
